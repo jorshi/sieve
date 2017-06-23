@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="Pm83vz" name="Sieve" displaySplashScreen="1" reportAppUsage="1"
+              splashScreenColour="Dark" projectType="audioplug" version="1.0.0"
+              bundleIdentifier="com.UVic.Sieve" includeBinaryInAppConfig="1"
+              buildVST="1" buildVST3="0" buildAU="1" buildAUv3="0" buildRTAS="0"
+              buildAAX="0" buildStandalone="1" enableIAA="0" pluginName="Sieve"
+              pluginDesc="Sieve" pluginManufacturer="University of Victoria"
+              pluginManufacturerCode="Uvic" pluginCode="Pm83" pluginChannelConfigs=""
+              pluginIsSynth="1" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
+              pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="SieveAU"
+              pluginRTASCategory="" aaxIdentifier="com.yourcompany.Sieve" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
+              jucerVersion="5.0.2" companyName="University of Victoria" companyWebsite="uvic.ca">
+  <MAINGROUP id="bS7Zw9" name="Sieve">
+    <GROUP id="{22B62575-2E8A-2AC3-6CB4-58FFE5C4B28D}" name="Resources">
+      <FILE id="GSG8XL" name="Offside-Regular.ttf" compile="0" resource="1"
+            file="Resources/Offside-Regular.ttf"/>
+    </GROUP>
+    <GROUP id="{05089DAC-D89A-209E-728C-18A42D6C77FD}" name="Source">
+      <GROUP id="{CF9A02B6-1242-D27E-45D1-90779AC6E038}" name="DSP">
+        <FILE id="lo16qy" name="PluginProcessor.cpp" compile="1" resource="0"
+              file="Source/PluginProcessor.cpp"/>
+        <FILE id="Zik4Q6" name="PluginProcessor.h" compile="0" resource="0"
+              file="Source/PluginProcessor.h"/>
+      </GROUP>
+      <GROUP id="{DF13C237-35B1-C707-336C-9BBFA6476672}" name="Sample Management">
+        <FILE id="Ld8SJU" name="Sample.cpp" compile="1" resource="0" file="Source/Sample.cpp"/>
+        <FILE id="rhMESi" name="Sample.h" compile="0" resource="0" file="Source/Sample.h"/>
+        <FILE id="xdsdca" name="SampleLoader.cpp" compile="1" resource="0"
+              file="Source/SampleLoader.cpp"/>
+        <FILE id="nNsRAE" name="SampleLoader.h" compile="0" resource="0" file="Source/SampleLoader.h"/>
+        <FILE id="SvLWAW" name="SampleManager.cpp" compile="1" resource="0"
+              file="Source/SampleManager.cpp"/>
+        <FILE id="F4C8OM" name="SampleManager.h" compile="0" resource="0" file="Source/SampleManager.h"/>
+      </GROUP>
+      <GROUP id="{51E519B5-B385-27A8-E6CC-7D8128A84556}" name="UI">
+        <FILE id="j099H0" name="ControlComponent.cpp" compile="1" resource="0"
+              file="Source/ControlComponent.cpp"/>
+        <FILE id="DyksW0" name="ControlComponent.h" compile="0" resource="0"
+              file="Source/ControlComponent.h"/>
+        <FILE id="TwCL4J" name="MainComponent.cpp" compile="1" resource="0"
+              file="Source/MainComponent.cpp"/>
+        <FILE id="qInTDm" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+        <FILE id="eMbVFZ" name="HeaderComponent.cpp" compile="1" resource="0"
+              file="Source/HeaderComponent.cpp"/>
+        <FILE id="v6CNYH" name="HeaderComponent.h" compile="0" resource="0"
+              file="Source/HeaderComponent.h"/>
+        <FILE id="QOmMwY" name="PadButton.cpp" compile="1" resource="0" file="Source/PadButton.cpp"/>
+        <FILE id="rJJOog" name="PadButton.h" compile="0" resource="0" file="Source/PadButton.h"/>
+        <FILE id="M0md50" name="CustomLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/CustomLookAndFeel.cpp"/>
+        <FILE id="Yzx2gM" name="CustomLookAndFeel.h" compile="0" resource="0"
+              file="Source/CustomLookAndFeel.h"/>
+        <FILE id="aFxEpS" name="PluginEditor.cpp" compile="1" resource="0"
+              file="Source/PluginEditor.cpp"/>
+        <FILE id="UjVggC" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+        <FILE id="YJ28pt" name="SampleGrid.cpp" compile="1" resource="0" file="Source/SampleGrid.cpp"/>
+        <FILE id="C9Z8Yn" name="SampleGrid.h" compile="0" resource="0" file="Source/SampleGrid.h"/>
+        <FILE id="ee6Pvn" name="WaveformComponent.cpp" compile="1" resource="0"
+              file="Source/WaveformComponent.cpp"/>
+        <FILE id="avyDiG" name="WaveformComponent.h" compile="0" resource="0"
+              file="Source/WaveformComponent.h"/>
+      </GROUP>
+      <GROUP id="{C634A3DF-1886-607C-B204-7E79C3EB97F9}" name="Utility">
+        <FILE id="pjy6Bk" name="FileLoader.cpp" compile="1" resource="0" file="Source/FileLoader.cpp"/>
+        <FILE id="mKMdO2" name="FileLoader.h" compile="0" resource="0" file="Source/FileLoader.h"/>
+        <FILE id="LSj2oJ" name="DirectoryChooser.cpp" compile="1" resource="0"
+              file="Source/DirectoryChooser.cpp"/>
+        <FILE id="cV3NXN" name="DirectoryChooser.h" compile="0" resource="0"
+              file="Source/DirectoryChooser.h"/>
+        <FILE id="nfA7ux" name="dbConnector.cpp" compile="1" resource="0" file="Source/dbConnector.cpp"/>
+        <FILE id="oAU1E8" name="dbConnector.h" compile="0" resource="0" file="Source/dbConnector.h"/>
+      </GROUP>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="SampleBrowser"
+                       osxCompatibility="default" osxArchitecture="default"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="SampleBrowser"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_events" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_video" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../Archive/juce-grapefruit-osx/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+</JUCERPROJECT>

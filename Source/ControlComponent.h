@@ -1,0 +1,52 @@
+/*
+  ==============================================================================
+
+    ControlComponent.h
+    Created: 20 Jun 2017 2:38:26pm
+    Author:  Jordie Shier 
+
+  ==============================================================================
+*/
+
+#pragma once
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "WaveformComponent.h"
+#include "CustomLookAndFeel.h"
+#include "Sample.h"
+#include "SampleManager.h"
+
+//==============================================================================
+/*
+*/
+class ControlComponent    : public Component,
+                            public ButtonListener,
+                            public ActionBroadcaster
+                            
+{
+public:
+    ControlComponent(SampleManager* s);
+    ~ControlComponent();
+
+    void paint (Graphics&) override;
+    void resized() override;
+    
+    void updateSelectedSample(Sample::Ptr s);
+
+private:
+
+    // Button callback
+    void buttonClicked(Button* button) override;
+    
+    // Pointer to sample manager
+    SampleManager* sampleManager;
+    
+    ScopedPointer<WaveformComponent> waveformComponent;
+    ScopedPointer<TextButton> newSamplesButton;
+    ScopedPointer<TextButton> zoomInButton;
+    ScopedPointer<TextButton> zoomOutButton;
+    ScopedPointer<TextButton> resetButton;
+    ScopedPointer<ComboBox> typeCombo;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlComponent)
+};
