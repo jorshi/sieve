@@ -26,6 +26,15 @@ SampleBrowserAudioProcessor::SampleBrowserAudioProcessor()
 #endif
 {
     sampleManager_ = new SampleManager;
+    sampler_ = new Synthesiser;
+    
+    // Make an 8 voice sampler
+    for (int i = 0; i < 8; i++)
+    {
+        sampler_->addVoice(new SamplerVoice);
+    }
+    
+    startNote_ = 48;
 }
 
 SampleBrowserAudioProcessor::~SampleBrowserAudioProcessor()
@@ -88,8 +97,7 @@ void SampleBrowserAudioProcessor::changeProgramName (int index, const String& ne
 //==============================================================================
 void SampleBrowserAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    sampler_->setCurrentPlaybackSampleRate(sampleRate);
 }
 
 void SampleBrowserAudioProcessor::releaseResources()
@@ -136,14 +144,8 @@ void SampleBrowserAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiB
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        float* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
-    }
+    // Playback samples that have been triggered
+    sampler_->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
 //==============================================================================
@@ -169,6 +171,47 @@ void SampleBrowserAudioProcessor::setStateInformation (const void* data, int siz
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+//==============================================================================
+void SampleBrowserAudioProcessor::loadSamplerSounds()
+{
+    Sample::Ptr sample;
+    SamplerSound::Ptr sound;
+    BigInteger midiNotes;
+    AudioFormatReader* reader;
+    
+    // Clear current sounds
+    sampler_->clearSounds();
+    sounds_.clear();
+    
+    // TODO -- the number of pads should be some sort of setting variable somewhere
+    for (int i = 0; i < 64; i++)
+    {
+        sample = sampleManager_->getSample(i);
+        if (sample != nullptr)
+        {
+            reader = sampleManager_->getReaderForSample(*sample);
+            double length = reader->lengthInSamples / reader->sampleRate;
+            midiNotes.setRange(startNote_+i, 1, true);
+            
+            // Create a new sampler sound for this sound
+            sound = new SamplerSound("Pad " + String(i),
+                                     *reader,
+                                     midiNotes,
+                                     startNote_+i,
+                                     0.1,
+                                     length,
+                                     length);
+            sampler_->addSound(sound);
+            delete reader;
+        }
+    }
+}
+
+void SampleBrowserAudioProcessor::triggerSound(int pad)
+{
+    sampler_->noteOn(1, pad + startNote_, 100);
 }
 
 //==============================================================================

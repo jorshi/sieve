@@ -20,7 +20,8 @@
 /*
 */
 class MainComponent    : public Component,
-                         public ActionListener
+                         public ActionListener,
+                         public ActionBroadcaster
 {
 public:
     MainComponent(SampleManager* s);

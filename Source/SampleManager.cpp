@@ -63,7 +63,6 @@ void SampleManager::updateThumbnails()
 
 void SampleManager::updateRainbowColours()
 {
-                //newButton = new PadButton("Pad " + std::to_string(count), Colour::fromRGB((i*10) + 100, (j*10) + 100, 150 - (i+j)*2), over, down);
     int numSamples = currentSamples_.size();
     int count = 0;
     Sample::Ptr sample;
@@ -97,4 +96,10 @@ void SampleManager::updateRainbowColours()
             count++;
         }
     }
+}
+
+
+AudioFormatReader* SampleManager::getReaderForSample(Sample& sample)
+{
+    return loader_.getAudioReader(sample.getFile());
 }

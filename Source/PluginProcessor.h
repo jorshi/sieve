@@ -59,11 +59,15 @@ public:
     
     //==============================================================================
     SampleManager* getSampleManager() { return sampleManager_.get(); };
+    void loadSamplerSounds();
+    void triggerSound(int pad);
 
 private:
     //==============================================================================
     ScopedPointer<SampleManager> sampleManager_;
-    
+    ScopedPointer<Synthesiser> sampler_;
+    ReferenceCountedArray<SamplerSound> sounds_;
+    int startNote_;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleBrowserAudioProcessor)
 };

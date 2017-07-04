@@ -49,9 +49,12 @@ void MainComponent::actionListenerCallback(const juce::String &message)
     if (message == "update_grid")
     {
         sampleGrid->updateGrid();
+        sendActionMessage(message);
+        
     }
     else
     {
+        sendActionMessage(message);
         int pad = message.getIntValue();
         controlComponent->updateSelectedSample(sampleManager->getSample(pad));
     }

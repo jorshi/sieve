@@ -42,6 +42,9 @@ public:
     // Rainbow colours for testing!
     void updateRainbowColours();
     
+    // Gets the audio format reader for a given sample
+    AudioFormatReader* getReaderForSample(Sample& sample);
+    
 private:
     
     // Static callback for a select sample query

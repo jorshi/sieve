@@ -22,6 +22,7 @@ SampleBrowserAudioProcessorEditor::SampleBrowserAudioProcessorEditor (SampleBrow
     addAndMakeVisible(header);
     
     main = new MainComponent(sampleManager);
+    main->addActionListener(this);
     addAndMakeVisible(main);
     
     setSize (650, 675);
@@ -51,4 +52,13 @@ void SampleBrowserAudioProcessorEditor::buttonClicked(juce::Button *button)
 
 void SampleBrowserAudioProcessorEditor::actionListenerCallback(const juce::String &message)
 {
+    if (message == "update_grid")
+    {
+        processor.loadSamplerSounds();
+    }
+    else
+    {
+        int pad = message.getIntValue();
+        processor.triggerSound(pad);
+    }
 }
