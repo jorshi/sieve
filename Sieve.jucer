@@ -26,6 +26,10 @@
       <GROUP id="{DF13C237-35B1-C707-336C-9BBFA6476672}" name="Sample Management">
         <FILE id="Ld8SJU" name="Sample.cpp" compile="1" resource="0" file="Source/Sample.cpp"/>
         <FILE id="rhMESi" name="Sample.h" compile="0" resource="0" file="Source/Sample.h"/>
+        <FILE id="ap7eXK" name="SampleAnalysis.cpp" compile="1" resource="0"
+              file="Source/SampleAnalysis.cpp"/>
+        <FILE id="YiYNJk" name="SampleAnalysis.h" compile="0" resource="0"
+              file="Source/SampleAnalysis.h"/>
         <FILE id="xdsdca" name="SampleLoader.cpp" compile="1" resource="0"
               file="Source/SampleLoader.cpp"/>
         <FILE id="nNsRAE" name="SampleLoader.h" compile="0" resource="0" file="Source/SampleLoader.h"/>
@@ -74,7 +78,8 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3">
+    <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3&#10;essentia"
+               extraCompilerFlags="-I/usr/local/include" extraLinkerFlags="-L/usr/local/lib">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="SampleBrowser"
                        osxCompatibility="default" osxArchitecture="default"/>
