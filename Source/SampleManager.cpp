@@ -14,6 +14,9 @@ SampleManager::SampleManager()
 {
     sampleLoader_ = new SampleLoader;
     thumbnailCache_ = new AudioThumbnailCache(64);
+    
+    // Load in sample folders from database
+    readSampleFolders();
 }
 
 void SampleManager::loadNewSamples()
@@ -21,6 +24,10 @@ void SampleManager::loadNewSamples()
     File directory;
     if (directoryChooser_.getDirectory(directory))
     {
+        SampleFolder::Ptr newFolder = new SampleFolder;
+        newFolder->setPath(directory);
+        //newFolder->save(db_);
+        
         sampleLoader_->addDirectory(directory);
     }
 }
@@ -102,4 +109,12 @@ void SampleManager::updateRainbowColours()
 AudioFormatReader* SampleManager::getReaderForSample(Sample& sample)
 {
     return loader_.getAudioReader(sample.getFile());
+}
+
+
+void SampleManager::readSampleFolders()
+{
+    sampleFolders_.clear();
+    String sql = "SELECT * FROM `sample_folders` LIMIT 50;";
+    db_.runCommand(sql, selectSampleFolderCallback, this);
 }

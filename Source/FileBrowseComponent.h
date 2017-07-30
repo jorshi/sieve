@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "CustomLookAndFeel.h"
+#include "SampleManager.h"
 
 //==============================================================================
 /*
@@ -21,7 +22,7 @@ class FileBrowseComponent    : public Component,
                                public ActionBroadcaster
 {
 public:
-    FileBrowseComponent();
+    FileBrowseComponent(SampleManager* m);
     ~FileBrowseComponent();
 
     void paint (Graphics&) override;
@@ -32,6 +33,8 @@ private:
     void buttonClicked(Button* button) override;
     
     ScopedPointer<TextButton> fileBrowser;
+    SampleManager* manager;
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBrowseComponent)
 };

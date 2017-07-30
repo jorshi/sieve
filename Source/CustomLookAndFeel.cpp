@@ -42,6 +42,7 @@ const Colour CustomLookAndFeel::Colours::buttonOver = Colour::fromRGB(175, 175, 
 const Colour CustomLookAndFeel::Colours::padOver = juce::Colours::burlywood;
 const Colour CustomLookAndFeel::Colours::padPress = juce::Colours::aqua;
 const Colour CustomLookAndFeel::Colours::padOff = juce::Colours::grey;
+const Colour CustomLookAndFeel::Colours::darkerTable = Colour::fromRGB(160, 160, 160);
 
 // Gradients
 const ColourGradient CustomLookAndFeel::Colours::background = ColourGradient(
