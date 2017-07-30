@@ -24,11 +24,14 @@ void SampleManager::loadNewSamples()
     File directory;
     if (directoryChooser_.getDirectory(directory))
     {
+        // Add sample folder to DB and update the current sample folder list
         SampleFolder::Ptr newFolder = new SampleFolder;
         newFolder->setPath(directory);
-        //newFolder->save(db_);
+        newFolder->save(db_);
+        newFolder->updateStatus(1, db_);
+        sampleFolders_.add(newFolder);
         
-        sampleLoader_->addDirectory(directory);
+        sampleLoader_->addSampleFolder(newFolder);
     }
 }
 

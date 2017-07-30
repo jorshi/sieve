@@ -19,7 +19,8 @@
 */
 class FileBrowseComponent    : public Component,
                                public ButtonListener,
-                               public ActionBroadcaster
+                               public ActionBroadcaster,
+                               public Timer
 {
 public:
     FileBrowseComponent(SampleManager* m);
@@ -27,6 +28,8 @@ public:
 
     void paint (Graphics&) override;
     void resized() override;
+    
+    void timerCallback() override;
 
 private:
     

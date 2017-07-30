@@ -18,10 +18,13 @@ FileBrowseComponent::FileBrowseComponent(SampleManager* m) : manager(m)
     fileBrowser->setButtonText("Add Audio Samples");
     fileBrowser->addListener(this);
     addAndMakeVisible(fileBrowser);
+    
+    startTimer(1000);
 }
 
 FileBrowseComponent::~FileBrowseComponent()
 {
+    stopTimer();
 }
 
 void FileBrowseComponent::paint (Graphics& g)
@@ -45,6 +48,7 @@ void FileBrowseComponent::paint (Graphics& g)
         
         g.setColour(CustomLookAndFeel::Colours::headerText);
         g.drawText(folders.getUnchecked(i)->getFile().getFullPathName(), 36, 50 + (i*40), 400, 39, Justification::centredLeft);
+        g.drawText(folders.getUnchecked(i)->getStatusStr(), 450, 50 + (i*40), 100, 39, Justification::centredLeft);
     }
     
     g.setColour(Colours::grey);
@@ -62,6 +66,12 @@ void FileBrowseComponent::buttonClicked(juce::Button *button)
 {
     if (button == fileBrowser)
     {
-        sendActionMessage("add_samples");
+        manager->loadNewSamples();
+        repaint();
     }
+}
+
+void FileBrowseComponent::timerCallback()
+{
+    repaint();
 }
