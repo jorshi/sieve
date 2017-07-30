@@ -14,14 +14,25 @@ SampleManager::SampleManager()
 {
     sampleLoader_ = new SampleLoader;
     thumbnailCache_ = new AudioThumbnailCache(64);
+    
+    // Load in sample folders from database
+    readSampleFolders();
 }
+
 
 void SampleManager::loadNewSamples()
 {
     File directory;
     if (directoryChooser_.getDirectory(directory))
     {
-        sampleLoader_->addDirectory(directory);
+        // Add sample folder to DB and update the current sample folder list
+        SampleFolder::Ptr newFolder = new SampleFolder;
+        newFolder->setPath(directory);
+        if (newFolder->save(db_)) {
+            newFolder->updateStatus(1, db_);
+            sampleFolders_.add(newFolder);
+            sampleLoader_->addSampleFolder(newFolder);
+        }
     }
 }
 
@@ -61,6 +72,8 @@ void SampleManager::updateThumbnails()
     }
 }
 
+
+// This is just here for testing
 void SampleManager::updateRainbowColours()
 {
     int numSamples = currentSamples_.size();
@@ -81,14 +94,6 @@ void SampleManager::updateRainbowColours()
             int g = j*10 + 100;
             int b = 150 - (i*j)*2;
             
-            //int r = i*4 + 85;
-            //int g = j*2 + 170;
-            //int b = 160 - (i*j)*1;
-    
-            //int r = i*1 + 113;
-            //int g = j*1 + 168;
-            //int b = 150 - (i*j)*0.5;
-            
             sample = currentSamples_.getUnchecked(count);
             sample->setColour(Colour::fromRGB(r,g,b));
             std::cout << r << " " << g << " " << b << "\n";
@@ -102,4 +107,12 @@ void SampleManager::updateRainbowColours()
 AudioFormatReader* SampleManager::getReaderForSample(Sample& sample)
 {
     return loader_.getAudioReader(sample.getFile());
+}
+
+
+void SampleManager::readSampleFolders()
+{
+    sampleFolders_.clear();
+    String sql = "SELECT * FROM `sample_folders` LIMIT 50;";
+    db_.runCommand(sql, selectSampleFolderCallback, this);
 }

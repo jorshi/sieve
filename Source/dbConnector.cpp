@@ -41,7 +41,7 @@ bool DBConnector::runCommand(juce::String command, int (*callbackFunc)(void *, i
     
     if (rc != SQLITE_OK)
     {
-        //std::cout << "SQL ERROR: " << zErrMsg << "\n";
+        std::cout << "SQL ERROR: " << zErrMsg << "\n";
         return false;
     }
     
@@ -54,6 +54,7 @@ void DBConnector::setupTables()
     String sqlSampleFolder = "CREATE TABLE IF NOT EXISTS `sample_folders` ( " \
         "`id` INTEGER PRIMARY KEY, " \
         "`path` VARCHAR(200) NOT NULL, " \
+        "`status` INT NOT NULL DEFAULT 0, " \
         "UNIQUE (`path`) " \
         ");";
     

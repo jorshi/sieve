@@ -29,7 +29,7 @@ public:
     // Default Deconstructor
     ~SampleLoader();
     
-    void addDirectory(File&);
+    void addSampleFolder(SampleFolder::Ptr);
     
 private:
     
@@ -42,11 +42,10 @@ private:
     
     void exploreDirectory(const File& directory, Array<String>& tags);
     
-    
-    std::queue<File> directories_;
+    std::queue<SampleFolder::Ptr> sampleFolders_;
+
     CriticalSection mutex_;
-    ScopedPointer<File> currentlyLoading_;
-    ScopedPointer<SampleFolder> currentSampleFolder_;
+    SampleFolder::Ptr currentSampleFolder_;
     ScopedPointer<WildcardFileFilter> fileFilter_;
     DBConnector db_;
 };

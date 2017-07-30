@@ -89,9 +89,9 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3&#10;essentia"
                extraCompilerFlags="-I/usr/local/include" extraLinkerFlags="-L/usr/local/lib">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="SampleBrowser"
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"
                        osxCompatibility="default" osxArchitecture="default"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="SampleBrowser"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Sieve"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../Archive/juce-grapefruit-osx/modules"/>

@@ -26,7 +26,7 @@ SampleBrowserAudioProcessorEditor::SampleBrowserAudioProcessorEditor (SampleBrow
     main->addActionListener(this);
     addAndMakeVisible(main);
     
-    fileBrowse = new FileBrowseComponent;
+    fileBrowse = new FileBrowseComponent(sampleManager);
     fileBrowse->addActionListener(this);
     addAndMakeVisible(fileBrowse);
     

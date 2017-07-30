@@ -13,7 +13,7 @@
 
 SampleLoader::SampleLoader() : Thread("Sample Loading Thread")
 {
-    currentlyLoading_ = nullptr;
+    currentSampleFolder_ = nullptr;
     fileFilter_ = new WildcardFileFilter("*.wav", "", "audio file filter");
 }
 
@@ -35,22 +35,22 @@ void SampleLoader::run()
         
         // If the directory queue is empty and no directories are being loaded
         // then this thread can shutdown
-        if (directories_.size() < 1 && currentlyLoading_ == nullptr)
+        if (sampleFolders_.size() < 1 && currentSampleFolder_ == nullptr)
         {
             signalThreadShouldExit();
         }
         
         // If no directory is being explored currently and the directory queue is not
         // empty then mark the next directory for loading
-        else if (directories_.size() > 0 && currentlyLoading_ == nullptr)
+        else if (sampleFolders_.size() > 0 && currentSampleFolder_ == nullptr)
         {
-            currentlyLoading_ = new File(directories_.front());
-            directories_.pop();
+            currentSampleFolder_ = sampleFolders_.front();
+            sampleFolders_.pop();
         }
         mutex_.exit();
         
         // Load samples from the directoy contained in the currently loading pointer
-        if (currentlyLoading_ != nullptr)
+        if (currentSampleFolder_ != nullptr)
         {
             loadSamples();
         }
@@ -67,18 +67,15 @@ void SampleLoader::loadSamples()
     Array<Sample> samples;
     TaggedSamples sampleTags;
     
-    // Save the folder that was selected for loading
-    currentSampleFolder_ = new SampleFolder(0, currentlyLoading_->getFullPathName());
-    currentSampleFolder_->save(db_);
-    
     // Save the top level directory name
-    tags.add(currentlyLoading_->getFileName());
+    tags.add(currentSampleFolder_->getFile().getFileName());
     
     // Recursively explore the given folder
-    exploreDirectory(*currentlyLoading_, tags);
+    exploreDirectory(currentSampleFolder_->getFile(), tags);
 
     // Finished exploring the directory
-    currentlyLoading_.release();
+    currentSampleFolder_->updateStatus(2, db_);
+    currentSampleFolder_ = nullptr;
 }
 
 
@@ -104,11 +101,10 @@ void SampleLoader::exploreDirectory(const File& directory, Array<String>& tags)
     }
 }
 
-
-void SampleLoader::addDirectory(File& directory)
+void SampleLoader::addSampleFolder(SampleFolder::Ptr folder)
 {
     mutex_.enter();
-    directories_.push(directory);
+    sampleFolders_.push(folder);
     mutex_.exit();
     
     if (!isThreadRunning())

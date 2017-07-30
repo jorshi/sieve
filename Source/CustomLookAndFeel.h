@@ -35,6 +35,8 @@ public:
         static const Colour padOver;
         static const Colour padPress;
         static const Colour padOff;
+        static const Colour darkerTable;
+        static const Colour tableHeader;
     };
     
     static const Typeface::Ptr offsideTypeface;
