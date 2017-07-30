@@ -66,7 +66,11 @@ void SampleLoader::loadSamples()
     Array<String> tags;
     Array<Sample> samples;
     TaggedSamples sampleTags;
-
+    
+    // Save the folder that was selected for loading
+    currentSampleFolder_ = new SampleFolder(0, currentlyLoading_->getFullPathName());
+    currentSampleFolder_->save(db_);
+    
     // Save the top level directory name
     tags.add(currentlyLoading_->getFileName());
     
@@ -93,7 +97,7 @@ void SampleLoader::exploreDirectory(const File& directory, Array<String>& tags)
         }
         else if (fileFilter_->isFileSuitable(iter.getFile()))
         {
-            Sample newSample(0, iter.getFile().getFileName(), iter.getFile().getFullPathName(), 0, 0);
+            Sample newSample(0, iter.getFile().getFileName(), iter.getFile().getFullPathName(), 0, 0, false, currentSampleFolder_->getId());
             newSample.save(db_);
             //newSample.saveTagsForSample(db_, newTags);
         }

@@ -13,6 +13,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "dbConnector.h"
 #include "Sample.h"
+#include "SampleFolder.h"
 
 #include <queue>
 #include <mutex>
@@ -37,7 +38,6 @@ private:
     // Run thread
     void run() override;
     
-    // 
     void loadSamples();
     
     void exploreDirectory(const File& directory, Array<String>& tags);
@@ -46,6 +46,7 @@ private:
     std::queue<File> directories_;
     CriticalSection mutex_;
     ScopedPointer<File> currentlyLoading_;
+    ScopedPointer<SampleFolder> currentSampleFolder_;
     ScopedPointer<WildcardFileFilter> fileFilter_;
     DBConnector db_;
 };

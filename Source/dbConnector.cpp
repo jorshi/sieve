@@ -22,9 +22,6 @@ DBConnector::DBConnector()
     else
     {
         isConnected_ = true;
-        //std::cout << "DB connection established\n";
-        
-        // Setup Tables
         setupTables();
     }
 }
@@ -54,14 +51,22 @@ bool DBConnector::runCommand(juce::String command, int (*callbackFunc)(void *, i
 
 void DBConnector::setupTables()
 {
-    // Need to setup tables
-    String sqlSamples = "CREATE TABLE IF NOT EXISTS`samples` ( " \
+    String sqlSampleFolder = "CREATE TABLE IF NOT EXISTS `sample_folders` ( " \
+        "`id` INTEGER PRIMARY KEY, " \
+        "`path` VARCHAR(200) NOT NULL, " \
+        "UNIQUE (`path`) " \
+        ");";
+    
+    String sqlSamples = "CREATE TABLE IF NOT EXISTS `samples` ( " \
         "`id` INTEGER PRIMARY KEY, " \
         "`name` VARCHAR(200) NOT NULL, " \
         "`path` VARCHAR(200) NOT NULL, " \
         "`start_time` DOUBLE DEFAULT NULL, " \
         "`stop_time` DOUBLE DEFAULT NULL, " \
-        "UNIQUE (`path`) " \
+        "`analyzed` INT(1) DEFAULT 0, " \
+        "`sample_folder` INT(11) NOT NULL, "\
+        "UNIQUE (`path`), " \
+        "FOREIGN KEY (`sample_folder`) REFERENCES `sample_folders` (`id`) ON DELETE CASCADE " \
         ");";
     
     String sqlTags = "CREATE TABLE IF NOT EXISTS `tags` ( " \
@@ -78,12 +83,15 @@ void DBConnector::setupTables()
         "FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE " \
         ");";
         
-    if (runCommand(sqlSamples) &&
+    if (    runCommand(sqlSampleFolder) &&
+            runCommand(sqlSamples) &&
             runCommand(sqlTags) &&
             runCommand(sqlSampleTags))
     {
         //std::cout << "All tables succesfully created\n";
     }
+    
+    runCommand("PRAGMA foreign_keys = ON;");
 }
 
 

@@ -1,0 +1,37 @@
+/*
+  ==============================================================================
+
+    FileBrowseComponent.h
+    Created: 29 Jul 2017 5:29:39pm
+    Author:  Jordie Shier 
+
+  ==============================================================================
+*/
+
+#pragma once
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "CustomLookAndFeel.h"
+
+//==============================================================================
+/*
+*/
+class FileBrowseComponent    : public Component,
+                               public ButtonListener,
+                               public ActionBroadcaster
+{
+public:
+    FileBrowseComponent();
+    ~FileBrowseComponent();
+
+    void paint (Graphics&) override;
+    void resized() override;
+
+private:
+    
+    void buttonClicked(Button* button) override;
+    
+    ScopedPointer<TextButton> fileBrowser;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBrowseComponent)
+};

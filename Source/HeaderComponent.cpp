@@ -17,8 +17,18 @@ HeaderComponent::HeaderComponent()
     headerFont = new Font(CustomLookAndFeel::offsideTypeface);
     headerFont->setHeight(46);
     
-    addAndMakeVisible(&sampleManagerButton);
-    sampleManagerButton.setButtonText("Sample Manager");
+    sampleManagerButton = new TextButton;
+    sampleManagerButton->setButtonText("Sample Manager");
+    sampleManagerButton->addListener(this);
+    addAndMakeVisible(sampleManagerButton);
+    
+    backToGridButton = new TextButton;
+    backToGridButton->setButtonText("Back");
+    backToGridButton->addListener(this);
+    addAndMakeVisible(backToGridButton);
+    
+    currentState = grid;
+    updateHeaderUI();
 }
 
 HeaderComponent::~HeaderComponent()
@@ -37,6 +47,46 @@ void HeaderComponent::paint (Graphics& g)
 
 void HeaderComponent::resized()
 {
-    sampleManagerButton.setBounds(513, 13, 120, 25);
+    sampleManagerButton->setBounds(513, 13, 120, 25);
+    backToGridButton->setBounds(588, 13, 45, 25);
+    
+}
 
+void HeaderComponent::buttonClicked(Button* button)
+{
+    if (button == sampleManagerButton)
+    {
+        sendActionMessage("file_browse");
+    }
+    else if (button == backToGridButton)
+    {
+        sendActionMessage("grid");
+    }
+}
+
+void HeaderComponent::updateHeaderUI()
+{
+    sampleManagerButton->setVisible(false);
+    backToGridButton->setVisible(false);
+    
+    if (currentState == grid)
+    {
+        sampleManagerButton->setVisible(true);
+    }
+    else if (currentState == browse)
+    {
+        backToGridButton->setVisible(true);
+    }
+}
+
+void HeaderComponent::setGridState()
+{
+    currentState = grid;
+    updateHeaderUI();
+}
+
+void HeaderComponent::setBrowseState()
+{
+    currentState = browse;
+    updateHeaderUI();
 }

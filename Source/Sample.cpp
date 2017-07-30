@@ -11,8 +11,8 @@
 #include "Sample.h"
 
 // Full Constructor
-Sample::Sample(int id, String name, String fullPath, double start, double stop) :
-    id_(id), name_(name), path_(fullPath), startTime_(start), stopTime_(stop)
+Sample::Sample(int id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder) :
+    id_(id), name_(name), path_(fullPath), startTime_(start), stopTime_(stop), analyzed_(analyzed), folder_(folder)
 {
     
 }
@@ -23,11 +23,13 @@ bool Sample::save(const DBConnector &db)
     
     db.runCommand("BEGIN;");
     
-    String sql = "INSERT INTO `samples` (`name`, `path`, `start_time`, `stop_time`) " \
+    String sql = "INSERT INTO `samples` (`name`, `path`, `start_time`, `stop_time`, `analyzed`, `sample_folder`) " \
         "VALUES ('" + name_.replace("'", "''") + \
         "', '" + path_.getFullPathName().replace("'", "''") + \
         "', " + String(startTime_) + \
         ", " + String(stopTime_) + \
+        ", " + String(0) + \
+        ", " + String(folder_) + \
         ");";
     
     if (db.runCommand(sql))

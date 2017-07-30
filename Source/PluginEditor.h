@@ -21,6 +21,7 @@
 #include "WaveformComponent.h"
 #include "HeaderComponent.h"
 #include "MainComponent.h"
+#include "FileBrowseComponent.h"
 
 
 //==============================================================================
@@ -45,6 +46,13 @@ private:
     // Action callback
     void actionListenerCallback(const String& message) override;
     
+    // UI State selection
+    void setMainUI();
+    
+    // UI State
+    enum UIState {grid, browse};
+    UIState currentState;
+    
     // Reference to processor
     SampleBrowserAudioProcessor& processor;
     
@@ -55,9 +63,7 @@ private:
     // Components
     ScopedPointer<HeaderComponent> header;
     ScopedPointer<MainComponent> main;
-
-
-
+    ScopedPointer<FileBrowseComponent> fileBrowse;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleBrowserAudioProcessorEditor)
 };
