@@ -19,6 +19,7 @@ SampleManager::SampleManager()
     readSampleFolders();
 }
 
+
 void SampleManager::loadNewSamples()
 {
     File directory;
@@ -27,11 +28,11 @@ void SampleManager::loadNewSamples()
         // Add sample folder to DB and update the current sample folder list
         SampleFolder::Ptr newFolder = new SampleFolder;
         newFolder->setPath(directory);
-        newFolder->save(db_);
-        newFolder->updateStatus(1, db_);
-        sampleFolders_.add(newFolder);
-        
-        sampleLoader_->addSampleFolder(newFolder);
+        if (newFolder->save(db_)) {
+            newFolder->updateStatus(1, db_);
+            sampleFolders_.add(newFolder);
+            sampleLoader_->addSampleFolder(newFolder);
+        }
     }
 }
 
@@ -71,6 +72,8 @@ void SampleManager::updateThumbnails()
     }
 }
 
+
+// This is just here for testing
 void SampleManager::updateRainbowColours()
 {
     int numSamples = currentSamples_.size();
@@ -90,14 +93,6 @@ void SampleManager::updateRainbowColours()
             int r = i*15 + 100;
             int g = j*10 + 100;
             int b = 150 - (i*j)*2;
-            
-            //int r = i*4 + 85;
-            //int g = j*2 + 170;
-            //int b = 160 - (i*j)*1;
-    
-            //int r = i*1 + 113;
-            //int g = j*1 + 168;
-            //int b = 150 - (i*j)*0.5;
             
             sample = currentSamples_.getUnchecked(count);
             sample->setColour(Colour::fromRGB(r,g,b));

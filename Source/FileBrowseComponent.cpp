@@ -31,7 +31,15 @@ void FileBrowseComponent::paint (Graphics& g)
 {
     g.setGradientFill(CustomLookAndFeel::Colours::background);
     g.fillAll();
+    
+    g.setColour(CustomLookAndFeel::Colours::tableHeader);
+    g.fillRect(34, 50, 582, 30);
+    
+    g.setColour(CustomLookAndFeel::Colours::headerText);
+    g.drawText("Folder Name", 39, 50, 400, 30, Justification::centredLeft);
+    g.drawText("Status", 480, 50, 100, 30, Justification::centredLeft);
  
+    // Draw the table entries with alternating colours
     ReferenceCountedArray<SampleFolder>& folders = manager->getSampleFolders();
     for (int i = 0; i < folders.size(); i++)
     {
@@ -44,15 +52,16 @@ void FileBrowseComponent::paint (Graphics& g)
             g.setColour(CustomLookAndFeel::Colours::darkerTable);
         }
         
-        g.fillRect(34, (i*40) + 50, 582, 40);
+        g.fillRect(34, (i*40) + 80, 582, 40);
         
         g.setColour(CustomLookAndFeel::Colours::headerText);
-        g.drawText(folders.getUnchecked(i)->getFile().getFullPathName(), 36, 50 + (i*40), 400, 39, Justification::centredLeft);
-        g.drawText(folders.getUnchecked(i)->getStatusStr(), 450, 50 + (i*40), 100, 39, Justification::centredLeft);
+        g.drawText(folders.getUnchecked(i)->getFile().getFileName(), 39, 80 + (i*40), 400, 39, Justification::centredLeft);
+        g.drawText(folders.getUnchecked(i)->getStatusStr(), 480, 80 + (i*40), 100, 39, Justification::centredLeft);
     }
     
     g.setColour(Colours::grey);
     g.drawRect(34, 50, 582, 541);
+    g.drawRect(34, 50, 582, 30);
 }
 
 void FileBrowseComponent::resized()
