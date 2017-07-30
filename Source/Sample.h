@@ -23,7 +23,7 @@ public:
     Sample() {};
     
     // Constructor
-    Sample(int id, String name, String fullPath, double start, double stop);
+    Sample(int id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder);
     
     // Default Deconstuctor
     ~Sample() {};
@@ -46,16 +46,17 @@ public:
     void setPath(const String& path) { path_ = File(path); };
     void setThumbnail(AudioThumbnail* newThumb) { thumbnail_ = newThumb; };
     void setColour(const Colour& c) { colour_ = c; };
+    void setAnalyzed(const int a) { analyzed_ = a; };
     
 private:
     
     int id_;
     String name_;
     File path_;
-    
     double startTime_;
     double stopTime_;
-    
+    bool analyzed_;
+    int folder_;
     Colour colour_;
     
     ScopedPointer<AudioThumbnail> thumbnail_;

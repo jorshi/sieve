@@ -16,7 +16,9 @@
 //==============================================================================
 /*
 */
-class HeaderComponent    : public Component
+class HeaderComponent    : public Component,
+                           public ButtonListener,
+                           public ActionBroadcaster
 {
 public:
     HeaderComponent();
@@ -24,11 +26,24 @@ public:
 
     void paint (Graphics&) override;
     void resized() override;
+    
+    void setGridState();
+    void setBrowseState();
 
 private:
     
+    // Button callback
+    void buttonClicked(Button* button) override;
+    
+    void updateHeaderUI();
+    
+    enum HeaderState {grid, browse};
+    HeaderState currentState;
+    
     ScopedPointer<Font> headerFont;
-    TextButton sampleManagerButton;
+    ScopedPointer<TextButton> sampleManagerButton;
+    ScopedPointer<TextButton> backToGridButton;
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HeaderComponent)
 };

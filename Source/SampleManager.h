@@ -51,7 +51,7 @@ private:
     static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)
     {
         SampleManager* manager = reinterpret_cast<SampleManager*>(param);
-        if (argc == 5)
+        if (argc == 7)
         {
             Sample::Ptr newSample = new Sample();
             newSample->setId(atoi(argv[0]));
