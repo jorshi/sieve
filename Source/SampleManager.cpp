@@ -13,11 +13,28 @@
 SampleManager::SampleManager()
 {
     sampleLoader_ = new SampleLoader;
+    analysis_ = new SampleAnalysis;
+    
     thumbnailCache_ = new AudioThumbnailCache(64);
     
     // Load in sample folders from database
     readSampleFolders();
     setupTypes();
+
+    // Check current folders for any unfinished loading or analysis
+    for (auto folder = sampleFolders_.begin(); folder != sampleFolders_.end(); ++folder)
+    {
+        switch ((*folder)->getStatus())
+        {
+            case 0:
+                (*folder)->updateStatus(1, db_);
+            case 1:
+                sampleLoader_->addSampleFolder(*folder);
+            case 2:
+                analysis_->addSampleFolder(*folder);
+                break;
+        }
+    }
 }
 
 
@@ -64,6 +81,7 @@ void SampleManager::loadNewSamples()
             newFolder->updateStatus(1, db_);
             sampleFolders_.add(newFolder);
             sampleLoader_->addSampleFolder(newFolder);
+            analysis_->addSampleFolder(newFolder);
         }
     }
 }

@@ -25,8 +25,6 @@ bool SampleFolder::save(const DBConnector &db)
         ", " + String(status_) + \
         ");";
     
-    std::cout << sql << "\n";
-    
     if (db.runCommand(sql))
     {
         id_ = db.lastInsertId();
@@ -40,18 +38,17 @@ bool SampleFolder::save(const DBConnector &db)
 
 bool SampleFolder::updateStatus(int status, const DBConnector &db)
 {
-    status_ = status;
-    
     // Start DB transaction
     db.runCommand("BEGIN;");
     
     String sql = "UPDATE `sample_folders` " \
-    "SET `status` = " + String(status_) + \
+    "SET `status` = " + String(status) + \
     " WHERE `id` = " + String(id_) + ";";
     
     if (db.runCommand(sql))
     {
         db.runCommand("COMMIT;");
+        status_ = status;
         return true;
     }
     

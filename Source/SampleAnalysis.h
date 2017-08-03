@@ -14,9 +14,12 @@
 #include <essentia/algorithmfactory.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
 #include <essentia/scheduler/network.h>
+#include <queue>
+
+#include "SampleFolder.h"
 
 
-class SampleAnalysis
+class SampleAnalysis : private Thread
 {
 public:
     
@@ -24,9 +27,21 @@ public:
     SampleAnalysis();
     
     // Default Decontstructor
-    ~SampleAnalysis() {};
+    ~SampleAnalysis();
+    
+    // Add a sample folder to queue
+    void addSampleFolder(SampleFolder::Ptr folder);
     
 private:
+    
+    // Run thread
+    void run() override;
+    
+    // Queue of sample folders that need to be analyzed
+    std::queue<SampleFolder::Ptr> sampleFolders_;
+    
+    CriticalSection mutex_;
+    SampleFolder::Ptr currentSampleFolder_;
     
     
     

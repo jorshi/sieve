@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "SampleLoader.h"
+#include "SampleAnalysis.h"
 #include "Sample.h"
 #include "SampleType.h"
 #include "SampleFolder.h"
@@ -72,6 +73,7 @@ private:
     ScopedPointer<AudioThumbnailCache> thumbnailCache_;
     
     ScopedPointer<SampleLoader> sampleLoader_;
+    ScopedPointer<SampleAnalysis> analysis_;
     DirectoryChooser directoryChooser_;
     DBConnector db_;
     FileLoader loader_;
