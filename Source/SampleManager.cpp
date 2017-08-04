@@ -23,7 +23,7 @@ SampleManager::SampleManager()
 
 void SampleManager::setupTypes()
 {
-    Array<String> defaultTypes = {"unknown", "kick", "snare"};
+    Array<String> defaultTypes = {"kick", "snare"};
     SampleType::Ptr newType;
     
     // Load default sample types. If they don't exist in the database yet then create
@@ -37,16 +37,17 @@ void SampleManager::setupTypes()
             if (sampleTypesBuffer_.size() > 0)
             {
                 sampleTypes_.insert(std::pair<String, SampleType::Ptr>(*type, sampleTypesBuffer_.getUnchecked(0)));
+                sampleLoader_->addSampleType(*type, sampleTypesBuffer_.getUnchecked(0));
             }
             else
             {
                 newType = new SampleType(0, *type);
                 newType->save(db_);
                 sampleTypes_.insert(std::pair<String, SampleType::Ptr>(*type, newType));
+                sampleLoader_->addSampleType(*type, newType);
             }
         }
     }
-    
     sampleTypesBuffer_.clear();
 }
 

@@ -71,7 +71,7 @@ void DBConnector::setupTables()
         "`stop_time` DOUBLE DEFAULT NULL, " \
         "`analyzed` INT(1) DEFAULT 0, " \
         "`sample_folder` INT(11) NOT NULL, "\
-        "`sample_type` INT(11) NOT NULL, "\
+        "`sample_type` INT(11), "\
         "UNIQUE (`path`), " \
         "FOREIGN KEY (`sample_folder`) REFERENCES `sample_folders` (`id`) ON DELETE CASCADE, " \
         "FOREIGN KEY (`sample_type`) REFERENCES `sample_type` (`id`) ON DELETE CASCADE" \
@@ -97,10 +97,11 @@ void DBConnector::setupTables()
             runCommand(sqlTags) &&
             runCommand(sqlSampleTags))
     {
-        //std::cout << "All tables succesfully created\n";
+        std::cout << "All tables succesfully created\n";
     }
     
     runCommand("PRAGMA foreign_keys = ON;");
+    runCommand("REPLACE INTO `sample_type` VALUES (0, 'none');");
 }
 
 
