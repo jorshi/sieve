@@ -13,6 +13,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "dbConnector.h"
 #include "Sample.h"
+#include "SampleType.h"
 #include "SampleFolder.h"
 
 #include <queue>
@@ -31,17 +32,22 @@ public:
     
     void addSampleFolder(SampleFolder::Ptr);
     
+    // Add a sample type keyword for relating samples to a sample type
+    void addSampleType(const String& keyword, SampleType::Ptr);
+    
 private:
     
     using TaggedSamples = std::map<String, Array<Sample*>>;
+    using TypeMap = std::map<String, const SampleType::Ptr>;
     
     // Run thread
     void run() override;
     
     void loadSamples();
     
-    void exploreDirectory(const File& directory, Array<String>& tags);
+    void exploreDirectory(const File& directory, Array<String>& tags, SampleType::Ptr type = nullptr);
     
+    TypeMap sampleTypes_;
     std::queue<SampleFolder::Ptr> sampleFolders_;
 
     CriticalSection mutex_;

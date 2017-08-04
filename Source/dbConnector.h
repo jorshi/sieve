@@ -27,7 +27,7 @@ public:
     bool runCommand(String sql, int (*callbackFunc)(void *, int, char **, char **)=callback, void* context=0) const;
     
     // Last insert ID
-    int lastInsertId() const { return sqlite3_last_insert_rowid(db_); };
+    long long lastInsertId() const { return sqlite3_last_insert_rowid(db_); };
     
 private:
     

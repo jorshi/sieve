@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "dbConnector.h"
+#include "SampleType.h"
 
 class Sample : public ReferenceCountedObject
 {
@@ -23,7 +24,7 @@ public:
     Sample() {};
     
     // Constructor
-    Sample(int id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder);
+    Sample(int id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type=0);
     
     // Default Deconstuctor
     ~Sample() {};
@@ -34,7 +35,7 @@ public:
     bool saveTagsForSample(const DBConnector& db, const Array<String>& tags);
     
     // Getters
-    int getId() const { return id_; };
+    long long getId() const { return id_; };
     File& getFile() { return path_; };
     const String& getName() const { return name_; };
     AudioThumbnail& getThumbnail() { return *thumbnail_; };
@@ -50,13 +51,15 @@ public:
     
 private:
     
-    int id_;
+    long long id_;
     String name_;
     File path_;
     double startTime_;
     double stopTime_;
     bool analyzed_;
     int folder_;
+    int type_;
+
     Colour colour_;
     
     ScopedPointer<AudioThumbnail> thumbnail_;

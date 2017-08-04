@@ -40,6 +40,8 @@
         <FILE id="SvLWAW" name="SampleManager.cpp" compile="1" resource="0"
               file="Source/SampleManager.cpp"/>
         <FILE id="F4C8OM" name="SampleManager.h" compile="0" resource="0" file="Source/SampleManager.h"/>
+        <FILE id="VenkOs" name="SampleType.cpp" compile="1" resource="0" file="Source/SampleType.cpp"/>
+        <FILE id="NuiG8c" name="SampleType.h" compile="0" resource="0" file="Source/SampleType.h"/>
       </GROUP>
       <GROUP id="{51E519B5-B385-27A8-E6CC-7D8128A84556}" name="UI">
         <FILE id="NJVbNA" name="FileBrowseComponent.cpp" compile="1" resource="0"

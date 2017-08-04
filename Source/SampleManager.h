@@ -13,10 +13,13 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "SampleLoader.h"
 #include "Sample.h"
+#include "SampleType.h"
 #include "SampleFolder.h"
 #include "DirectoryChooser.h"
 #include "dbConnector.h"
 #include "FileLoader.h"
+
+#include <map>
 
 class SampleManager
 {
@@ -62,6 +65,9 @@ private:
     // List of loaded sample folders
     ReferenceCountedArray<SampleFolder> sampleFolders_;
     
+    ReferenceCountedArray<SampleType> sampleTypesBuffer_;
+    std::map<String, SampleType::Ptr> sampleTypes_;
+    
     // Thumbnails
     ScopedPointer<AudioThumbnailCache> thumbnailCache_;
     
@@ -71,6 +77,9 @@ private:
     FileLoader loader_;
 
     //==============================================================================
+    
+    // Creates the default sample types required for operation - currently just snare and kick
+    void setupTypes();
     
     // Static callback for a select sample query
     static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)
@@ -97,6 +106,18 @@ private:
             SampleFolder::Ptr newFolder = new SampleFolder(atoi(argv[0]), String(argv[1]));
             newFolder->setStatus(atoi(argv[2]));
             manager->sampleFolders_.add(newFolder);
+        }
+        return 0;
+    }
+    
+    // Static Callback for a select sample type query
+    static int selectSampleTypeCallback(void *param, int argc, char **argv, char **azCol)
+    {
+        SampleManager* manager = reinterpret_cast<SampleManager*>(param);
+        if (argc > 1)
+        {
+            SampleType::Ptr newType = new SampleType(atoi(argv[0]), String(argv[1]));
+            manager->sampleTypesBuffer_.add(newType);
         }
         return 0;
     }

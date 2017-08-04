@@ -79,7 +79,7 @@ void SampleLoader::loadSamples()
 }
 
 
-void SampleLoader::exploreDirectory(const File& directory, Array<String>& tags)
+void SampleLoader::exploreDirectory(const File& directory, Array<String>& tags, SampleType::Ptr type)
 {
     Array<String> newTags = tags;
     DirectoryIterator iter(directory, false, "*", File::findFilesAndDirectories);
@@ -89,12 +89,28 @@ void SampleLoader::exploreDirectory(const File& directory, Array<String>& tags)
     {
         if (isDirectory)
         {
-            newTags.add(iter.getFile().getFileName());
-            exploreDirectory(iter.getFile(), newTags);
+            String dirName = iter.getFile().getFileName();
+            newTags.add(dirName);
+            
+            TypeMap::iterator it = sampleTypes_.find(dirName);
+            if (it != sampleTypes_.end())
+            {
+                type = it->second;
+            }
+            
+            exploreDirectory(iter.getFile(), newTags, type);
         }
         else if (fileFilter_->isFileSuitable(iter.getFile()))
         {
-            Sample newSample(0, iter.getFile().getFileName(), iter.getFile().getFullPathName(), 0, 0, false, currentSampleFolder_->getId());
+            long long typeId = 0;
+            if (type != nullptr)
+            {
+                typeId = type->getId();
+            }
+            Sample newSample(0, iter.getFile().getFileName(), iter.getFile().getFullPathName(),
+                             0, 0, false, currentSampleFolder_->getId(), typeId);
+            
+            
             newSample.save(db_);
             //newSample.saveTagsForSample(db_, newTags);
         }
@@ -111,4 +127,9 @@ void SampleLoader::addSampleFolder(SampleFolder::Ptr folder)
     {
         startThread();
     }
+}
+
+void SampleLoader::addSampleType(const String& keyword, const SampleType::Ptr sampleType)
+{
+    sampleTypes_.insert(std::pair<String, const SampleType::Ptr>(keyword, sampleType));
 }
