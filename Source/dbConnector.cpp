@@ -58,6 +58,11 @@ void DBConnector::setupTables()
         "UNIQUE (`path`) " \
         ");";
     
+    String sqlSampleType = "CREATE TABLE IF NOT EXISTS `sample_type` ( " \
+    "`id` INTEGER PRIMARY KEY, " \
+    "`name` VARCHAR(200) NOT NULL UNIQUE " \
+    ");";
+    
     String sqlSamples = "CREATE TABLE IF NOT EXISTS `samples` ( " \
         "`id` INTEGER PRIMARY KEY, " \
         "`name` VARCHAR(200) NOT NULL, " \
@@ -66,8 +71,10 @@ void DBConnector::setupTables()
         "`stop_time` DOUBLE DEFAULT NULL, " \
         "`analyzed` INT(1) DEFAULT 0, " \
         "`sample_folder` INT(11) NOT NULL, "\
+        "`sample_type` INT(11) NOT NULL, "\
         "UNIQUE (`path`), " \
-        "FOREIGN KEY (`sample_folder`) REFERENCES `sample_folders` (`id`) ON DELETE CASCADE " \
+        "FOREIGN KEY (`sample_folder`) REFERENCES `sample_folders` (`id`) ON DELETE CASCADE, " \
+        "FOREIGN KEY (`sample_type`) REFERENCES `sample_type` (`id`) ON DELETE CASCADE" \
         ");";
     
     String sqlTags = "CREATE TABLE IF NOT EXISTS `tags` ( " \
@@ -85,6 +92,7 @@ void DBConnector::setupTables()
         ");";
         
     if (    runCommand(sqlSampleFolder) &&
+            runCommand(sqlSampleType) &&
             runCommand(sqlSamples) &&
             runCommand(sqlTags) &&
             runCommand(sqlSampleTags))

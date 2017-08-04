@@ -17,6 +17,37 @@ SampleManager::SampleManager()
     
     // Load in sample folders from database
     readSampleFolders();
+    setupTypes();
+}
+
+
+void SampleManager::setupTypes()
+{
+    Array<String> defaultTypes = {"unknown", "kick", "snare"};
+    SampleType::Ptr newType;
+    
+    // Load default sample types. If they don't exist in the database yet then create
+    // them and save into database
+    for (auto type = defaultTypes.begin(); type != defaultTypes.end(); ++type)
+    {
+        sampleTypesBuffer_.clear();
+        String sql = "SELECT * FROM `sample_type` WHERE `name` = '" + *type + "';";
+        if (db_.runCommand(sql, selectSampleTypeCallback, this))
+        {
+            if (sampleTypesBuffer_.size() > 0)
+            {
+                sampleTypes_.insert(std::pair<String, SampleType::Ptr>(*type, sampleTypesBuffer_.getUnchecked(0)));
+            }
+            else
+            {
+                newType = new SampleType(0, *type);
+                newType->save(db_);
+                sampleTypes_.insert(std::pair<String, SampleType::Ptr>(*type, newType));
+            }
+        }
+    }
+    
+    sampleTypesBuffer_.clear();
 }
 
 
