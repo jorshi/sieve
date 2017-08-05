@@ -11,12 +11,12 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include <essentia/algorithmfactory.h>
-#include <essentia/streaming/algorithms/poolstorage.h>
-#include <essentia/scheduler/network.h>
 #include <queue>
 
+#include "Sample.h"
 #include "SampleFolder.h"
+#include "dbConnector.h"
+#include "FeatureAnalysis.h"
 
 
 class SampleAnalysis : private Thread
@@ -24,7 +24,7 @@ class SampleAnalysis : private Thread
 public:
     
     // Default Constructor
-    SampleAnalysis();
+    SampleAnalysis(const DBConnector& db);
     
     // Default Decontstructor
     ~SampleAnalysis();
@@ -34,15 +34,44 @@ public:
     
 private:
     
-    // Run thread
-    void run() override;
+    CriticalSection mutex_;
+    SampleFolder::Ptr currentSampleFolder_;
+    
+    // Reference to a database connection
+    const DBConnector& db_;
     
     // Queue of sample folders that need to be analyzed
     std::queue<SampleFolder::Ptr> sampleFolders_;
     
-    CriticalSection mutex_;
-    SampleFolder::Ptr currentSampleFolder_;
+    ReferenceCountedArray<Sample> analysisSamples_;
     
+    // Feature analysis object
+    ScopedPointer<FeatureAnalysis> analysis_;
+    
+    // Static callback for a select sample query
+    static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)
+    {
+        SampleAnalysis* analysisObj = reinterpret_cast<SampleAnalysis*>(param);
+        if (argc == 8)
+        {
+            Sample::Ptr newSample = new Sample(atoi(argv[0]),
+                                               String(argv[1]),
+                                               String(argv[2]),
+                                               atof(argv[3]),
+                                               atof(argv[4]),
+                                               atoi(argv[5]),
+                                               atoi(argv[6]),
+                                               atoi(argv[7]));
+            
+            analysisObj->analysisSamples_.add(newSample);
+        }
+        return 0;
+    }
+    
+    // Run thread
+    void run() override;
+    
+    void runAnalysisBatch();
     
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SampleAnalysis)

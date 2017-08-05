@@ -13,7 +13,7 @@
 SampleManager::SampleManager()
 {
     sampleLoader_ = new SampleLoader;
-    analysis_ = new SampleAnalysis;
+    analysis_ = new SampleAnalysis(db_);
     
     thumbnailCache_ = new AudioThumbnailCache(64);
     

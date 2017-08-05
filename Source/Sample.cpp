@@ -59,3 +59,18 @@ bool Sample::saveTagsForSample(const DBConnector &db, const Array<juce::String> 
     
     return true;
 }
+
+
+bool Sample::updateSave(const DBConnector &db)
+{    
+    String sql = "UPDATE `samples` SET " \
+        "name = '" + name_.replace("'", "''") + "', " + \
+        "start_time = " + String(startTime_) + ", " + \
+        "stop_time = " + String(stopTime_) + ", " + \
+        "analyzed = " + String(int(analyzed_)) + ", " + \
+        "sample_folder = " + String(folder_) + ", " + \
+        "sample_type = " + String(type_) + " " + \
+        "WHERE id = " + String(id_) + ";";
+    
+    return db.runCommand(sql);
+ }

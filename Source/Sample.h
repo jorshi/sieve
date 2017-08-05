@@ -34,11 +34,16 @@ public:
     
     bool saveTagsForSample(const DBConnector& db, const Array<String>& tags);
     
+    // Update database
+    bool updateSave(const DBConnector& db);
+    
     // Getters
     long long getId() const { return id_; };
     File& getFile() { return path_; };
     const String& getName() const { return name_; };
     AudioThumbnail& getThumbnail() { return *thumbnail_; };
+    double getStartTime() { return startTime_; };
+    double getStopTime() { return stopTime_; };
     Colour& getColour() { return colour_; };
     
     // Setters
@@ -48,6 +53,8 @@ public:
     void setThumbnail(AudioThumbnail* newThumb) { thumbnail_ = newThumb; };
     void setColour(const Colour& c) { colour_ = c; };
     void setAnalyzed(const int a) { analyzed_ = a; };
+    void setStartTime(const double& s) { startTime_ = s; };
+    void setStopTime(const double& s) { stopTime_ = s; };
     
 private:
     

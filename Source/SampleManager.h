@@ -58,6 +58,9 @@ public:
     
 private:
     
+    // Initialize db connection
+    DBConnector db_;
+    
     // Current samples and queued samples. Queued sampels are collected as they are loaded
     // from the database on a select before being moved into the current sample array
     ReferenceCountedArray<Sample> currentSamples_;
@@ -75,7 +78,7 @@ private:
     ScopedPointer<SampleLoader> sampleLoader_;
     ScopedPointer<SampleAnalysis> analysis_;
     DirectoryChooser directoryChooser_;
-    DBConnector db_;
+
     FileLoader loader_;
 
     //==============================================================================
@@ -87,7 +90,7 @@ private:
     static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)
     {
         SampleManager* manager = reinterpret_cast<SampleManager*>(param);
-        if (argc == 7)
+        if (argc == 8)
         {
             Sample::Ptr newSample = new Sample();
             newSample->setId(atoi(argv[0]));
@@ -95,7 +98,6 @@ private:
             newSample->setPath(String(argv[2]));
             manager->queuedSamples_.add(newSample);
         }
-        
         return 0;
     }
     

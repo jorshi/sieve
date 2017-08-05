@@ -11,15 +11,16 @@
 #include "SampleAnalysis.h"
 
 
-SampleAnalysis::SampleAnalysis() : Thread("Sample Analysis Thread")
+SampleAnalysis::SampleAnalysis(const DBConnector& db) : Thread("Sample Analysis Thread"), db_(db)
 {
     currentSampleFolder_ = nullptr;
+    analysis_ = new FeatureAnalysis(db_);
 }
 
 
 SampleAnalysis::~SampleAnalysis()
 {
-    stopThread(4000);
+    stopThread(8000);
 }
 
 
@@ -47,10 +48,10 @@ void SampleAnalysis::run()
         
         if (currentSampleFolder_ != nullptr && currentSampleFolder_->getStatus() == 2)
         {
-            std::cout << "Running analysis on " << currentSampleFolder_->getFile().getFileName() << "\n";
+            runAnalysisBatch();
         }        
         
-        wait(1000);
+        wait(250);
     }
 }
 
@@ -63,5 +64,29 @@ void SampleAnalysis::addSampleFolder(SampleFolder::Ptr folder)
     if (!isThreadRunning())
     {
         startThread();
+    }
+}
+
+
+void SampleAnalysis::runAnalysisBatch()
+{
+    String sql = "SELECT * FROM `samples` WHERE sample_folder = " + String(currentSampleFolder_->getId()) + \
+        " AND analyzed = 0 LIMIT 1;";
+    
+    analysisSamples_.clear();
+    db_.runCommand(sql, selectSampleCallback, this);
+
+    if (analysisSamples_.size() == 0)
+    {
+        currentSampleFolder_->updateStatus(3, db_);
+        currentSampleFolder_ = nullptr;
+        return;
+    }
+    
+    for (auto sample = analysisSamples_.begin(); sample != analysisSamples_.end(); ++sample)
+    {
+        analysis_->run(*sample);
+        (*sample)->setAnalyzed(1);
+        (*sample)->updateSave(db_);
     }
 }

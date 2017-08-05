@@ -25,6 +25,10 @@
               file="Source/PluginProcessor.h"/>
       </GROUP>
       <GROUP id="{DF13C237-35B1-C707-336C-9BBFA6476672}" name="Sample Management">
+        <FILE id="ELp9gD" name="FeatureAnalysis.cpp" compile="1" resource="0"
+              file="Source/FeatureAnalysis.cpp"/>
+        <FILE id="xqdpw7" name="FeatureAnalysis.h" compile="0" resource="0"
+              file="Source/FeatureAnalysis.h"/>
         <FILE id="Ld8SJU" name="Sample.cpp" compile="1" resource="0" file="Source/Sample.cpp"/>
         <FILE id="rhMESi" name="Sample.h" compile="0" resource="0" file="Source/Sample.h"/>
         <FILE id="ap7eXK" name="SampleAnalysis.cpp" compile="1" resource="0"
