@@ -107,6 +107,7 @@ void FeatureAnalysis::run(Sample::Ptr sample, AnalysisObject::Ptr analysis, doub
     }
     catch (std::exception& e)
     {
+        // Something is wrong with the sample if we can't load it -- mark it and exclude from future analysis
         sample->setExclude(true);
         sample->updateSave(db_);
         throw std::exception(e);

@@ -29,13 +29,26 @@ public:
     
     void runDimensionReduction();
     
-    
 private:
     
     const DBConnector& db_;
     const ReferenceCountedArray<SampleFolder>& sampleFolders_;
     
+    // Struct for keeping track of the different sample types and the specific segmentation to use
+    struct SampleClassPCA
+    {
+        SampleClassPCA(int t, double s, double l) : sampleType(t), segStart(t), segLength(l) {};
+        
+        int sampleType;
+        double segStart;
+        double segLength;
+    };
+    
+    OwnedArray<SampleClassPCA> sampleClasses_;
+    
     void run() override;
+    
+    void pca();
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DimensionReduction)
     
