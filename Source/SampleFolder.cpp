@@ -20,12 +20,11 @@ bool SampleFolder::save(const DBConnector &db)
     
     db.runCommand("BEGIN;");
     
-    String sql = "INSERT INTO `sample_folders` (`path`, `status`) " \
+    String sql = "INSERT INTO `sample_folders` (`path`, `status`, `num_samples`) " \
         "VALUES ('" + path_.getFullPathName().replace("'", "''") + "'" + \
         ", " + String(status_) + \
+        ", " + String(numSamples_) + \
         ");";
-    
-    std::cout << sql << "\n";
     
     if (db.runCommand(sql))
     {
@@ -40,23 +39,33 @@ bool SampleFolder::save(const DBConnector &db)
 
 bool SampleFolder::updateStatus(int status, const DBConnector &db)
 {
-    status_ = status;
-    
     // Start DB transaction
     db.runCommand("BEGIN;");
     
     String sql = "UPDATE `sample_folders` " \
-    "SET `status` = " + String(status_) + \
+    "SET `status` = " + String(status) + \
     " WHERE `id` = " + String(id_) + ";";
     
     if (db.runCommand(sql))
     {
         db.runCommand("COMMIT;");
+        status_ = status;
         return true;
     }
     
     db.runCommand("ROLLBACK;");
     return false;
+}
+
+bool SampleFolder::update(const DBConnector &db)
+{
+    String sql = "UPDATE `sample_folders` SET " \
+        "`path` = '" + path_.getFullPathName().replace("'", "''") + "', " + \
+        "`status` = " + String(status_) + ", " + \
+        "`num_samples` = " + String(numSamples_) + " " \
+        "WHERE `id` = " + String(id_) + ";";
+    
+    return db.runCommand(sql);
 }
 
 String SampleFolder::getStatusStr()

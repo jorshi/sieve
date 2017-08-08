@@ -11,7 +11,7 @@
 #include "Sample.h"
 
 // Full Constructor
-Sample::Sample(int id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type) :
+Sample::Sample(long long id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type) :
     id_(id), name_(name), path_(fullPath), startTime_(start), stopTime_(stop), analyzed_(analyzed), folder_(folder), type_(type)
 {
     
@@ -59,3 +59,18 @@ bool Sample::saveTagsForSample(const DBConnector &db, const Array<juce::String> 
     
     return true;
 }
+
+
+bool Sample::updateSave(const DBConnector &db)
+{    
+    String sql = "UPDATE `samples` SET " \
+        "name = '" + name_.replace("'", "''") + "', " + \
+        "start_time = " + String(startTime_) + ", " + \
+        "stop_time = " + String(stopTime_) + ", " + \
+        "analyzed = " + String(int(analyzed_)) + ", " + \
+        "sample_folder = " + String(folder_) + ", " + \
+        "sample_type = " + String(type_) + " " + \
+        "WHERE id = " + String(id_) + ";";
+    
+    return db.runCommand(sql);
+ }

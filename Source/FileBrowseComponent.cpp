@@ -56,7 +56,15 @@ void FileBrowseComponent::paint (Graphics& g)
         
         g.setColour(CustomLookAndFeel::Colours::headerText);
         g.drawText(folders.getUnchecked(i)->getFile().getFileName(), 39, 80 + (i*40), 400, 39, Justification::centredLeft);
-        g.drawText(folders.getUnchecked(i)->getStatusStr(), 480, 80 + (i*40), 100, 39, Justification::centredLeft);
+        
+        String status = folders.getUnchecked(i)->getStatusStr();
+        
+        if (folders.getUnchecked(i)->getStatus() == 2)
+        {
+            status += " - " + String(folders.getUnchecked(i)->getPercentAnalyzed(), 2) + "%";
+        }
+        
+        g.drawText(status, 480, 80 + (i*40), 150, 39, Justification::centredLeft);
     }
     
     g.setColour(Colours::grey);

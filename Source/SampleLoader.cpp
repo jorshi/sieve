@@ -74,7 +74,8 @@ void SampleLoader::loadSamples()
     exploreDirectory(currentSampleFolder_->getFile(), tags);
 
     // Finished exploring the directory
-    currentSampleFolder_->updateStatus(2, db_);
+    currentSampleFolder_->setStatus(2);
+    currentSampleFolder_->update(db_);
     currentSampleFolder_ = nullptr;
 }
 
@@ -110,9 +111,8 @@ void SampleLoader::exploreDirectory(const File& directory, Array<String>& tags, 
             Sample newSample(0, iter.getFile().getFileName(), iter.getFile().getFullPathName(),
                              0, 0, false, currentSampleFolder_->getId(), typeId);
             
-            
             newSample.save(db_);
-            //newSample.saveTagsForSample(db_, newTags);
+            currentSampleFolder_->incrementSamples();
         }
     }
 }
