@@ -63,7 +63,9 @@ void SampleAnalysis::run()
         if (currentSampleFolder_ != nullptr && currentSampleFolder_->getStatus() == 2)
         {
             runAnalysisBatch();
-        }        
+        }
+        
+        wait(1000);
     }
 }
 
@@ -83,12 +85,16 @@ void SampleAnalysis::addSampleFolder(SampleFolder::Ptr folder)
 void SampleAnalysis::runAnalysisBatch()
 {
     String sql = "SELECT * FROM `samples` WHERE sample_folder = " + String(currentSampleFolder_->getId()) + \
-        " AND analyzed = 0 LIMIT 100;";
+        " AND analyzed = 0;";
     
     analysisSamples_.clear();
     db_.runCommand(sql, selectSampleCallback, this);
 
-    if (analysisSamples_.size() == 0)
+    int remainingSamples = analysisSamples_.size();
+    int totalSamples = currentSampleFolder_->getNumSamples();
+    currentSampleFolder_->setPercentAnalyzed(100 * (double(totalSamples)-remainingSamples) / totalSamples);
+    
+    if (remainingSamples == 0)
     {
         currentSampleFolder_->updateStatus(3, db_);
         currentSampleFolder_ = nullptr;
@@ -105,7 +111,13 @@ void SampleAnalysis::runAnalysisBatch()
                 if (!threadShouldExit())
                 {
                     AnalysisObject::Ptr newAnalysis = new AnalysisObject(0, (*sample)->getId(), (*seg)->start, (*seg)->length);
-                    analysis_->run(*sample, newAnalysis, (*seg)->start, (*seg)->length);
+                    try {
+                        analysis_->run(*sample, newAnalysis, (*seg)->start, (*seg)->length);
+                        newAnalysis->save(db_);
+                    } catch (std::exception& e) {
+                        std::cout << e.what() << "\n";
+                        return;
+                    }
                 }
                 else
                 {
@@ -116,6 +128,8 @@ void SampleAnalysis::runAnalysisBatch()
             // Save sample as being fully analyzed
             (*sample)->setAnalyzed(1);
             (*sample)->updateSave(db_);
+            remainingSamples--;
+            currentSampleFolder_->setPercentAnalyzed(100 * (double(totalSamples)-remainingSamples) / totalSamples);
         }
         else
         {

@@ -185,6 +185,9 @@ public:
     void setSampleId(long long sampleId) { sampleId_ = sampleId; };
     void setStart(double s) { start_ = s; };
     void setLength(double l) { length_ = l; };
+    
+    // Save analysis object into database
+    bool save(const DBConnector& db);
 
 private:
     

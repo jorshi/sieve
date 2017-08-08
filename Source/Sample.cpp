@@ -11,7 +11,7 @@
 #include "Sample.h"
 
 // Full Constructor
-Sample::Sample(int id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type) :
+Sample::Sample(long long id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type) :
     id_(id), name_(name), path_(fullPath), startTime_(start), stopTime_(stop), analyzed_(analyzed), folder_(folder), type_(type)
 {
     

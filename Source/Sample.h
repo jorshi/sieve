@@ -24,7 +24,7 @@ public:
     Sample() {};
     
     // Constructor
-    Sample(int id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type=0);
+    Sample(long long id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type=0);
     
     // Default Deconstuctor
     ~Sample() {};
@@ -47,7 +47,7 @@ public:
     Colour& getColour() { return colour_; };
     
     // Setters
-    void setId(const int& id) { id_ = id; };
+    void setId(const long long& id) { id_ = id; };
     void setName(const String& name) { name_ = name; };
     void setPath(const String& path) { path_ = File(path); };
     void setThumbnail(AudioThumbnail* newThumb) { thumbnail_ = newThumb; };

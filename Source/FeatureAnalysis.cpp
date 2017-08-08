@@ -47,15 +47,10 @@ FeatureAnalysis::FeatureAnalysis(const DBConnector& db) : db_(db)
                            "defaultStats", stats);
     
     envelope_ = factory.create("Envelope");
-    
     lat_ = factory.create("LogAttackTime");
-    
     centroid_ = factory.create("Centroid");
-    
     trimmer_ = factory.create("Trimmer");
-    
     rms_ = factory.create("RMS");
-    
 }
 
 
@@ -101,7 +96,7 @@ void FeatureAnalysis::run(Sample::Ptr sample, AnalysisObject::Ptr analysis, doub
     // Set up and read audio samples from file
     std::vector<Real> audioBuffer;
     std::vector<Real> audioEqBuffer;
-    
+
     audio_->output("audio").set(audioBuffer);
     audioEq_->output("audio").set(audioEqBuffer);
     

@@ -109,6 +109,7 @@ private:
         {
             SampleFolder::Ptr newFolder = new SampleFolder(atoi(argv[0]), String(argv[1]));
             newFolder->setStatus(atoi(argv[2]));
+            newFolder->setNumSamples(atoi(argv[3]));
             manager->sampleFolders_.add(newFolder);
         }
         return 0;

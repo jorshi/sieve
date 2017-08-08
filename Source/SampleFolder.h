@@ -21,7 +21,7 @@ public:
     typedef ReferenceCountedObjectPtr<SampleFolder> Ptr;
     
     // Constructors
-    SampleFolder() {};
+    SampleFolder() : numSamples_(0), percentAnalyzed_(0) {};
     SampleFolder(int id, const String& path);
     
     // Destructor
@@ -30,24 +30,35 @@ public:
     // Save current instance into database
     bool save(const DBConnector& db);
     bool updateStatus(int status, const DBConnector& db);
+    bool update(const DBConnector& db);
     
     // Get status string
     String getStatusStr();
     
+    // Increment the number of samples
+    void incrementSamples() { ++numSamples_; };
+    
     // Getters
-    int getId() { return id_; };
+    long long getId() { return id_; };
     File& getFile() { return path_; };
     int getStatus() { return status_; };
+    int getNumSamples() { return numSamples_; };
+    double getPercentAnalyzed() { return percentAnalyzed_; };
     
     // Setters
-    void setId(const int id) { id_ = id; };
+    void setId(const long long id) { id_ = id; };
     void setPath(const String& path) { path_ = File(path); };
     void setPath(const File& path) { path_ = path; };
     void setStatus(const int s) { status_ = s; };
+    void setNumSamples(const int n) { numSamples_ = n; };
+    void setPercentAnalyzed(const double p) { percentAnalyzed_ = p; };
     
 private:
     
-    int id_;
+    long long id_;
     File path_;
     int status_;
+    int numSamples_;
+    
+    double percentAnalyzed_;
 };
