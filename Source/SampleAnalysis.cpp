@@ -15,6 +15,20 @@ SampleAnalysis::SampleAnalysis(const DBConnector& db) : Thread("Sample Analysis 
 {
     currentSampleFolder_ = nullptr;
     analysis_ = new FeatureAnalysis(db_);
+    
+    // Time segmentations to run
+    segmentations_.add(new TimeSegmentation(.20, .025));
+    segmentations_.add(new TimeSegmentation(.20, .1));
+    segmentations_.add(new TimeSegmentation(.20, .25));
+    segmentations_.add(new TimeSegmentation(.20, .5));
+    segmentations_.add(new TimeSegmentation(.50, .025));
+    segmentations_.add(new TimeSegmentation(.50, .1));
+    segmentations_.add(new TimeSegmentation(.50, .25));
+    segmentations_.add(new TimeSegmentation(.50, .5));
+    segmentations_.add(new TimeSegmentation(.90, .025));
+    segmentations_.add(new TimeSegmentation(.90, .1));
+    segmentations_.add(new TimeSegmentation(.90, .25));
+    segmentations_.add(new TimeSegmentation(.90, .5));
 }
 
 
@@ -85,13 +99,26 @@ void SampleAnalysis::runAnalysisBatch()
     {
         if (!threadShouldExit())
         {
-            analysis_->run(*sample, 0.5, 0.250);
+            // Run analysis for all segmentations
+            for (auto seg = segmentations_.begin(); seg != segmentations_.end(); ++seg)
+            {
+                if (!threadShouldExit())
+                {
+                    analysis_->run(*sample, (*seg)->start, (*seg)->length);
+                }
+                else
+                {
+                    return;
+                }
+            }
+            
+            // Save sample as being fully analyzed
             (*sample)->setAnalyzed(1);
             (*sample)->updateSave(db_);
         }
         else
         {
-            break;
+            return;
         }
     }
 }

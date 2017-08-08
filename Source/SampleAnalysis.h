@@ -34,6 +34,15 @@ public:
     
 private:
     
+    struct TimeSegmentation
+    {
+        TimeSegmentation(double s, double l) : start(s), length(l) {};
+        double start;
+        double length;
+    };
+    
+    OwnedArray<TimeSegmentation> segmentations_;
+    
     CriticalSection mutex_;
     SampleFolder::Ptr currentSampleFolder_;
     
