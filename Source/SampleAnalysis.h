@@ -17,6 +17,7 @@
 #include "SampleFolder.h"
 #include "dbConnector.h"
 #include "FeatureAnalysis.h"
+#include "AnalysisObject.h"
 
 
 class SampleAnalysis : private Thread

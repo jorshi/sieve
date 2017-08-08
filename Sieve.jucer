@@ -10,7 +10,7 @@
               pluginIsSynth="1" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="SieveAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.Sieve" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
-              jucerVersion="5.1.0" companyName="University of Victoria" companyWebsite="uvic.ca"
+              jucerVersion="5.1.1" companyName="University of Victoria" companyWebsite="uvic.ca"
               cppLanguageStandard="11">
   <MAINGROUP id="bS7Zw9" name="Sieve">
     <GROUP id="{22B62575-2E8A-2AC3-6CB4-58FFE5C4B28D}" name="Resources">
@@ -25,27 +25,33 @@
               file="Source/PluginProcessor.h"/>
       </GROUP>
       <GROUP id="{DF13C237-35B1-C707-336C-9BBFA6476672}" name="Sample Management">
+        <GROUP id="{FB3CDE09-F02C-CC56-6CCD-61A6A6D09997}" name="Models">
+          <FILE id="EpcHr5" name="AnalysisObject.cpp" compile="1" resource="0"
+                file="Source/AnalysisObject.cpp"/>
+          <FILE id="SLSuc1" name="AnalysisObject.h" compile="0" resource="0"
+                file="Source/AnalysisObject.h"/>
+          <FILE id="Ld8SJU" name="Sample.cpp" compile="1" resource="0" file="Source/Sample.cpp"/>
+          <FILE id="rhMESi" name="Sample.h" compile="0" resource="0" file="Source/Sample.h"/>
+          <FILE id="Qupw19" name="SampleFolder.cpp" compile="1" resource="0"
+                file="Source/SampleFolder.cpp"/>
+          <FILE id="fkFBRd" name="SampleFolder.h" compile="0" resource="0" file="Source/SampleFolder.h"/>
+          <FILE id="VenkOs" name="SampleType.cpp" compile="1" resource="0" file="Source/SampleType.cpp"/>
+          <FILE id="NuiG8c" name="SampleType.h" compile="0" resource="0" file="Source/SampleType.h"/>
+        </GROUP>
         <FILE id="ELp9gD" name="FeatureAnalysis.cpp" compile="1" resource="0"
               file="Source/FeatureAnalysis.cpp"/>
         <FILE id="xqdpw7" name="FeatureAnalysis.h" compile="0" resource="0"
               file="Source/FeatureAnalysis.h"/>
-        <FILE id="Ld8SJU" name="Sample.cpp" compile="1" resource="0" file="Source/Sample.cpp"/>
-        <FILE id="rhMESi" name="Sample.h" compile="0" resource="0" file="Source/Sample.h"/>
         <FILE id="ap7eXK" name="SampleAnalysis.cpp" compile="1" resource="0"
               file="Source/SampleAnalysis.cpp"/>
         <FILE id="YiYNJk" name="SampleAnalysis.h" compile="0" resource="0"
               file="Source/SampleAnalysis.h"/>
-        <FILE id="Qupw19" name="SampleFolder.cpp" compile="1" resource="0"
-              file="Source/SampleFolder.cpp"/>
-        <FILE id="fkFBRd" name="SampleFolder.h" compile="0" resource="0" file="Source/SampleFolder.h"/>
         <FILE id="xdsdca" name="SampleLoader.cpp" compile="1" resource="0"
               file="Source/SampleLoader.cpp"/>
         <FILE id="nNsRAE" name="SampleLoader.h" compile="0" resource="0" file="Source/SampleLoader.h"/>
         <FILE id="SvLWAW" name="SampleManager.cpp" compile="1" resource="0"
               file="Source/SampleManager.cpp"/>
         <FILE id="F4C8OM" name="SampleManager.h" compile="0" resource="0" file="Source/SampleManager.h"/>
-        <FILE id="VenkOs" name="SampleType.cpp" compile="1" resource="0" file="Source/SampleType.cpp"/>
-        <FILE id="NuiG8c" name="SampleType.h" compile="0" resource="0" file="Source/SampleType.h"/>
       </GROUP>
       <GROUP id="{51E519B5-B385-27A8-E6CC-7D8128A84556}" name="UI">
         <FILE id="NJVbNA" name="FileBrowseComponent.cpp" compile="1" resource="0"

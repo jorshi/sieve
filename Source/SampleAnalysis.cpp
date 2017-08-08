@@ -104,7 +104,8 @@ void SampleAnalysis::runAnalysisBatch()
             {
                 if (!threadShouldExit())
                 {
-                    analysis_->run(*sample, (*seg)->start, (*seg)->length);
+                    AnalysisObject::Ptr newAnalysis = new AnalysisObject(0, (*sample)->getId(), (*seg)->start, (*seg)->length);
+                    analysis_->run(*sample, newAnalysis, (*seg)->start, (*seg)->length);
                 }
                 else
                 {

@@ -15,6 +15,7 @@
 #include <essentia/pool.h>
 
 #include "Sample.h"
+#include "AnalysisObject.h"
 #include "dbConnector.h"
 
 using namespace essentia;
@@ -32,7 +33,7 @@ public:
     
     // Function call operator to run analysis
     void run();
-    void run(Sample::Ptr sample, double segStart=0, double segLength=0);
+    void run(Sample::Ptr sample, AnalysisObject::Ptr analysis, double segStart=0, double segLength=0);
     
 private:
     
