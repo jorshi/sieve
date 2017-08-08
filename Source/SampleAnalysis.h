@@ -62,7 +62,7 @@ private:
     static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)
     {
         SampleAnalysis* analysisObj = reinterpret_cast<SampleAnalysis*>(param);
-        if (argc == 8)
+        if (argc == 9)
         {
             Sample::Ptr newSample = new Sample(atoi(argv[0]),
                                                String(CharPointer_UTF8(argv[1])),
@@ -71,7 +71,8 @@ private:
                                                atof(argv[4]),
                                                atoi(argv[5]),
                                                atoi(argv[6]),
-                                               atoi(argv[7]));
+                                               atoi(argv[7]),
+                                               atoi(argv[8]));
             
             analysisObj->analysisSamples_.add(newSample);
         }

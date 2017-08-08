@@ -20,6 +20,8 @@ SampleManager::SampleManager()
     // Load in sample folders from database
     readSampleFolders();
     setupTypes();
+    
+    dimensionReduction_ = new DimensionReduction(db_, sampleFolders_);
 
     // Check current folders for any unfinished loading or analysis
     for (auto folder = sampleFolders_.begin(); folder != sampleFolders_.end(); ++folder)
@@ -33,8 +35,12 @@ SampleManager::SampleManager()
             case 2:
                 analysis_->addSampleFolder(*folder);
                 break;
+            case 3:
+                break;
         }
     }
+    
+    
 }
 
 
@@ -82,6 +88,7 @@ void SampleManager::loadNewSamples()
             sampleFolders_.add(newFolder);
             sampleLoader_->addSampleFolder(newFolder);
             analysis_->addSampleFolder(newFolder);
+            dimensionReduction_->runDimensionReduction();
         }
     }
 }

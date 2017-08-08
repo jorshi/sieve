@@ -14,21 +14,21 @@
 SampleAnalysis::SampleAnalysis(const DBConnector& db) : Thread("Sample Analysis Thread"), db_(db)
 {
     currentSampleFolder_ = nullptr;
-    analysis_ = new FeatureAnalysis(db_);
+    analysis_ = nullptr;
     
     // Time segmentations to run
-    segmentations_.add(new TimeSegmentation(.20, .025));
+    //segmentations_.add(new TimeSegmentation(.20, .025));
     segmentations_.add(new TimeSegmentation(.20, .1));
-    segmentations_.add(new TimeSegmentation(.20, .25));
-    segmentations_.add(new TimeSegmentation(.20, .5));
-    segmentations_.add(new TimeSegmentation(.50, .025));
-    segmentations_.add(new TimeSegmentation(.50, .1));
+    //segmentations_.add(new TimeSegmentation(.20, .25));
+    //segmentations_.add(new TimeSegmentation(.20, .5));
+    //segmentations_.add(new TimeSegmentation(.50, .025));
+    //segmentations_.add(new TimeSegmentation(.50, .1));
     segmentations_.add(new TimeSegmentation(.50, .25));
-    segmentations_.add(new TimeSegmentation(.50, .5));
-    segmentations_.add(new TimeSegmentation(.90, .025));
-    segmentations_.add(new TimeSegmentation(.90, .1));
-    segmentations_.add(new TimeSegmentation(.90, .25));
-    segmentations_.add(new TimeSegmentation(.90, .5));
+    //segmentations_.add(new TimeSegmentation(.50, .5));
+    //segmentations_.add(new TimeSegmentation(.90, .025));
+    //segmentations_.add(new TimeSegmentation(.90, .1));
+    //segmentations_.add(new TimeSegmentation(.90, .25));
+    //segmentations_.add(new TimeSegmentation(.90, .5));
 }
 
 
@@ -62,6 +62,10 @@ void SampleAnalysis::run()
         
         if (currentSampleFolder_ != nullptr && currentSampleFolder_->getStatus() == 2)
         {
+            if (analysis_ == nullptr)
+            {
+                analysis_ = new FeatureAnalysis(db_);
+            }
             runAnalysisBatch();
         }
         
@@ -85,7 +89,7 @@ void SampleAnalysis::addSampleFolder(SampleFolder::Ptr folder)
 void SampleAnalysis::runAnalysisBatch()
 {
     String sql = "SELECT * FROM `samples` WHERE sample_folder = " + String(currentSampleFolder_->getId()) + \
-        " AND analyzed = 0;";
+        " AND analyzed = 0 AND exclude = 0;";
     
     analysisSamples_.clear();
     db_.runCommand(sql, selectSampleCallback, this);
@@ -116,6 +120,7 @@ void SampleAnalysis::runAnalysisBatch()
                         newAnalysis->save(db_);
                     } catch (std::exception& e) {
                         std::cout << e.what() << "\n";
+                        analysis_ = nullptr;
                         return;
                     }
                 }

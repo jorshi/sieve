@@ -73,6 +73,7 @@ void DBConnector::setupTables()
         "`analyzed` INT(1) DEFAULT 0, " \
         "`sample_folder` INT(11) NOT NULL, "\
         "`sample_type` INT(11), "\
+        "`exclude` INT(11) DEFAULT 0, " \
         "UNIQUE (`path`), " \
         "FOREIGN KEY (`sample_folder`) REFERENCES `sample_folders` (`id`) ON DELETE CASCADE, " \
         "FOREIGN KEY (`sample_type`) REFERENCES `sample_type` (`id`) ON DELETE CASCADE" \
