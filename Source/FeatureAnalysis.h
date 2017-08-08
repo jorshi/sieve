@@ -32,7 +32,7 @@ public:
     
     // Function call operator to run analysis
     void run();
-    void run(Sample::Ptr sample);
+    void run(Sample::Ptr sample, double segStart=0, double segLength=0);
     
 private:
     
@@ -51,6 +51,11 @@ private:
     Algorithm* aggr_;
     Algorithm* frameCutter_;
     Algorithm* startStopSilence_;
+    Algorithm* envelope_;
+    Algorithm* lat_;
+    Algorithm* centroid_;
+    Algorithm* trimmer_;
+    Algorithm* rms_;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FeatureAnalysis)
     

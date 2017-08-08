@@ -55,8 +55,8 @@ private:
         if (argc == 8)
         {
             Sample::Ptr newSample = new Sample(atoi(argv[0]),
-                                               String(argv[1]),
-                                               String(argv[2]),
+                                               String(CharPointer_UTF8(argv[1])),
+                                               String(CharPointer_UTF8(argv[2])),
                                                atof(argv[3]),
                                                atof(argv[4]),
                                                atoi(argv[5]),

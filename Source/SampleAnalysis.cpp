@@ -50,8 +50,6 @@ void SampleAnalysis::run()
         {
             runAnalysisBatch();
         }        
-        
-        wait(250);
     }
 }
 
@@ -71,7 +69,7 @@ void SampleAnalysis::addSampleFolder(SampleFolder::Ptr folder)
 void SampleAnalysis::runAnalysisBatch()
 {
     String sql = "SELECT * FROM `samples` WHERE sample_folder = " + String(currentSampleFolder_->getId()) + \
-        " AND analyzed = 0 LIMIT 1;";
+        " AND analyzed = 0 LIMIT 100;";
     
     analysisSamples_.clear();
     db_.runCommand(sql, selectSampleCallback, this);
@@ -85,8 +83,15 @@ void SampleAnalysis::runAnalysisBatch()
     
     for (auto sample = analysisSamples_.begin(); sample != analysisSamples_.end(); ++sample)
     {
-        analysis_->run(*sample);
-        (*sample)->setAnalyzed(1);
-        (*sample)->updateSave(db_);
+        if (!threadShouldExit())
+        {
+            analysis_->run(*sample, 0.5, 0.250);
+            (*sample)->setAnalyzed(1);
+            (*sample)->updateSave(db_);
+        }
+        else
+        {
+            break;
+        }
     }
 }

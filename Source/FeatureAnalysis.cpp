@@ -15,7 +15,7 @@ FeatureAnalysis::FeatureAnalysis(const DBConnector& db) : db_(db)
 {
     sampleRate_ = 44100;
     frameSize_ = 2048;
-    hopSize_ = 1024;
+    hopSize_ = 256;
     
     essentia::init();
     AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -46,6 +46,16 @@ FeatureAnalysis::FeatureAnalysis(const DBConnector& db) : db_(db)
     aggr_ = factory.create("PoolAggregator",
                            "defaultStats", stats);
     
+    envelope_ = factory.create("Envelope");
+    
+    lat_ = factory.create("LogAttackTime");
+    
+    centroid_ = factory.create("Centroid");
+    
+    trimmer_ = factory.create("Trimmer");
+    
+    rms_ = factory.create("RMS");
+    
 }
 
 
@@ -58,12 +68,17 @@ FeatureAnalysis::~FeatureAnalysis()
     delete aggr_;
     delete frameCutter_;
     delete startStopSilence_;
+    delete envelope_;
+    delete lat_;
+    delete centroid_;
+    delete trimmer_;
+    delete rms_;
     
     essentia::shutdown();
 }
 
 
-void FeatureAnalysis::run(Sample::Ptr sample)
+void FeatureAnalysis::run(Sample::Ptr sample, double segStart, double segLength)
 {
     Pool pool;
     
@@ -75,27 +90,35 @@ void FeatureAnalysis::run(Sample::Ptr sample)
     aggr_->reset();
     frameCutter_->reset();
     startStopSilence_->reset();
+    envelope_->reset();
+    centroid_->reset();
+    trimmer_->reset();
+    rms_->reset();
     
     audio_->configure("filename", sample->getFile().getFullPathName().toStdString());
     audioEq_->configure("filename", sample->getFile().getFullPathName().toStdString());
     
-    // Audio buffers
+    // Set up and read audio samples from file
     std::vector<Real> audioBuffer;
     std::vector<Real> audioEqBuffer;
+    
+    audio_->output("audio").set(audioBuffer);
+    audioEq_->output("audio").set(audioEqBuffer);
+    
+    audio_->compute();
+    audioEq_->compute();
     
     // Onset Detection
     std::vector<Real> frame;
     int startFrame;
     int stopFrame;
     
-    audio_->output("audio").set(audioBuffer);
     frameCutter_->input("signal").set(audioBuffer);
     frameCutter_->output("frame").set(frame);
     startStopSilence_->input("frame").set(frame);
     startStopSilence_->output("startFrame").set(startFrame);
     startStopSilence_->output("stopFrame").set(stopFrame);
     
-    audio_->compute();
     while(true)
     {
         frameCutter_->compute();
@@ -110,9 +133,69 @@ void FeatureAnalysis::run(Sample::Ptr sample)
     sample->setStartTime(double(startFrame * 32) / sampleRate_);
     sample->setStopTime(double(stopFrame * 32) / sampleRate_);
     
-    // Reset audio input for analysis
-    audio_->reset();
-    audioBuffer.clear();
+    // Compute LAT and temporal centroid
+    std::vector<Real> envelopeBuffer;
+    Real lat;
+    Real attackStart;
+    Real attackStop;
+    Real tc;
+    
+    envelope_->input("signal").set(audioEqBuffer);
+    envelope_->output("signal").set(envelopeBuffer);
+    lat_->input("signal").set(envelopeBuffer);
+    lat_->output("logAttackTime").set(lat);
+    lat_->output("attackStart").set(attackStart);
+    lat_->output("attackStop").set(attackStop);
+    
+    centroid_->configure("range", Real((audioEqBuffer.size() - 1)) / sampleRate_);
+    centroid_->input("array").set(envelopeBuffer);
+    centroid_->output("centroid").set(tc);
+    
+    envelope_->compute();
+    lat_->compute();
+    centroid_->compute();
+    
+    // Apply time segmentation
+    Real windowStart;
+    Real windowEnd;
+    Real latUnused;
+    
+    lat_->reset();
+    lat_->configure("startAttackThreshold", segStart > 0.9 ? 0.9 : Real(segStart));
+    lat_->input("signal").set(envelopeBuffer);
+    lat_->output("logAttackTime").set(latUnused);
+    lat_->output("attackStart").set(windowStart);
+    lat_->output("attackStop").set(windowEnd);
+    
+    lat_->compute();
+    windowStart = segStart > 0.9 ? windowEnd : windowStart;
+    
+    if (segLength > 0)
+    {
+        std::vector<Real> trimBuffer;
+        
+        trimmer_->configure("startTime", windowStart);
+        trimmer_->configure("endTime", windowStart + segLength);
+        
+        trimmer_->input("signal").set(audioBuffer);
+        trimmer_->output("signal").set(trimBuffer);
+        trimmer_->compute();
+        
+        audioBuffer = trimBuffer;
+        
+        // Now compute for the equal loudness audio input
+        trimmer_->input("signal").set(audioEqBuffer);
+        trimmer_->compute();
+        
+        audioEqBuffer = trimBuffer;
+    }
+    
+    // Calculat RMS on trimmed sample
+    Real rms;
+    rms_->input("array").set(audioEqBuffer);
+    rms_->output("rms").set(rms);
+    rms_->compute();
+    rms = 20*log10(rms);
     
     // Collecting variables for Eqloud spectral extractor output
     std::vector<std::vector<Real>> barkbands;
@@ -146,9 +229,7 @@ void FeatureAnalysis::run(Sample::Ptr sample)
     std::vector<Real> oddtoevenharmonicenergyratio;
     
     // --- Connections for Eqloud spectral extractor
-    audio_->output("audio").set(audioBuffer);
     spectral_->input("signal").set(audioBuffer);
-    
     spectral_->output("barkbands").set(barkbands);
     spectral_->output("barkbands_skewness").set(barkbands_skewness);
     spectral_->output("barkbands_kurtosis").set(barkbands_kurtosis);
@@ -179,9 +260,8 @@ void FeatureAnalysis::run(Sample::Ptr sample)
     spectral_->output("tristimulus").set(tristimulus);
     spectral_->output("oddtoevenharmonicenergyratio").set(oddtoevenharmonicenergyratio);
     
-    audio_->compute();
+    // Compute low level spectral indicators
     spectral_->compute();
-    
     
     // Collection variables for output of spectral extractor
     std::vector<Real> dissonance;
@@ -193,9 +273,7 @@ void FeatureAnalysis::run(Sample::Ptr sample)
     std::vector<Real> spectral_spread;
     
     // Connections for spectral extractor
-    audioEq_->output("audio").set(audioEqBuffer);
     spectralEq_->input("signal").set(audioEqBuffer);
-    
     spectralEq_->output("dissonance").set(dissonance);
     spectralEq_->output("sccoeffs").set(sccoeffs);
     spectralEq_->output("scvalleys").set(scvalleys);
@@ -203,8 +281,8 @@ void FeatureAnalysis::run(Sample::Ptr sample)
     spectralEq_->output("spectral_kurtosis").set(spectral_kurtosis);
     spectralEq_->output("spectral_skewness").set(spectral_skewness);
     spectralEq_->output("spectral_spread").set(spectral_spread);
-    
-    audioEq_->compute();
+
+    // Compute low level spectral indicators with equal loudness filter
     spectralEq_->compute();
     
     pool.merge("barkbands", barkbands, "replace");
@@ -253,6 +331,6 @@ void FeatureAnalysis::run(Sample::Ptr sample)
     const std::map<std::string, std::vector<Real>>& vectorResults = aggrPool.getRealPool();
     const std::map<std::string, Real>& realResults = aggrPool.getSingleRealPool();
     
-    //std::cout << vectorResults.size() + realResults.size() << "\n";
+    std::cout << vectorResults.size() + realResults.size() << "\n";
     
 }
