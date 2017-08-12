@@ -32,7 +32,6 @@ DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCou
     AlgorithmFactory& factory = AlgorithmFactory::instance();
     
     pca_ = factory.create("PCA",
-                          "dimensions", 2,
                           "namespaceIn", "feature",
                           "namespaceOut", "pca");
     
@@ -88,67 +87,57 @@ void DimensionReduction::pca()
             // Check to see if we need to exit the thread
             if (threadShouldExit()) return;
             
-            // how many dimensions are there?
-            int bands = analysisMatrix_[0].size();
-            
-            // calculate covariance for this songs frames
-            // before there was an implementation for covariance from Vincent akkerman. I (eaylon) think it is better
-            // and more maintainable to use an algorithm that computes covariance.
-            // Using singleGaussian algo seems to give slightly different results for variances (8 decimal places)
-            TNT::Array2D<Real> matrix, covMatrix, icov;
-            std::vector<Real> means;
-            matrix = vecvecToArray2D(analysisMatrix_);
-            Algorithm* sg = AlgorithmFactory::create("SingleGaussian");
-            sg->input("matrix").set(matrix);
-            sg->output("mean").set(means);
-            sg->output("covariance").set(covMatrix);
-            sg->output("inverseCovariance").set(icov);
-            sg->compute();
-            delete sg;
-            
-            // calculate eigenvectors, get the eigenvector matrix
-            JAMA::Eigenvalue<Real> eigMatrixCalc(covMatrix);
-            Array2D<Real>    eigMatrix;
-            eigMatrixCalc.getV(eigMatrix);
-            
-            int nFrames = analysisMatrix_.size();
-            for (int row=0; row<nFrames; row++) {
-                for (int col=0; col<bands; col++) {
-                    analysisMatrix_[row][col] -= means[col];
+            // Definitely doing more work here than needs to be done -- converting from one orientation to another
+            // and then back -- TODO fix this up!
+            std::vector<std::vector<Real>> rotated(analysisMatrix_[0].size());
+            for (int i = 0; i < analysisMatrix_.size(); i++)
+            {
+                for (int j = 0; j < analysisMatrix_[0].size(); j++)
+                {
+                    rotated[j].push_back(analysisMatrix_[i][j]);
                 }
             }
             
-            // reduce dimensions of eigMatrix
-            int requiredDimensions = bands;
-            if (requiredDimensions > eigMatrix.dim2() || requiredDimensions < 1)
-                requiredDimensions = eigMatrix.dim2();
-            Array2D<Real> reducedEig(eigMatrix.dim1(), requiredDimensions);
+            // Standardize data
+            for (auto feature = rotated.begin(); feature != rotated.end(); ++feature)
+            {
+                Real sum = std::accumulate(feature->begin(), feature->end(), 0.0);
+                Real mean = sum / feature->size();
+                
+                std::vector<Real> diff(feature->size());
+                std::transform(feature->begin(), feature->end(), diff.begin(), std::bind2nd(std::minus<Real>(), mean));
+                
+                Real sqSum = std::inner_product(feature->begin(), feature->end(), diff.begin(), 0.0);
+                Real stdDev = std::sqrt(sqSum / feature->size());
+                
+                std::transform(feature->begin(), feature->end(), feature->begin(), [mean, stdDev](Real v){ return (v - mean) / stdDev; });
+            }
             
-            for (int row=0; row<eigMatrix.dim1(); row++) {
-                for (int column=0; column<requiredDimensions; column++) {
-                    reducedEig[row][column] = eigMatrix[row][column+eigMatrix.dim2()-requiredDimensions];
+            for (int i = 0; i < analysisMatrix_.size(); i++)
+            {
+                for (int j = 0; j < analysisMatrix_[0].size(); j++)
+                {
+                    analysisMatrix_[i][j] = rotated[j][i];
                 }
             }
             
-            // transform all the frames and add to the output
-            Array2D<Real> featVector(1,bands, 0.0);
-            vector<Real> results = vector<Real>(requiredDimensions, 0.0);
-            for (int row=0; row<nFrames; row++) {
-                for (int col=0; col<bands; col++) {
-                    analysisMatrix_[0][col] = analysisMatrix_[row][col];
-                }
-                featVector = matmult(featVector, reducedEig);
-                for (int i=0; i<requiredDimensions; i++) {
-                    results[i] = featVector[0][i];
-                }
-            }
+            // Check to see if we need to exit the thread
+            if (threadShouldExit()) return;
             
-            std::cout << "done";
-
+            // Pools for Essentia PCA
+            Pool pcaIn;
+            Pool pcaOut;
             
-
+            // Store analysis matrix in a pool
+            pcaIn.merge("feature", analysisMatrix_, "replace");
             
+            // Calculate PCA
+            pca_->reset();
+            pca_->input("poolIn").set(pcaIn);
+            pca_->output("poolOut").set(pcaOut);
+            pca_->compute();
             
+            std::map<std::string, std::vector<std::vector<Real>>> output =  pcaOut.getVectorRealPool();
             
         }
     }
