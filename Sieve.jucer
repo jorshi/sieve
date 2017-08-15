@@ -93,48 +93,6 @@
               file="Source/WaveformComponent.h"/>
       </GROUP>
       <GROUP id="{C634A3DF-1886-607C-B204-7E79C3EB97F9}" name="Utility">
-        <GROUP id="{EAE49580-5D28-CC86-AF56-C11E2BB522FD}" name="tnt">
-          <FILE id="zGi6Mk" name="jama_cholesky.h" compile="0" resource="0" file="Source/tnt/jama_cholesky.h"/>
-          <FILE id="c5rQp6" name="jama_eig.h" compile="0" resource="0" file="Source/tnt/jama_eig.h"/>
-          <FILE id="OqNUQE" name="jama_lu.h" compile="0" resource="0" file="Source/tnt/jama_lu.h"/>
-          <FILE id="c3GXRy" name="jama_qr.h" compile="0" resource="0" file="Source/tnt/jama_qr.h"/>
-          <FILE id="HOlul1" name="jama_svd.h" compile="0" resource="0" file="Source/tnt/jama_svd.h"/>
-          <FILE id="cPfqp9" name="tnt.h" compile="0" resource="0" file="Source/tnt/tnt.h"/>
-          <FILE id="OVAf4b" name="tnt_array1d.h" compile="0" resource="0" file="Source/tnt/tnt_array1d.h"/>
-          <FILE id="cQMJq2" name="tnt_array1d_utils.h" compile="0" resource="0"
-                file="Source/tnt/tnt_array1d_utils.h"/>
-          <FILE id="dt1cyy" name="tnt_array2d.h" compile="0" resource="0" file="Source/tnt/tnt_array2d.h"/>
-          <FILE id="naekAS" name="tnt_array2d_utils.h" compile="0" resource="0"
-                file="Source/tnt/tnt_array2d_utils.h"/>
-          <FILE id="BT7psn" name="tnt_array3d.h" compile="0" resource="0" file="Source/tnt/tnt_array3d.h"/>
-          <FILE id="Mp3U3N" name="tnt_array3d_utils.h" compile="0" resource="0"
-                file="Source/tnt/tnt_array3d_utils.h"/>
-          <FILE id="fNE7La" name="tnt_cmat.h" compile="0" resource="0" file="Source/tnt/tnt_cmat.h"/>
-          <FILE id="ah15Vw" name="tnt_fortran_array1d.h" compile="0" resource="0"
-                file="Source/tnt/tnt_fortran_array1d.h"/>
-          <FILE id="xXCAvK" name="tnt_fortran_array1d_utils.h" compile="0" resource="0"
-                file="Source/tnt/tnt_fortran_array1d_utils.h"/>
-          <FILE id="WDnyPr" name="tnt_fortran_array2d.h" compile="0" resource="0"
-                file="Source/tnt/tnt_fortran_array2d.h"/>
-          <FILE id="CEuIjv" name="tnt_fortran_array2d_utils.h" compile="0" resource="0"
-                file="Source/tnt/tnt_fortran_array2d_utils.h"/>
-          <FILE id="pevtzr" name="tnt_fortran_array3d.h" compile="0" resource="0"
-                file="Source/tnt/tnt_fortran_array3d.h"/>
-          <FILE id="hQC2lF" name="tnt_fortran_array3d_utils.h" compile="0" resource="0"
-                file="Source/tnt/tnt_fortran_array3d_utils.h"/>
-          <FILE id="NjQ4JK" name="tnt_i_refvec.h" compile="0" resource="0" file="Source/tnt/tnt_i_refvec.h"/>
-          <FILE id="tJR031" name="tnt_math_utils.h" compile="0" resource="0"
-                file="Source/tnt/tnt_math_utils.h"/>
-          <FILE id="NjXFVI" name="tnt_sparse_matrix_csr.h" compile="0" resource="0"
-                file="Source/tnt/tnt_sparse_matrix_csr.h"/>
-          <FILE id="AgXkPS" name="tnt_stopwatch.h" compile="0" resource="0" file="Source/tnt/tnt_stopwatch.h"/>
-          <FILE id="OmdLRZ" name="tnt_subscript.h" compile="0" resource="0" file="Source/tnt/tnt_subscript.h"/>
-          <FILE id="Fj089I" name="tnt_vec.h" compile="0" resource="0" file="Source/tnt/tnt_vec.h"/>
-          <FILE id="fcsAvJ" name="tnt_version.h" compile="0" resource="0" file="Source/tnt/tnt_version.h"/>
-          <FILE id="fFWj2a" name="tnt2essentiautils.h" compile="0" resource="0"
-                file="Source/tnt/tnt2essentiautils.h"/>
-          <FILE id="NVIyPv" name="tnt2vector.h" compile="0" resource="0" file="Source/tnt/tnt2vector.h"/>
-        </GROUP>
         <FILE id="pjy6Bk" name="FileLoader.cpp" compile="1" resource="0" file="Source/FileLoader.cpp"/>
         <FILE id="mKMdO2" name="FileLoader.h" compile="0" resource="0" file="Source/FileLoader.h"/>
         <FILE id="LSj2oJ" name="DirectoryChooser.cpp" compile="1" resource="0"
