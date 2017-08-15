@@ -19,6 +19,7 @@
 #include "DirectoryChooser.h"
 #include "dbConnector.h"
 #include "FileLoader.h"
+#include "DimensionReduction.h"
 
 #include <map>
 
@@ -77,6 +78,7 @@ private:
     
     ScopedPointer<SampleLoader> sampleLoader_;
     ScopedPointer<SampleAnalysis> analysis_;
+    ScopedPointer<DimensionReduction> dimensionReduction_;
     DirectoryChooser directoryChooser_;
 
     FileLoader loader_;
@@ -90,12 +92,18 @@ private:
     static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)
     {
         SampleManager* manager = reinterpret_cast<SampleManager*>(param);
-        if (argc == 8)
+        if (argc == 9)
         {
-            Sample::Ptr newSample = new Sample();
-            newSample->setId(atoi(argv[0]));
-            newSample->setName(String(argv[1]));
-            newSample->setPath(String(argv[2]));
+            Sample::Ptr newSample = new Sample(atoi(argv[0]),
+                                               String(CharPointer_UTF8(argv[1])),
+                                               String(CharPointer_UTF8(argv[2])),
+                                               atof(argv[3]),
+                                               atof(argv[4]),
+                                               atoi(argv[5]),
+                                               atoi(argv[6]),
+                                               atoi(argv[7]),
+                                               atoi(argv[8]));
+
             manager->queuedSamples_.add(newSample);
         }
         return 0;

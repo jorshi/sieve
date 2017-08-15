@@ -11,8 +11,8 @@
 #include "Sample.h"
 
 // Full Constructor
-Sample::Sample(long long id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type) :
-    id_(id), name_(name), path_(fullPath), startTime_(start), stopTime_(stop), analyzed_(analyzed), folder_(folder), type_(type)
+Sample::Sample(long long id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type, bool exclude) :
+    id_(id), name_(name), path_(fullPath), startTime_(start), stopTime_(stop), analyzed_(analyzed), folder_(folder), type_(type), exclude_(exclude)
 {
     
 }
@@ -23,7 +23,7 @@ bool Sample::save(const DBConnector &db)
     
     db.runCommand("BEGIN;");
     
-    String sql = "INSERT INTO `samples` (`name`, `path`, `start_time`, `stop_time`, `analyzed`, `sample_folder`, `sample_type`) " \
+    String sql = "INSERT INTO `samples` (`name`, `path`, `start_time`, `stop_time`, `analyzed`, `sample_folder`, `sample_type`, `exclude`) " \
         "VALUES ('" + name_.replace("'", "''") + \
         "', '" + path_.getFullPathName().replace("'", "''") + \
         "', " + String(startTime_) + \
@@ -31,6 +31,7 @@ bool Sample::save(const DBConnector &db)
         ", " + String(0) + \
         ", " + String(folder_) + \
         ", " + String(type_) + \
+        ", " + String(exclude_) + \
         ");";
     
     if (db.runCommand(sql))
@@ -69,7 +70,8 @@ bool Sample::updateSave(const DBConnector &db)
         "stop_time = " + String(stopTime_) + ", " + \
         "analyzed = " + String(int(analyzed_)) + ", " + \
         "sample_folder = " + String(folder_) + ", " + \
-        "sample_type = " + String(type_) + " " + \
+        "sample_type = " + String(type_) + ", " + \
+        "exclude = " + String(exclude_) + " " + \
         "WHERE id = " + String(id_) + ";";
     
     return db.runCommand(sql);

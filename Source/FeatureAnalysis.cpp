@@ -89,20 +89,30 @@ void FeatureAnalysis::run(Sample::Ptr sample, AnalysisObject::Ptr analysis, doub
     centroid_->reset();
     trimmer_->reset();
     rms_->reset();
-    
-    audio_->configure("filename", sample->getFile().getFullPathName().toStdString());
-    audioEq_->configure("filename", sample->getFile().getFullPathName().toStdString());
-    
+
     // Set up and read audio samples from file
     std::vector<Real> audioBuffer;
     std::vector<Real> audioEqBuffer;
+    
+    try
+    {
+        audio_->configure("filename", sample->getFile().getFullPathName().toStdString());
+        audioEq_->configure("filename", sample->getFile().getFullPathName().toStdString());
+        
+        audio_->output("audio").set(audioBuffer);
+        audioEq_->output("audio").set(audioEqBuffer);
+        
+        audio_->compute();
+        audioEq_->compute();
+    }
+    catch (std::exception& e)
+    {
+        // Something is wrong with the sample if we can't load it -- mark it and exclude from future analysis
+        sample->setExclude(true);
+        sample->updateSave(db_);
+        throw std::exception(e);
+    }
 
-    audio_->output("audio").set(audioBuffer);
-    audioEq_->output("audio").set(audioEqBuffer);
-    
-    audio_->compute();
-    audioEq_->compute();
-    
     // Onset Detection
     std::vector<Real> frame;
     int startFrame;

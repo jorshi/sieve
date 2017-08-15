@@ -73,6 +73,7 @@ void DBConnector::setupTables()
         "`analyzed` INT(1) DEFAULT 0, " \
         "`sample_folder` INT(11) NOT NULL, "\
         "`sample_type` INT(11), "\
+        "`exclude` INT(11) DEFAULT 0, " \
         "UNIQUE (`path`), " \
         "FOREIGN KEY (`sample_folder`) REFERENCES `sample_folders` (`id`) ON DELETE CASCADE, " \
         "FOREIGN KEY (`sample_type`) REFERENCES `sample_type` (`id`) ON DELETE CASCADE" \
@@ -90,6 +91,14 @@ void DBConnector::setupTables()
         "UNIQUE (`sample_id`, `tag_id`), " \
         "FOREIGN KEY (`sample_id`) REFERENCES `samples` (`id`) ON DELETE CASCADE, " \
         "FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE " \
+        ");";
+    
+    String sqlReducedDimension = "CREATE TABLE IF NOT EXISTS `samples_reduced` ( " \
+        "`id` INTEGER PRIMARY KEY, " \
+        "`sample_id` INT(11) NOT NULL, " \
+        "`dim_1` DOUBLE NOT NULL, " \
+        "`dim_2` DOUBLE NOT NULL, " \
+        "FOREIGN KEY (`sample_id`) REFERENCES `samples` (`id`) ON DELETE CASCADE " \
         ");";
     
     String sqlAnalysis = "CREATE TABLE IF NOT EXISTS `analysis` ( " \
@@ -239,6 +248,7 @@ void DBConnector::setupTables()
             runCommand(sqlSamples) &&
             runCommand(sqlTags) &&
             runCommand(sqlSampleTags) &&
+            runCommand(sqlReducedDimension) &&
             runCommand(sqlAnalysis))
     {
         std::cout << "All tables succesfully created\n";

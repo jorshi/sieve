@@ -24,7 +24,7 @@ public:
     Sample() {};
     
     // Constructor
-    Sample(long long id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type=0);
+    Sample(long long id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type=0, bool exclude=false);
     
     // Default Deconstuctor
     ~Sample() {};
@@ -55,6 +55,7 @@ public:
     void setAnalyzed(const int a) { analyzed_ = a; };
     void setStartTime(const double& s) { startTime_ = s; };
     void setStopTime(const double& s) { stopTime_ = s; };
+    void setExclude(bool e) { exclude_ = e; };
     
 private:
     
@@ -66,6 +67,7 @@ private:
     bool analyzed_;
     int folder_;
     int type_;
+    bool exclude_;
 
     Colour colour_;
     

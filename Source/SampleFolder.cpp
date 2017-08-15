@@ -77,7 +77,9 @@ String SampleFolder::getStatusStr()
         case 2:
             return "Analyzing";
         case 3:
-            return "Analyzed";
+            return "Reducing Dimensions";
+        case 4:
+            return "Completed";
         default:
             return "None";
     }
