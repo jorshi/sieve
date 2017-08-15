@@ -22,6 +22,7 @@
 #include "dbConnector.h"
 #include "FeatureAnalysis.h"
 #include "AnalysisObject.h"
+#include "SampleReduced.h"
 
 
 
@@ -54,7 +55,7 @@ private:
     // Struct for keeping track of the different sample types and the specific segmentation to use
     struct SampleClassPCA
     {
-        SampleClassPCA(int t, double s, double l) : sampleType(t), segStart(t), segLength(l) {};
+        SampleClassPCA(int t, double s, double l) : sampleType(t), segStart(s), segLength(l) {};
         
         int sampleType;
         double segStart;

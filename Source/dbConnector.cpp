@@ -93,6 +93,14 @@ void DBConnector::setupTables()
         "FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE " \
         ");";
     
+    String sqlReducedDimension = "CREATE TABLE IF NOT EXISTS `samples_reduced` ( " \
+        "`id` INTEGER PRIMARY KEY, " \
+        "`sample_id` INT(11) NOT NULL, " \
+        "`dim_1` DOUBLE NOT NULL, " \
+        "`dim_2` DOUBLE NOT NULL, " \
+        "FOREIGN KEY (`sample_id`) REFERENCES `samples` (`id`) ON DELETE CASCADE " \
+        ");";
+    
     String sqlAnalysis = "CREATE TABLE IF NOT EXISTS `analysis` ( " \
         "`id` INTEGER PRIMARY KEY, " \
         "`sample_id` INT(11) NOT NULL, " \
@@ -240,6 +248,7 @@ void DBConnector::setupTables()
             runCommand(sqlSamples) &&
             runCommand(sqlTags) &&
             runCommand(sqlSampleTags) &&
+            runCommand(sqlReducedDimension) &&
             runCommand(sqlAnalysis))
     {
         std::cout << "All tables succesfully created\n";

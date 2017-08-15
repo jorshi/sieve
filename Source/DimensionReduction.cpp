@@ -56,7 +56,15 @@ void DimensionReduction::run()
     {
         if (std::all_of(sampleFolders_.begin(), sampleFolders_.end(), [](SampleFolder::Ptr f){ return f->getStatus() == 3; }))
         {
+            // Clean up the sample reduction table
+            db_.runCommand("DELETE FROM `samples_reduced`;");
             pca();
+            
+            if (threadShouldExit()) break;
+            for (auto folder = sampleFolders_.begin(); folder != sampleFolders_.end(); ++folder)
+            {
+                (*folder)->updateStatus(4, db_);
+            }
         }
         
         else if (std::all_of(sampleFolders_.begin(), sampleFolders_.end(), [](SampleFolder::Ptr f){ return f->getStatus() == 4; }))
@@ -78,17 +86,21 @@ void DimensionReduction::pca()
             // Get all samples for a sample type
             String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
                 "WHERE s.sample_type = " + String((*sampleClass)->sampleType) + \
+                " AND a.start = " + String((*sampleClass)->segStart) + \
+                " AND a.length = " + String((*sampleClass)->segLength) + \
                 " AND s.exclude = 0;";
 
             analysisMatrix_.clear();
             sampleOrder_.clear();
-            db_.runCommand(sql, selectAnalysisPoolCallback, this);
+            if (!db_.runCommand(sql, selectAnalysisPoolCallback, this)) return;
             
             // Check to see if we need to exit the thread
             if (threadShouldExit()) return;
             
             // Definitely doing more work here than needs to be done -- converting from one orientation to another
             // and then back -- TODO fix this up!
+            std::cout << sql << "\n";
+            jassert(analysisMatrix_.size() > 0);
             std::vector<std::vector<Real>> rotated(analysisMatrix_[0].size());
             for (int i = 0; i < analysisMatrix_.size(); i++)
             {
@@ -99,6 +111,7 @@ void DimensionReduction::pca()
             }
             
             // Standardize data
+            if (threadShouldExit()) return;
             for (auto feature = rotated.begin(); feature != rotated.end(); ++feature)
             {
                 Real sum = std::accumulate(feature->begin(), feature->end(), 0.0);
@@ -137,8 +150,24 @@ void DimensionReduction::pca()
             pca_->output("poolOut").set(pcaOut);
             pca_->compute();
             
+            // Get principle components out from pool
             std::map<std::string, std::vector<std::vector<Real>>> output =  pcaOut.getVectorRealPool();
             
+            // Save the first two components resulting from PCA
+            jassert(output.at("pca").size() == sampleOrder_.size());
+            auto component = output.at("pca").begin();
+            size_t numFeatures = component->size();
+            SampleReduced::Ptr newSampleRedux;
+            
+            if (threadShouldExit()) return;
+            for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId, ++component)
+            {
+                double dim1 = component->at(numFeatures - 1);
+                double dim2 = component->at(numFeatures - 2);
+                
+                newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
+                newSampleRedux->save(db_);
+            }
         }
     }
 }

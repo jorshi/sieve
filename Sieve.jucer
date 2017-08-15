@@ -35,6 +35,9 @@
           <FILE id="Qupw19" name="SampleFolder.cpp" compile="1" resource="0"
                 file="Source/SampleFolder.cpp"/>
           <FILE id="fkFBRd" name="SampleFolder.h" compile="0" resource="0" file="Source/SampleFolder.h"/>
+          <FILE id="nM9vTQ" name="SampleReduced.cpp" compile="1" resource="0"
+                file="Source/SampleReduced.cpp"/>
+          <FILE id="xpmcQf" name="SampleReduced.h" compile="0" resource="0" file="Source/SampleReduced.h"/>
           <FILE id="VenkOs" name="SampleType.cpp" compile="1" resource="0" file="Source/SampleType.cpp"/>
           <FILE id="NuiG8c" name="SampleType.h" compile="0" resource="0" file="Source/SampleType.h"/>
         </GROUP>
