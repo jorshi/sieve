@@ -54,7 +54,12 @@ void DimensionReduction::run()
 {
     while(!threadShouldExit())
     {
-        if (std::all_of(sampleFolders_.begin(), sampleFolders_.end(), [](SampleFolder::Ptr f){ return f->getStatus() == 3; }))
+        if (std::all_of(sampleFolders_.begin(), sampleFolders_.end(), [](SampleFolder::Ptr f){ return f->getStatus() == 4; }))
+        {
+            // Everything has already been run through dimension reduction
+            signalThreadShouldExit();
+        }
+        else if (std::all_of(sampleFolders_.begin(), sampleFolders_.end(), [](SampleFolder::Ptr f){ return f->getStatus() >= 3; }))
         {
             // Clean up the sample reduction table
             db_.runCommand("DELETE FROM `samples_reduced`;");
@@ -67,12 +72,6 @@ void DimensionReduction::run()
             }
         }
         
-        else if (std::all_of(sampleFolders_.begin(), sampleFolders_.end(), [](SampleFolder::Ptr f){ return f->getStatus() == 4; }))
-        {
-            // Everything has already been run through dimension reduction
-            signalThreadShouldExit();
-        }
-            
         wait(1000);
     }
 }
