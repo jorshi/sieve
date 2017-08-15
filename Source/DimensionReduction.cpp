@@ -10,10 +10,6 @@
 
 #include "DimensionReduction.h"
 
-#include "tnt/tnt2vector.h"
-#include "tnt/jama_lu.h"
-#include "tnt/jama_eig.h"
-
 using namespace essentia;
 using namespace standard;
 
