@@ -94,6 +94,30 @@ void SampleManager::loadNewSamples()
 }
 
 
+void SampleManager::updateGrid(const int &sampleType)
+{
+    String sql = "SELECT r.*, s.* FROM `samples_reduced` r " \
+        "JOIN samples s ON s.id = r.sample_id " \
+        "WHERE s.sample_type = " + String(sampleType) + ";";
+    
+    samplesReduced_.clear();
+    if (db_.runCommand(sql, selectSamplesReducedCallback, this))
+    {
+        // Sort along the x-axis first
+        std::sort(samplesReduced_.begin(), samplesReduced_.end(), [](SampleReduced::Ptr a, SampleReduced::Ptr b) {
+            return a->getX() < b->getX();
+        });
+        
+        
+        
+        
+        
+        
+    }
+    
+}
+
+
 void SampleManager::updateGridRandom()
 {
     queuedSamples_.clear();

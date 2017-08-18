@@ -16,6 +16,7 @@
 #include "Sample.h"
 #include "SampleType.h"
 #include "SampleFolder.h"
+#include "SampleReduced.h"
 #include "DirectoryChooser.h"
 #include "dbConnector.h"
 #include "FileLoader.h"
@@ -38,6 +39,9 @@ public:
     
     // Loads a random selection of samples into the current sample buffer
     void updateGridRandom();
+    
+    // Load samples onto grid based on sample type selected
+    void updateGrid(const int& sampleType);
     
     // Get a pointer to one of the samples int he sample buffers
     Sample::Ptr getSample(int num) const;
@@ -66,6 +70,7 @@ private:
     // from the database on a select before being moved into the current sample array
     ReferenceCountedArray<Sample> currentSamples_;
     ReferenceCountedArray<Sample> queuedSamples_;
+    std::vector<SampleReduced::Ptr> samplesReduced_;
     
     // List of loaded sample folders
     ReferenceCountedArray<SampleFolder> sampleFolders_;
@@ -134,6 +139,35 @@ private:
         }
         return 0;
     }
+    
+    // Static Callback for a select samples reduced query
+    static int selectSamplesReducedCallback(void *param, int argc, char **argv, char **azCol)
+    {
+        SampleManager* manager = reinterpret_cast<SampleManager*>(param);
+        
+        // This also quered for the associated sample object
+        if (argc == 13)
+        {
+            SampleReduced::Ptr newSampleReduced = new SampleReduced(atoi(argv[0]), atoi(argv[1]), atof(argv[2]), atof(argv[3]));
+            
+            Sample::Ptr newSample = new Sample(atoi(argv[4]),
+                                               String(CharPointer_UTF8(argv[5])),
+                                               String(CharPointer_UTF8(argv[6])),
+                                               atof(argv[7]),
+                                               atof(argv[8]),
+                                               atoi(argv[9]),
+                                               atoi(argv[10]),
+                                               atoi(argv[11]),
+                                               atoi(argv[12]));
+            
+            newSampleReduced->setSamplePtr(newSample);
+            manager->samplesReduced_.push_back(newSampleReduced);
+            
+        }
+        return 0;
+    }
+    
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SampleManager)
 };
