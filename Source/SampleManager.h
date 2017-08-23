@@ -21,6 +21,7 @@
 #include "dbConnector.h"
 #include "FileLoader.h"
 #include "DimensionReduction.h"
+#include <mlpack/methods/neighbor_search/neighbor_search.hpp>
 
 #include <map>
 
@@ -93,6 +94,10 @@ private:
     // Creates the default sample types required for operation - currently just snare and kick
     void setupTypes();
     
+    void distributeX(std::vector<SampleReduced::Ptr>& reducedSamples, Sample::Ptr parent, int current, int goal, int& column);
+    void distributeY(std::vector<SampleReduced::Ptr>& reducedSamples, Sample::Ptr parent, int current, int goal);
+    
+    
     // Static callback for a select sample query
     static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)
     {
@@ -159,6 +164,8 @@ private:
                                                atoi(argv[10]),
                                                atoi(argv[11]),
                                                atoi(argv[12]));
+            
+            newSample->setColour(juce::Colours::aqua);
             
             newSampleReduced->setSamplePtr(newSample);
             manager->samplesReduced_.push_back(newSampleReduced);

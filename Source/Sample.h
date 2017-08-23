@@ -46,6 +46,9 @@ public:
     double getStopTime() { return stopTime_; };
     Colour& getColour() { return colour_; };
     
+    Sample::Ptr getParent() { return parent_; };
+    ReferenceCountedArray<Sample>& getChildren() { return children_; };
+    
     // Setters
     void setId(const long long& id) { id_ = id; };
     void setName(const String& name) { name_ = name; };
@@ -56,6 +59,7 @@ public:
     void setStartTime(const double& s) { startTime_ = s; };
     void setStopTime(const double& s) { stopTime_ = s; };
     void setExclude(bool e) { exclude_ = e; };
+    void setParent(Sample::Ptr p) { parent_ = p; };
     
 private:
     
@@ -69,7 +73,13 @@ private:
     int type_;
     bool exclude_;
 
+    // Colour for sample pad
     Colour colour_;
     
+    // Image of the waveform to show as thumbnail
     ScopedPointer<AudioThumbnail> thumbnail_;
+    
+    // Pointers to the parent and children samples for nesting
+    Sample::Ptr parent_;
+    ReferenceCountedArray<Sample> children_;
 };

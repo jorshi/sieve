@@ -105,7 +105,7 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3&#10;essentia"
+    <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3&#10;essentia&#10;mlpack"
                extraCompilerFlags="-I/usr/local/include" extraLinkerFlags="-L/usr/local/lib">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"

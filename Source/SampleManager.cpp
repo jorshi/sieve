@@ -103,19 +103,97 @@ void SampleManager::updateGrid(const int &sampleType)
     samplesReduced_.clear();
     if (db_.runCommand(sql, selectSamplesReducedCallback, this))
     {
+        Sample::Ptr root = new Sample();
+        ReferenceCountedArray<Sample>& samples = root->getChildren();
+        
+        for (int i = 0; i < 64; i++)
+        {
+            samples.insert(i, nullptr);
+        }
+
+        // Recursive distribution
         // Sort along the x-axis first
         std::sort(samplesReduced_.begin(), samplesReduced_.end(), [](SampleReduced::Ptr a, SampleReduced::Ptr b) {
             return a->getX() < b->getX();
         });
         
+        if (samplesReduced_.size() < 9)
+        {
+            // These are the samples! Otherwise need to distribute
+        }
+        else
+        {
+            int column = 0;
+            distributeX(samplesReduced_, root, 1, 8, column);
+        }
         
-        
-        
-        
-        
+        jassert(samples.size() == 64);
+        currentSamples_.swapWith(samples);
+        updateThumbnails();
     }
     
 }
+
+void SampleManager::distributeX(std::vector<SampleReduced::Ptr>& reducedSamples, Sample::Ptr parent, int current, int goal, int& column)
+{
+    const size_t numSamples = (int)reducedSamples.size();
+    jassert(numSamples > 0);
+    
+    if (current == goal)
+    {
+        // Sort along the Y axis for distribution
+        std::sort(reducedSamples.begin(), reducedSamples.end(), [](SampleReduced::Ptr a, SampleReduced::Ptr b) {
+            return a->getY() < b->getY();
+        });
+        
+        if (numSamples < 9)
+        {
+            ReferenceCountedArray<Sample>& samples = parent->getChildren();
+            
+            
+            // These are the samples for this column! Otherwise need to distribute more
+            for (int i = 0; i < numSamples; i++)
+            {
+                Sample::Ptr sample = reducedSamples.at(i)->getSamplePtr();
+                sample->setParent(parent);
+                samples.set((i * 8) + column, sample);
+            }
+            
+            return;
+        }
+        
+        // Distribute alont the Y-axis
+        distributeY(reducedSamples, parent, 1, 8);
+    }
+    
+    // Split the x-axis in half
+    const size_t half = std::ceil(static_cast<double>(numSamples)/ 2);
+    std::vector<SampleReduced::Ptr> low(reducedSamples.begin(), reducedSamples.begin() + half);
+    std::vector<SampleReduced::Ptr> high(reducedSamples.begin() + half, reducedSamples.end());
+    current *= 2;
+    
+    // Continue recursive distribution
+    if (current == goal)
+    {
+        distributeX(low, parent, current, goal, column);
+        column++;
+        distributeX(high, parent, current, goal, column);
+        column++;
+    }
+    else
+    {
+        distributeX(low, parent, current, goal, column);
+        distributeX(high, parent, current, goal, column);
+    }
+
+}
+
+
+void SampleManager::distributeY(std::vector<SampleReduced::Ptr> &reducedSamples, Sample::Ptr parent, int current, int goal)
+{
+    
+}
+
 
 
 void SampleManager::updateGridRandom()
@@ -147,6 +225,7 @@ void SampleManager::updateThumbnails()
 {
     for (auto sample = currentSamples_.begin(); sample < currentSamples_.end(); ++sample)
     {
+        if (*sample == nullptr) continue;
         AudioThumbnail* newThumbnail = new AudioThumbnail(512, loader_.getFormatManager(), *thumbnailCache_);
         newThumbnail->setSource(new FileInputSource((*sample)->getFile()));
         (*sample)->setThumbnail(newThumbnail);
