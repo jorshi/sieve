@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "Mapping.h"
+
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "SampleLoader.h"
 #include "SampleAnalysis.h"
@@ -21,7 +23,6 @@
 #include "dbConnector.h"
 #include "FileLoader.h"
 #include "DimensionReduction.h"
-#include <mlpack/methods/neighbor_search/neighbor_search.hpp>
 
 #include <map>
 

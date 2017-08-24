@@ -111,25 +111,24 @@ void SampleManager::updateGrid(const int &sampleType)
             samples.insert(i, nullptr);
         }
 
-        // Recursive distribution
-        // Sort along the x-axis first
-        std::sort(samplesReduced_.begin(), samplesReduced_.end(), [](SampleReduced::Ptr a, SampleReduced::Ptr b) {
-            return a->getX() < b->getX();
-        });
         
-        if (samplesReduced_.size() < 9)
+        if (samplesReduced_.size() > 64)
         {
-            // These are the samples! Otherwise need to distribute
+            // Do clustering
         }
         else
         {
-            int column = 0;
-            distributeX(samplesReduced_, root, 1, 8, column);
+            Mapping sampleMapping;
+            
+            std::vector<std::vector<double>> reducedMap;
+            
+            for (int i = 0; i < samplesReduced_.size(); i++)
+            {
+                reducedMap.push_back({samplesReduced_.at(i)->getX(), samplesReduced_.at(i)->getY()});
+            }
+            
+            sampleMapping.mapToGrid(reducedMap);
         }
-        
-        jassert(samples.size() == 64);
-        currentSamples_.swapWith(samples);
-        updateThumbnails();
     }
     
 }

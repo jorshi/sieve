@@ -49,6 +49,8 @@
               file="Source/FeatureAnalysis.cpp"/>
         <FILE id="xqdpw7" name="FeatureAnalysis.h" compile="0" resource="0"
               file="Source/FeatureAnalysis.h"/>
+        <FILE id="l0Bnyg" name="Mapping.cpp" compile="1" resource="0" file="Source/Mapping.cpp"/>
+        <FILE id="SnP0WO" name="Mapping.h" compile="0" resource="0" file="Source/Mapping.h"/>
         <FILE id="ap7eXK" name="SampleAnalysis.cpp" compile="1" resource="0"
               file="Source/SampleAnalysis.cpp"/>
         <FILE id="YiYNJk" name="SampleAnalysis.h" compile="0" resource="0"
