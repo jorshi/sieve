@@ -18,7 +18,7 @@ std::vector<int> Mapping::mapToGrid(std::vector<std::vector<double> > &columnMat
     
     arma::mat data(2, columnMat.size());
     
-    int gridDim = std::ceil(std::log2(columnMat.size()));
+    int gridDim = std::ceil(std::sqrt(columnMat.size()));
     if (gridDim > 8) gridDim = 8;
     
     double maxX = -INFINITY;
@@ -63,7 +63,7 @@ std::vector<int> Mapping::mapToGrid(std::vector<std::vector<double> > &columnMat
     {
         for (int j = 0; j < columnMat.size(); j++)
         {
-            matrix(i, j) = resultingDistances(j, i);
+            matrix(i, resultingNeighbors(j, i)) = resultingDistances(j, i);
         }
     }
     
@@ -72,13 +72,12 @@ std::vector<int> Mapping::mapToGrid(std::vector<std::vector<double> > &columnMat
     m.solve(matrix);
     
     std::vector<int> assignments(columnMat.size(), -1);
-
-
     for ( int row = 0 ; row < columnMat.size() ; row++ ) {
         for ( int col = 0 ; col < columnMat.size() ; col++ ) {
+
             if (matrix(row, col) == 0)
             {
-                // Expand back out to 64 grid arrangement
+                //Expand back out to 64 grid arrangement
                 assignments[col] = row + ((row / gridDim) * (8 - gridDim));
             }
         }

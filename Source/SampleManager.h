@@ -93,11 +93,7 @@ private:
     //==============================================================================
     
     // Creates the default sample types required for operation - currently just snare and kick
-    void setupTypes();
-    
-    void distributeX(std::vector<SampleReduced::Ptr>& reducedSamples, Sample::Ptr parent, int current, int goal, int& column);
-    void distributeY(std::vector<SampleReduced::Ptr>& reducedSamples, Sample::Ptr parent, int current, int goal);
-    
+    void setupTypes();    
     
     // Static callback for a select sample query
     static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)

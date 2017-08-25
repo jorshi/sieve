@@ -211,7 +211,7 @@ void SampleBrowserAudioProcessor::loadSamplerSounds()
 
 void SampleBrowserAudioProcessor::triggerSound(int pad)
 {
-    sampler_->noteOn(1, pad + startNote_, 0.9);
+    sampler_->noteOn(1, pad + startNote_, 1.0);
 }
 
 //==============================================================================

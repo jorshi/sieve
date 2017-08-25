@@ -53,6 +53,8 @@ private:
     // Pointer to the sample manager
     SampleManager* sampleManager;
     
+    TooltipWindow tooltip;
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleGrid)
 };

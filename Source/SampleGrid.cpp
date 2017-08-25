@@ -83,6 +83,7 @@ void SampleGrid::updateGrid()
                                 padOver,
                                 padDown);
                 pad->setEnabled(true);
+                pad->setTooltip(sample->getDisplay());
             }
         } else
         {
@@ -90,6 +91,7 @@ void SampleGrid::updateGrid()
             {
                 pad->setColours(padOff, padOver, padDown);
                 pad->setEnabled(false);
+                pad->setTooltip("");
             }
         }
     }

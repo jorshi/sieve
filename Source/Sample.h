@@ -49,6 +49,8 @@ public:
     Sample::Ptr getParent() { return parent_; };
     ReferenceCountedArray<Sample>& getChildren() { return children_; };
     
+    const String& getDisplay() { return display_; };
+    
     // Setters
     void setId(const long long& id) { id_ = id; };
     void setName(const String& name) { name_ = name; };
@@ -61,6 +63,8 @@ public:
     void setExclude(bool e) { exclude_ = e; };
     void setParent(Sample::Ptr p) { parent_ = p; };
     
+    void setDisplay(const String& s) { display_ = s; };
+    
 private:
     
     long long id_;
@@ -72,6 +76,8 @@ private:
     int folder_;
     int type_;
     bool exclude_;
+    
+    String display_;
 
     // Colour for sample pad
     Colour colour_;
