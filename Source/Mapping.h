@@ -11,6 +11,7 @@
 #pragma once
 
 #include <mlpack/methods/neighbor_search/neighbor_search.hpp>
+#include "munkres/munkres.h"
 
 class Mapping
 {
@@ -23,7 +24,7 @@ public:
     ~Mapping() {};
     
     // Run KNN mapping
-    void mapToGrid(std::vector<std::vector<double>>& columnMat);
+    std::vector<int> mapToGrid(std::vector<std::vector<double>>& columnMat);
     
 private:
     

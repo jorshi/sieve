@@ -127,8 +127,16 @@ void SampleManager::updateGrid(const int &sampleType)
                 reducedMap.push_back({samplesReduced_.at(i)->getX(), samplesReduced_.at(i)->getY()});
             }
             
-            sampleMapping.mapToGrid(reducedMap);
+            std::vector<int> assignments = sampleMapping.mapToGrid(reducedMap);
+            for (int i = 0; i < assignments.size(); i++)
+            {
+                Sample::Ptr samplePlacement = samplesReduced_.at(i)->getSamplePtr();
+                samples.set(assignments[i], samplePlacement);
+            }
         }
+        
+        currentSamples_ = samples;
+        updateThumbnails();
     }
     
 }
