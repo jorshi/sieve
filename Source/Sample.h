@@ -27,7 +27,10 @@ public:
     Sample(long long id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type=0, bool exclude=false);
     
     // Default Deconstuctor
-    ~Sample() {};
+    ~Sample();
+    
+    // Copy Constructor
+    Sample(const Sample& s);
     
     // Save a new sample instance
     bool save(const DBConnector& db);
@@ -88,4 +91,8 @@ private:
     // Pointers to the parent and children samples for nesting
     Sample::Ptr parent_;
     ReferenceCountedArray<Sample> children_;
+    
+    JUCE_LEAK_DETECTOR(Sample)
 };
+
+

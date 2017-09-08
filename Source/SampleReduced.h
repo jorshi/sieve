@@ -24,6 +24,9 @@ public:
     SampleReduced(int id, int sampleId, double x, double y);
     ~SampleReduced() {};
     
+    // Copy Constructor
+    SampleReduced(const SampleReduced& s);
+    
     // Getters
     int getId() { return id_; };
     int getSampleId() { return sampleId_; };

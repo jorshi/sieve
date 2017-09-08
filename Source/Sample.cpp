@@ -15,8 +15,38 @@ Sample::Sample(long long id, const String& name, const String& fullPath, double 
     id_(id), name_(name), path_(fullPath), startTime_(start), stopTime_(stop), analyzed_(analyzed), folder_(folder), type_(type), exclude_(exclude)
 {
     parent_ = nullptr;
+    thumbnail_ = nullptr;
+    
+    std::cout << "Creating: " << id_ << "\n";
 }
 
+Sample::~Sample()
+{
+    thumbnail_ = nullptr;
+    std::cout << "Deleting: " << id_ << "\n";
+}
+
+// Copy Constructor
+Sample::Sample(const Sample& s)
+{
+    id_ = s.id_;
+    name_ = s.name_;
+    path_ = s.path_;
+    startTime_ = s.startTime_;
+    stopTime_ = s.stopTime_;
+    analyzed_ = s.analyzed_;
+    folder_ = s.folder_;
+    type_ = s.type_;
+    exclude_ = s.exclude_;
+    //parent_ = s.parent_;
+    display_ = s.display_;
+    colour_ = s.colour_;
+    
+    // TODO: can we copy a thumbnail?? Don't think it matters right now but may be an issue in the future.
+    //thumbnail_ = nullptr;
+    
+    //children_ = s.children_;
+}
 
 bool Sample::save(const DBConnector &db)
 {

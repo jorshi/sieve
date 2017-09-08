@@ -16,6 +16,16 @@ SampleReduced::SampleReduced(int id, int sampleId, double x, double y) :
     
 }
 
+SampleReduced::SampleReduced(const SampleReduced& s)
+{
+    id_ = s.id_;
+    sampleId_ = s.sampleId_;
+    d1_ = s.d1_;
+    d2_ = s.d2_;
+    sample_ = s.sample_;
+}
+
+
 bool SampleReduced::save(const DBConnector& db)
 {
     String sql = "INSERT INTO `samples_reduced` (`sample_id`, `dim_1`, `dim_2`) VALUES (" + \

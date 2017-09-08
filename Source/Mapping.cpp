@@ -12,6 +12,7 @@
 
 
 using namespace mlpack::neighbor;
+using namespace mlpack::kmeans;
 
 std::vector<int> Mapping::mapToGrid(std::vector<std::vector<double> > &columnMat)
 {
@@ -85,3 +86,71 @@ std::vector<int> Mapping::mapToGrid(std::vector<std::vector<double> > &columnMat
     
     return assignments;
 }
+
+
+std::vector<std::pair<std::vector<int>, int>> Mapping::cluster(std::vector<std::vector<double>>& columnMat)
+{
+    arma::mat data(2, columnMat.size());
+    
+    for (int i = 0; i < columnMat.size(); i++)
+    {
+        data(0, i) = columnMat[i][0];
+        data(1, i) = columnMat[i][1];
+    }
+    
+    // Number of clusters
+    size_t clusters = 64;
+    
+    arma::Row<size_t> assignments;
+    arma::mat centroids;
+    
+    KMeans<> k;
+    k.Cluster(data, clusters, assignments, centroids);
+    
+    std::vector<std::pair<std::vector<int>, int>> clusterSamples(64);
+    
+    // Batch all of the samples into cluster lists
+    for (int i = 0; i < columnMat.size(); i++)
+    {
+        clusterSamples.at(assignments[i]).first.push_back(i);
+    }
+    
+    // Figure out the representive sample for this cluster
+    for (int i = 0; i < 64; i++)
+    {
+        if (clusterSamples.at(i).first.size() < 1)
+            continue;
+        
+        if (clusterSamples.at(i).first.size() == 1)
+        {
+            clusterSamples.at(i).second = clusterSamples.at(i).first.at(0);
+            continue;
+        }
+        
+        arma::mat subsetData(2, clusterSamples.at(i).first.size());
+        for (int j = 0; j < clusterSamples.at(i).first.size(); j++)
+        {
+            subsetData(0, j) = data(0, clusterSamples.at(i).first.at(j));
+            subsetData(1, j) = data(1, clusterSamples.at(i).first.at(j));
+        }
+        
+        KNN knn(subsetData);
+        
+        arma::Mat<size_t> resultingNeighbors;
+        arma::mat resultingDistances;
+        
+        arma::mat centroidMat(2, 1);
+        centroidMat(0,0) = centroids(0,i);
+        centroidMat(1,0) = centroids(1,i);
+    
+        knn.Search(centroids, 1, resultingNeighbors, resultingDistances);
+        clusterSamples.at(i).second =  clusterSamples.at(i).first.at(resultingNeighbors[0]);
+    }
+    
+    return clusterSamples;
+}
+
+
+
+
+

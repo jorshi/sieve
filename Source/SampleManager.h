@@ -34,7 +34,7 @@ public:
     SampleManager();
     
     // Default Deconstructor
-    ~SampleManager() {};
+    ~SampleManager();
     
     // Prompt user to input directory for new samples
     void loadNewSamples();
@@ -67,6 +67,7 @@ private:
     
     // Initialize db connection
     DBConnector db_;
+    FileLoader loader_;
     
     // Current samples and queued samples. Queued sampels are collected as they are loaded
     // from the database on a select before being moved into the current sample array
@@ -87,13 +88,18 @@ private:
     ScopedPointer<SampleAnalysis> analysis_;
     ScopedPointer<DimensionReduction> dimensionReduction_;
     DirectoryChooser directoryChooser_;
+    
+    Mapping sampleMapping_;
 
-    FileLoader loader_;
+
 
     //==============================================================================
     
     // Creates the default sample types required for operation - currently just snare and kick
-    void setupTypes();    
+    void setupTypes();
+    
+    // Recursively distribute loaded samples into sample pads
+    void distributeSamples(std::vector<SampleReduced::Ptr>& samples, Sample::Ptr root);
     
     // Static callback for a select sample query
     static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)
