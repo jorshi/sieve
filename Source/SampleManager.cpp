@@ -189,17 +189,17 @@ void SampleManager::distributeSamples(std::vector<SampleReduced::Ptr>& samples, 
         std::vector<std::vector<double>> reducedMap;
         
         // Put samples into a vector matrix
-        for (int i = 0; i < samplesReduced_.size(); i++)
+        for (int i = 0; i < samples.size(); i++)
         {
-            reducedMap.push_back({samplesReduced_.at(i)->getX(), samplesReduced_.at(i)->getY()});
+            reducedMap.push_back({samples.at(i)->getX(), samples.at(i)->getY()});
         }
         
         std::vector<int> assignments = sampleMapping_.mapToGrid(reducedMap);
         for (int i = 0; i < assignments.size(); i++)
         {
-            Sample::Ptr samplePlacement = samplesReduced_.at(i)->getSamplePtr();
-            samplePlacement->setDisplay(String(samplesReduced_.at(i)->getX(), 2) +
-                                        "," + String(samplesReduced_.at(i)->getY(), 2));
+            Sample::Ptr samplePlacement = samples.at(i)->getSamplePtr();
+            samplePlacement->setDisplay(String(samples.at(i)->getX(), 2) +
+                                        "," + String(samples.at(i)->getY(), 2));
             
             childSamples.set(assignments[i], samplePlacement);
         }
