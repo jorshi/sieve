@@ -72,6 +72,9 @@ private:
     // Thumbnails
     ScopedPointer<AudioThumbnailCache> thumbnailCache_;
     
+    // Dummy root sample to hold the sample distribution tree
+    Sample::Ptr root_;
+    
     // Current samples and queued samples. Queued sampels are collected as they are loaded
     // from the database on a select before being moved into the current sample array
     ReferenceCountedArray<Sample> currentSamples_;

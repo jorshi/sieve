@@ -14,8 +14,8 @@ SampleManager::SampleManager()
 {
     sampleLoader_ = new SampleLoader;
     analysis_ = new SampleAnalysis(db_);
-    
     thumbnailCache_ = new AudioThumbnailCache(64);
+    root_ = new Sample();
     
     // Load in sample folders from database
     readSampleFolders();
@@ -106,14 +106,13 @@ void SampleManager::updateGrid(const int &sampleType)
     samplesReduced_.clear();
     if (db_.runCommand(sql, selectSamplesReducedCallback, this))
     {
-        Sample::Ptr root = new Sample();
-
-        // Distribute samples across sample pads
-        distributeSamples(samplesReduced_, root);
-        
+        // Clear out old samples
         currentSamples_.clear();
-        currentSamples_ = root->getChildren();
+        root_->getChildren().clear();
         
+        // Distribute samples across sample pads
+        distributeSamples(samplesReduced_, root_);
+        currentSamples_ = root_->getChildren();
         updateThumbnails();
     }
 }
