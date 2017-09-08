@@ -16,13 +16,10 @@ Sample::Sample(long long id, const String& name, const String& fullPath, double 
 {
     parent_ = nullptr;
     thumbnail_ = nullptr;
-    
-    std::cout << "Creating: " << id_ << "\n";
 }
 
 Sample::~Sample()
 {
-    std::cout << "Deleting: " << id_ << "\n";
 }
 
 // Copy Constructor
@@ -37,13 +34,12 @@ Sample::Sample(const Sample& s)
     folder_ = s.folder_;
     type_ = s.type_;
     exclude_ = s.exclude_;
-    //parent_ = s.parent_;
+    parent_ = s.parent_;
     display_ = s.display_;
     colour_ = s.colour_;
     
     // TODO: can we copy a thumbnail?? Don't think it matters right now but may be an issue in the future.
     //thumbnail_ = nullptr;
-    
     //children_ = s.children_;
 }
 
