@@ -107,31 +107,15 @@ void SampleManager::updateGrid(const int &sampleType)
     if (db_.runCommand(sql, selectSamplesReducedCallback, this))
     {
         Sample::Ptr root = new Sample();
-        ReferenceCountedArray<Sample>& children = root->getChildren();
-        
+
         // Distribute samples across sample pads
-        //distributeSamples(samplesReduced_, root);
-        
-        //currentSamples_.swapWith(root->getChildren());
-        
-        children.ensureStorageAllocated(samplesReduced_.size());
-        for (int i = 0; i < samplesReduced_.size(); i++)
-        {
-            children.set(i, samplesReduced_.at(i)->getSamplePtr());
-            //children.set(i, samplesReduced_.at(i)->getSamplePtr());
-        }
+        distributeSamples(samplesReduced_, root);
         
         currentSamples_.clear();
-        currentSamples_ = children;
-        
-        //currentSamples_.swapWith(root->getChildren());
+        currentSamples_ = root->getChildren();
         
         updateThumbnails();
-        
-        //root->getChildren().clear();
-        //root = nullptr;
     }
-    
 }
 
 

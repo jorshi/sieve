@@ -22,7 +22,6 @@ Sample::Sample(long long id, const String& name, const String& fullPath, double 
 
 Sample::~Sample()
 {
-    thumbnail_ = nullptr;
     std::cout << "Deleting: " << id_ << "\n";
 }
 

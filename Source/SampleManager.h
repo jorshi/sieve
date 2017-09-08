@@ -69,6 +69,9 @@ private:
     DBConnector db_;
     FileLoader loader_;
     
+    // Thumbnails
+    ScopedPointer<AudioThumbnailCache> thumbnailCache_;
+    
     // Current samples and queued samples. Queued sampels are collected as they are loaded
     // from the database on a select before being moved into the current sample array
     ReferenceCountedArray<Sample> currentSamples_;
@@ -80,9 +83,6 @@ private:
     
     ReferenceCountedArray<SampleType> sampleTypesBuffer_;
     std::map<String, SampleType::Ptr> sampleTypes_;
-    
-    // Thumbnails
-    ScopedPointer<AudioThumbnailCache> thumbnailCache_;
     
     ScopedPointer<SampleLoader> sampleLoader_;
     ScopedPointer<SampleAnalysis> analysis_;
