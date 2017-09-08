@@ -85,12 +85,13 @@ private:
     // Colour for sample pad
     Colour colour_;
     
+    // Pointers to the parent and children samples for nesting
+    Sample* parent_;
+    ReferenceCountedArray<Sample> children_;
+    
     // Image of the waveform to show as thumbnail
     ScopedPointer<AudioThumbnail> thumbnail_;
-    
-    // Pointers to the parent and children samples for nesting
-    Sample::Ptr parent_;
-    ReferenceCountedArray<Sample> children_;
+
     
     JUCE_LEAK_DETECTOR(Sample)
 };

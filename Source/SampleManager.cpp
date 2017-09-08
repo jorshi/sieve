@@ -150,6 +150,8 @@ void SampleManager::distributeSamples(std::vector<SampleReduced::Ptr>& samples, 
             {
                 // Copy the sample representing the subset of samples
                 SampleReduced::Ptr newSubsetSampleReduced = new SampleReduced(*representativeSample);
+                std::cout << "Top level: " << newSubsetSampleReduced->getSamplePtr()->getId() << "\n";
+                
                 Sample::Ptr newSubsetSample = new Sample(*newSubsetSampleReduced->getSamplePtr());
                 newSubsetSampleReduced->setSamplePtr(newSubsetSample);
                 
