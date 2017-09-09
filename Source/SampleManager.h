@@ -171,8 +171,6 @@ private:
                                                atoi(argv[11]),
                                                atoi(argv[12]));
             
-            newSample->setColour(juce::Colours::aqua);
-            
             newSampleReduced->setSamplePtr(newSample);
             manager->samplesReduced_.push_back(newSampleReduced);
             

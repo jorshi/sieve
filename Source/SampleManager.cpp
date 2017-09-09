@@ -106,6 +106,38 @@ void SampleManager::updateGrid(const int &sampleType)
     samplesReduced_.clear();
     if (db_.runCommand(sql, selectSamplesReducedCallback, this))
     {
+        
+        double x;
+        double y;
+        double dist;
+        double angle;
+        double maxDist = 0;
+        
+        // Calculate magniutde and angle for each sample position which will be used for colours
+        std::vector<std::pair<double, double>> magAngle;
+        for (auto sample = samplesReduced_.begin(); sample != samplesReduced_.end(); ++sample)
+        {
+            x = (*sample)->getX();
+            y = (*sample)->getY();
+            
+            dist = sqrt(x*x + y*y);
+            angle = atan2(y, x) / (M_PI * 2);
+            
+            magAngle.push_back(std::pair<double, double>(dist, angle));
+            
+            if (dist > maxDist)
+            {
+                maxDist = dist;
+            }
+        }
+        
+        // Add colours to each sample
+        for (int i = 0; i < samplesReduced_.size(); i++)
+        {
+            samplesReduced_[i]->getSamplePtr()->setColour(Colour(magAngle[i].second, magAngle[i].first / maxDist, 1.0f, 1.0f));
+        }
+        
+        
         // Clear out old samples
         currentSamples_.clear();
         root_->getChildren().clear();
