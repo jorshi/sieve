@@ -49,6 +49,8 @@
               file="Source/FeatureAnalysis.cpp"/>
         <FILE id="xqdpw7" name="FeatureAnalysis.h" compile="0" resource="0"
               file="Source/FeatureAnalysis.h"/>
+        <FILE id="l0Bnyg" name="Mapping.cpp" compile="1" resource="0" file="Source/Mapping.cpp"/>
+        <FILE id="SnP0WO" name="Mapping.h" compile="0" resource="0" file="Source/Mapping.h"/>
         <FILE id="ap7eXK" name="SampleAnalysis.cpp" compile="1" resource="0"
               file="Source/SampleAnalysis.cpp"/>
         <FILE id="YiYNJk" name="SampleAnalysis.h" compile="0" resource="0"
@@ -93,6 +95,8 @@
               file="Source/WaveformComponent.h"/>
       </GROUP>
       <GROUP id="{C634A3DF-1886-607C-B204-7E79C3EB97F9}" name="Utility">
+        <FILE id="QfObjo" name="hungarian.cpp" compile="1" resource="0" file="Source/hungarian.cpp"/>
+        <FILE id="OE0HMR" name="hungarian.hpp" compile="0" resource="0" file="Source/hungarian.hpp"/>
         <FILE id="pjy6Bk" name="FileLoader.cpp" compile="1" resource="0" file="Source/FileLoader.cpp"/>
         <FILE id="mKMdO2" name="FileLoader.h" compile="0" resource="0" file="Source/FileLoader.h"/>
         <FILE id="LSj2oJ" name="DirectoryChooser.cpp" compile="1" resource="0"
@@ -105,8 +109,8 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3&#10;essentia"
-               extraCompilerFlags="-I/usr/local/include" extraLinkerFlags="-L/usr/local/lib">
+    <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3&#10;essentia&#10;mlpack&#10;munkres"
+               extraCompilerFlags="-I/usr/local/include&#10;" extraLinkerFlags="-L/usr/local/lib">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"
                        osxCompatibility="default" osxArchitecture="default"/>

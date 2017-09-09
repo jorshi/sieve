@@ -10,12 +10,15 @@
 
 #pragma once
 
+#include "Mapping.h"
+
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "SampleLoader.h"
 #include "SampleAnalysis.h"
 #include "Sample.h"
 #include "SampleType.h"
 #include "SampleFolder.h"
+#include "SampleReduced.h"
 #include "DirectoryChooser.h"
 #include "dbConnector.h"
 #include "FileLoader.h"
@@ -31,13 +34,16 @@ public:
     SampleManager();
     
     // Default Deconstructor
-    ~SampleManager() {};
+    ~SampleManager();
     
     // Prompt user to input directory for new samples
     void loadNewSamples();
     
     // Loads a random selection of samples into the current sample buffer
     void updateGridRandom();
+    
+    // Load samples onto grid based on sample type selected
+    void updateGrid(const int& sampleType);
     
     // Get a pointer to one of the samples int he sample buffers
     Sample::Ptr getSample(int num) const;
@@ -61,11 +67,19 @@ private:
     
     // Initialize db connection
     DBConnector db_;
+    FileLoader loader_;
+    
+    // Thumbnails
+    ScopedPointer<AudioThumbnailCache> thumbnailCache_;
+    
+    // Dummy root sample to hold the sample distribution tree
+    Sample::Ptr root_;
     
     // Current samples and queued samples. Queued sampels are collected as they are loaded
     // from the database on a select before being moved into the current sample array
     ReferenceCountedArray<Sample> currentSamples_;
     ReferenceCountedArray<Sample> queuedSamples_;
+    std::vector<SampleReduced::Ptr> samplesReduced_;
     
     // List of loaded sample folders
     ReferenceCountedArray<SampleFolder> sampleFolders_;
@@ -73,20 +87,22 @@ private:
     ReferenceCountedArray<SampleType> sampleTypesBuffer_;
     std::map<String, SampleType::Ptr> sampleTypes_;
     
-    // Thumbnails
-    ScopedPointer<AudioThumbnailCache> thumbnailCache_;
-    
     ScopedPointer<SampleLoader> sampleLoader_;
     ScopedPointer<SampleAnalysis> analysis_;
     ScopedPointer<DimensionReduction> dimensionReduction_;
     DirectoryChooser directoryChooser_;
+    
+    Mapping sampleMapping_;
 
-    FileLoader loader_;
+
 
     //==============================================================================
     
     // Creates the default sample types required for operation - currently just snare and kick
     void setupTypes();
+    
+    // Recursively distribute loaded samples into sample pads
+    void distributeSamples(std::vector<SampleReduced::Ptr>& samples, Sample::Ptr root);
     
     // Static callback for a select sample query
     static int selectSampleCallback(void *param, int argc, char **argv, char **azCol)
@@ -134,6 +150,37 @@ private:
         }
         return 0;
     }
+    
+    // Static Callback for a select samples reduced query
+    static int selectSamplesReducedCallback(void *param, int argc, char **argv, char **azCol)
+    {
+        SampleManager* manager = reinterpret_cast<SampleManager*>(param);
+        
+        // This also quered for the associated sample object
+        if (argc == 13)
+        {
+            SampleReduced::Ptr newSampleReduced = new SampleReduced(atoi(argv[0]), atoi(argv[1]), atof(argv[2]), atof(argv[3]));
+            
+            Sample::Ptr newSample = new Sample(atoi(argv[4]),
+                                               String(CharPointer_UTF8(argv[5])),
+                                               String(CharPointer_UTF8(argv[6])),
+                                               atof(argv[7]),
+                                               atof(argv[8]),
+                                               atoi(argv[9]),
+                                               atoi(argv[10]),
+                                               atoi(argv[11]),
+                                               atoi(argv[12]));
+            
+            newSample->setColour(juce::Colours::aqua);
+            
+            newSampleReduced->setSamplePtr(newSample);
+            manager->samplesReduced_.push_back(newSampleReduced);
+            
+        }
+        return 0;
+    }
+    
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SampleManager)
 };

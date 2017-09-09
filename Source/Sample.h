@@ -27,7 +27,10 @@ public:
     Sample(long long id, const String& name, const String& fullPath, double start, double stop, bool analyzed, int folder, int type=0, bool exclude=false);
     
     // Default Deconstuctor
-    ~Sample() {};
+    ~Sample();
+    
+    // Copy Constructor
+    Sample(const Sample& s);
     
     // Save a new sample instance
     bool save(const DBConnector& db);
@@ -46,6 +49,11 @@ public:
     double getStopTime() { return stopTime_; };
     Colour& getColour() { return colour_; };
     
+    Sample::Ptr getParent() { return parent_; };
+    ReferenceCountedArray<Sample>& getChildren() { return children_; };
+    
+    const String& getDisplay() { return display_; };
+    
     // Setters
     void setId(const long long& id) { id_ = id; };
     void setName(const String& name) { name_ = name; };
@@ -56,6 +64,9 @@ public:
     void setStartTime(const double& s) { startTime_ = s; };
     void setStopTime(const double& s) { stopTime_ = s; };
     void setExclude(bool e) { exclude_ = e; };
+    void setParent(Sample::Ptr p) { parent_ = p; };
+    
+    void setDisplay(const String& s) { display_ = s; };
     
 private:
     
@@ -68,8 +79,21 @@ private:
     int folder_;
     int type_;
     bool exclude_;
+    
+    String display_;
 
+    // Colour for sample pad
     Colour colour_;
     
+    // Pointers to the parent and children samples for nesting
+    Sample* parent_;
+    ReferenceCountedArray<Sample> children_;
+    
+    // Image of the waveform to show as thumbnail
     ScopedPointer<AudioThumbnail> thumbnail_;
+
+    
+    JUCE_LEAK_DETECTOR(Sample)
 };
+
+

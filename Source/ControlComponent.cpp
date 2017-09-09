@@ -80,7 +80,7 @@ void ControlComponent::buttonClicked(Button* button)
 {
     if (button == newSamplesButton)
     {
-        sampleManager->updateGridRandom();
+        sampleManager->updateGrid(typeCombo->getSelectedId());
         sendActionMessage("update_grid");
     }
 }

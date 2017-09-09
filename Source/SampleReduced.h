@@ -24,17 +24,22 @@ public:
     SampleReduced(int id, int sampleId, double x, double y);
     ~SampleReduced() {};
     
+    // Copy Constructor
+    SampleReduced(const SampleReduced& s);
+    
     // Getters
     int getId() { return id_; };
     int getSampleId() { return sampleId_; };
     double getX() { return d1_; };
     double getY() { return d2_; };
+    Sample::Ptr getSamplePtr() { return sample_; };
     
     // Setters
     void setId(const int& id) { id_ = id; };
     void setSampleId(const int& id) { sampleId_ = id; };
     void setX(const double& x) { d1_ = x; };
     void setY(const double& y) { d2_ = y; };
+    void setSamplePtr(Sample::Ptr s) { sample_ = s; };
     
     // Save instance into database
     bool save(const DBConnector& db);
@@ -48,4 +53,7 @@ private:
     // in case we want to add more later on
     double d1_;
     double d2_;
+    
+    // For utility purposes can store a pointer to the sample this refers to
+    Sample::Ptr sample_;
 };

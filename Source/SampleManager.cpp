@@ -14,8 +14,8 @@ SampleManager::SampleManager()
 {
     sampleLoader_ = new SampleLoader;
     analysis_ = new SampleAnalysis(db_);
-    
     thumbnailCache_ = new AudioThumbnailCache(64);
+    root_ = new Sample();
     
     // Load in sample folders from database
     readSampleFolders();
@@ -39,8 +39,11 @@ SampleManager::SampleManager()
                 break;
         }
     }
-    
-    
+}
+
+SampleManager::~SampleManager()
+{
+
 }
 
 
@@ -94,6 +97,115 @@ void SampleManager::loadNewSamples()
 }
 
 
+void SampleManager::updateGrid(const int &sampleType)
+{
+    String sql = "SELECT r.*, s.* FROM `samples_reduced` r " \
+        "JOIN samples s ON s.id = r.sample_id " \
+        "WHERE s.sample_type = " + String(sampleType) + ";";
+    
+    samplesReduced_.clear();
+    if (db_.runCommand(sql, selectSamplesReducedCallback, this))
+    {
+        // Clear out old samples
+        currentSamples_.clear();
+        root_->getChildren().clear();
+        
+        // Distribute samples across sample pads
+        distributeSamples(samplesReduced_, root_);
+        currentSamples_ = root_->getChildren();
+        updateThumbnails();
+    }
+}
+
+
+void SampleManager::distributeSamples(std::vector<SampleReduced::Ptr>& samples, Sample::Ptr root)
+{
+    // Recieve an array of samples -- connected to a rooot
+    
+    // If there are more than 64 samples then apply K-means clustering
+    // and make a recursive call for each cluster to this function
+    if (samples.size() > 64)
+    {
+        // Temporary vector of doubles to represent 2D positions
+        std::vector<std::vector<double>> reducedMap;
+        
+        // Put samples into a vector matrix
+        for (int i = 0; i < samples.size(); i++)
+        {
+            reducedMap.push_back({samples.at(i)->getX(), samples.at(i)->getY()});
+        }
+        
+        std::vector<std::pair<std::vector<int>, int>> clusters = sampleMapping_.cluster(reducedMap);
+        jassert(clusters.size() == 64);
+        
+        std::vector<SampleReduced::Ptr> topLevelSamples(64);
+        for (int i = 0; i < clusters.size(); i++)
+        {
+            // Top level samples
+            SampleReduced::Ptr representativeSample = samples.at(clusters.at(i).second);
+            topLevelSamples.at(i) = representativeSample;
+            
+            if (clusters.at(i).first.size() > 1)
+            {
+                // Copy the sample representing the subset of samples
+                SampleReduced::Ptr newSubsetSampleReduced = new SampleReduced(*representativeSample);
+                Sample::Ptr newSubsetSample = new Sample(*newSubsetSampleReduced->getSamplePtr());
+                newSubsetSampleReduced->setSamplePtr(newSubsetSample);
+                
+                // Replace the sample with the copy for use in the subset layer
+                samples.at(clusters.at(i).second) = newSubsetSampleReduced;
+                
+                std::vector<SampleReduced::Ptr> subsetSamples;
+                for (int j = 0; j < clusters.at(i).first.size(); j++)
+                {
+                    // Set the parent sample and push into the subset for distribution
+                    SampleReduced::Ptr subsetSample = samples.at(clusters.at(i).first.at(j));
+                    subsetSample->getSamplePtr()->setParent(representativeSample->getSamplePtr());
+                    subsetSamples.push_back(samples.at(clusters.at(i).first.at(j)));
+                }
+                
+                // Make a recursive call for this subset now
+                distributeSamples(subsetSamples, representativeSample->getSamplePtr());
+            }
+        }
+        
+        distributeSamples(topLevelSamples, root);
+        
+    }
+    
+    // Otherwise map each sample to a pad on the grid and return
+    else
+    {
+        // Initialize the child samples for the root pad
+        ReferenceCountedArray<Sample>& childSamples = root->getChildren();
+        childSamples.clear();
+        for (int i = 0; i < 64; i++)
+        {
+            childSamples.insert(i, nullptr);
+        }
+        
+        // Temporary vector of doubles to represent 2D positions
+        std::vector<std::vector<double>> reducedMap;
+        
+        // Put samples into a vector matrix
+        for (int i = 0; i < samples.size(); i++)
+        {
+            reducedMap.push_back({samples.at(i)->getX(), samples.at(i)->getY()});
+        }
+        
+        std::vector<int> assignments = sampleMapping_.mapToGrid(reducedMap);
+        for (int i = 0; i < assignments.size(); i++)
+        {
+            Sample::Ptr samplePlacement = samples.at(i)->getSamplePtr();
+            samplePlacement->setDisplay(String(samples.at(i)->getX(), 2) +
+                                        "," + String(samples.at(i)->getY(), 2));
+            
+            childSamples.set(assignments[i], samplePlacement);
+        }
+    }
+}
+
+
 void SampleManager::updateGridRandom()
 {
     queuedSamples_.clear();
@@ -123,6 +235,7 @@ void SampleManager::updateThumbnails()
 {
     for (auto sample = currentSamples_.begin(); sample < currentSamples_.end(); ++sample)
     {
+        if (*sample == nullptr) continue;
         AudioThumbnail* newThumbnail = new AudioThumbnail(512, loader_.getFormatManager(), *thumbnailCache_);
         newThumbnail->setSource(new FileInputSource((*sample)->getFile()));
         (*sample)->setThumbnail(newThumbnail);
@@ -153,7 +266,7 @@ void SampleManager::updateRainbowColours()
             
             sample = currentSamples_.getUnchecked(count);
             sample->setColour(Colour::fromRGB(r,g,b));
-            std::cout << r << " " << g << " " << b << "\n";
+            //std::cout << r << " " << g << " " << b << "\n";
             
             count++;
         }

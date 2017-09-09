@@ -22,7 +22,7 @@ DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCou
     }
     
     sampleClasses_.add(new SampleClassPCA(1, 0.2, 0.1));    // Kick Drum PCA Segmentations
-    sampleClasses_.add(new SampleClassPCA(2, 0.5, 0.25));   // Snare Drum PCA Segmentations
+    sampleClasses_.add(new SampleClassPCA(2, 0.9, 0.25));   // Snare Drum PCA Segmentations
     
     essentia::init();
     AlgorithmFactory& factory = AlgorithmFactory::instance();
