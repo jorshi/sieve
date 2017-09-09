@@ -95,4 +95,6 @@ void SampleGrid::updateGrid()
             }
         }
     }
+    
+    repaint();
 }
