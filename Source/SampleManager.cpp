@@ -183,6 +183,7 @@ void SampleManager::distributeSamples(std::vector<SampleReduced::Ptr>& samples, 
                 SampleReduced::Ptr newSubsetSampleReduced = new SampleReduced(*representativeSample);
                 Sample::Ptr newSubsetSample = new Sample(*newSubsetSampleReduced->getSamplePtr());
                 newSubsetSampleReduced->setSamplePtr(newSubsetSample);
+                representativeSample->getSamplePtr()->setSubsetSamples((int)clusters.at(i).first.size());
                 
                 // Replace the sample with the copy for use in the subset layer
                 samples.at(clusters.at(i).second) = newSubsetSampleReduced;
@@ -231,7 +232,7 @@ void SampleManager::distributeSamples(std::vector<SampleReduced::Ptr>& samples, 
             Sample::Ptr samplePlacement = samples.at(i)->getSamplePtr();
             samplePlacement->setDisplay(String(samples.at(i)->getX(), 2) +
                                         "," + String(samples.at(i)->getY(), 2));
-            
+            //samplePlacement->setSubsetSamples((int)assignments.size());
             childSamples.set(assignments[i], samplePlacement);
         }
     }

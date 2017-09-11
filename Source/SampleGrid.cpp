@@ -84,6 +84,7 @@ void SampleGrid::updateGrid()
                                 padDown);
                 pad->setEnabled(true);
                 pad->setTooltip(sample->getDisplay());
+                pad->setSubsetSize(sample->getSubsetSamples());
             }
         } else
         {
@@ -98,3 +99,6 @@ void SampleGrid::updateGrid()
     
     repaint();
 }
+
+
+
