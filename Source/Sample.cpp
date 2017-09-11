@@ -37,6 +37,7 @@ Sample::Sample(const Sample& s)
     parent_ = s.parent_;
     display_ = s.display_;
     colour_ = s.colour_;
+    subsetSamples_ = s.subsetSamples_;
     
     // TODO: can we copy a thumbnail?? Don't think it matters right now but may be an issue in the future.
     //thumbnail_ = nullptr;

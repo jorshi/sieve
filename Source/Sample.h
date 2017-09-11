@@ -48,6 +48,7 @@ public:
     double getStartTime() { return startTime_; };
     double getStopTime() { return stopTime_; };
     Colour& getColour() { return colour_; };
+    int getSubsetSamples() { return subsetSamples_; };
     
     Sample::Ptr getParent() { return parent_; };
     ReferenceCountedArray<Sample>& getChildren() { return children_; };
@@ -65,6 +66,7 @@ public:
     void setStopTime(const double& s) { stopTime_ = s; };
     void setExclude(bool e) { exclude_ = e; };
     void setParent(Sample::Ptr p) { parent_ = p; };
+    void setSubsetSamples(const int& n) { subsetSamples_ = n; };
     
     void setDisplay(const String& s) { display_ = s; };
     
@@ -79,6 +81,7 @@ private:
     int folder_;
     int type_;
     bool exclude_;
+    int subsetSamples_;
     
     String display_;
 
