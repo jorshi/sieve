@@ -63,6 +63,12 @@ public:
     // Get a reference to all the sample folders
     ReferenceCountedArray<SampleFolder>& getSampleFolders() { return sampleFolders_; };
     
+    // Update grid to children of the new root
+    void zoom(Sample::Ptr newRoot);
+    
+    // Zoom all the way back out
+    void zoomOutFull();
+    
 private:
     
     // Initialize db connection

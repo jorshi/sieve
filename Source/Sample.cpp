@@ -16,6 +16,7 @@ Sample::Sample(long long id, const String& name, const String& fullPath, double 
 {
     parent_ = nullptr;
     thumbnail_ = nullptr;
+    subsetSamples_ = 0;
 }
 
 Sample::~Sample()

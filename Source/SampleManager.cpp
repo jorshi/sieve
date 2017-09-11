@@ -319,3 +319,15 @@ void SampleManager::readSampleFolders()
     String sql = "SELECT * FROM `sample_folders` LIMIT 50;";
     db_.runCommand(sql, selectSampleFolderCallback, this);
 }
+
+void SampleManager::zoom(Sample::Ptr newRoot)
+{
+    currentSamples_ = newRoot->getChildren();
+    updateThumbnails();
+}
+
+void SampleManager::zoomOutFull()
+{
+    currentSamples_ = root_->getChildren();
+    updateThumbnails();
+}

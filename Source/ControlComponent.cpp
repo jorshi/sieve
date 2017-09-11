@@ -25,22 +25,27 @@ ControlComponent::ControlComponent(SampleManager* s) : sampleManager(s)
     zoomInButton = new TextButton;
     zoomInButton->setButtonText("Zoom In");
     zoomInButton->addListener(this);
+    zoomInButton->setEnabled(false);
     addAndMakeVisible(zoomInButton);
     
     zoomOutButton = new TextButton;
     zoomOutButton->setButtonText("Zoom Out");
     zoomOutButton->addListener(this);
+    zoomOutButton->setEnabled(false);
     addAndMakeVisible(zoomOutButton);
     
     resetButton = new TextButton;
     resetButton->setButtonText("Reset");
     resetButton->addListener(this);
+    resetButton->setEnabled(false);
     addAndMakeVisible(resetButton);
     
     typeCombo = new ComboBox("type_combo");
     typeCombo->addItem("Kicks", 1);
     typeCombo->addItem("Snares", 2);
     addAndMakeVisible(typeCombo);
+    
+    parentSample = nullptr;
 }
 
 ControlComponent::~ControlComponent()
@@ -73,6 +78,16 @@ void ControlComponent::resized()
 void ControlComponent::updateSelectedSample(Sample::Ptr s)
 {
     waveformComponent->updateSampleAndDraw(s);
+    selectedSample = s;
+    
+    if (s->getSubsetSamples() > 0)
+    {
+        zoomInButton->setEnabled(true);
+    }
+    else
+    {
+        zoomInButton->setEnabled(false);
+    }
 }
 
 // Button callback
@@ -80,7 +95,51 @@ void ControlComponent::buttonClicked(Button* button)
 {
     if (button == newSamplesButton)
     {
+        resetState();
         sampleManager->updateGrid(typeCombo->getSelectedId());
         sendActionMessage("update_grid");
+        resetButton->setEnabled(true);
     }
+    
+    if (button == zoomInButton)
+    {
+        if (selectedSample != nullptr)
+        {
+            sampleManager->zoom(selectedSample);
+            sendActionMessage("update_grid");
+            parentSample = selectedSample;
+            selectedSample = nullptr;
+            zoomInButton->setEnabled(false);
+            zoomOutButton->setEnabled(true);
+        }
+    }
+    
+    if (button == zoomOutButton)
+    {
+        if (parentSample != nullptr)
+        {
+            if (parentSample->getParent() != nullptr)
+            {
+                sampleManager->zoom(parentSample->getParent());
+            }
+            else
+            {
+                sampleManager->zoomOutFull();
+                zoomOutButton->setEnabled(false);
+            }
+            
+            sendActionMessage("update_grid");
+            parentSample = parentSample->getParent();
+            selectedSample = nullptr;
+            zoomInButton->setEnabled(false);
+
+        }
+    }
+}
+
+void ControlComponent::resetState()
+{
+    zoomInButton->setEnabled(false);
+    zoomOutButton->setEnabled(false);
+    resetButton->setEnabled(false);
 }
