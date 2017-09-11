@@ -69,6 +69,9 @@ public:
     // Zoom all the way back out
     void zoomOutFull();
     
+    // Clear out grid and samples
+    void clear();
+    
 private:
     
     // Initialize db connection

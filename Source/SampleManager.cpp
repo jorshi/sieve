@@ -331,3 +331,10 @@ void SampleManager::zoomOutFull()
     currentSamples_ = root_->getChildren();
     updateThumbnails();
 }
+
+void SampleManager::clear()
+{
+    currentSamples_.clear();
+    root_->getChildren().clear();
+    updateThumbnails();
+}

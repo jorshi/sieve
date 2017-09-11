@@ -54,8 +54,8 @@ void WaveformComponent::paint (Graphics& g)
     }
     else
     {
-        g.setColour(CustomLookAndFeel::Colours::headerText);
-        g.drawText("No Sample Loaded", 0, (getHeight() / 2) - 5, getWidth(), 10, Justification::centred);
+        //g.setColour(CustomLookAndFeel::Colours::headerText);
+        //g.drawText("No Sample Loaded", 0, (getHeight() / 2) - 5, getWidth(), 10, Justification::centred);
     }
     
     g.setColour (Colours::grey);

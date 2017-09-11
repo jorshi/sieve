@@ -135,6 +135,16 @@ void ControlComponent::buttonClicked(Button* button)
 
         }
     }
+    
+    if (button == resetButton)
+    {
+        resetState();
+        waveformComponent->updateSampleAndDraw(nullptr);
+        selectedSample = nullptr;
+        parentSample = nullptr;
+        sampleManager->clear();
+        sendActionMessage("update_grid");
+    }
 }
 
 void ControlComponent::resetState()
