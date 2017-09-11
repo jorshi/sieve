@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Sample.h"
 
 class PadButton : public ShapeButton,
                   public ActionBroadcaster

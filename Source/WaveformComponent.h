@@ -17,7 +17,8 @@
 //==============================================================================
 /*
 */
-class WaveformComponent    : public Component
+class WaveformComponent    : public Component,
+                             public DragAndDropContainer
 {
 public:
     WaveformComponent();
@@ -27,6 +28,9 @@ public:
     void resized() override;
     
     void updateSampleAndDraw(Sample::Ptr s);
+    
+    // Mouse drag on the waveform component for drag and drop of file
+    void mouseDrag(const MouseEvent& event) override;
 
 private:
     

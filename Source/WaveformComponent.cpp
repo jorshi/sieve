@@ -72,3 +72,12 @@ void WaveformComponent::updateSampleAndDraw(Sample::Ptr s)
     sample = s;
     repaint();
 }
+
+void WaveformComponent::mouseDrag(const MouseEvent& event)
+{
+    if (sample != nullptr)
+    {
+        StringArray files(sample->getFile().getFullPathName());
+        performExternalDragDropOfFiles(files, false);
+    }
+}
