@@ -93,6 +93,7 @@ void SampleGrid::updateGrid()
                 pad->setColours(padOff, padOver, padDown);
                 pad->setEnabled(false);
                 pad->setTooltip("");
+                pad->setSubsetSize(0);
             }
         }
     }

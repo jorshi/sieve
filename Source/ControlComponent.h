@@ -38,6 +38,9 @@ private:
     // Button callback
     void buttonClicked(Button* button) override;
     
+    // Reset buttons and sample grid
+    void resetState();
+    
     // Pointer to sample manager
     SampleManager* sampleManager;
     
@@ -47,6 +50,10 @@ private:
     ScopedPointer<TextButton> zoomOutButton;
     ScopedPointer<TextButton> resetButton;
     ScopedPointer<ComboBox> typeCombo;
+    
+    // Currently selected sample
+    Sample::Ptr selectedSample;
+    Sample::Ptr parentSample;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlComponent)
 };
