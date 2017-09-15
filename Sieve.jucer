@@ -63,6 +63,8 @@
         <FILE id="F4C8OM" name="SampleManager.h" compile="0" resource="0" file="Source/SampleManager.h"/>
       </GROUP>
       <GROUP id="{51E519B5-B385-27A8-E6CC-7D8128A84556}" name="UI">
+        <FILE id="FNshZy" name="FileList.cpp" compile="1" resource="0" file="Source/FileList.cpp"/>
+        <FILE id="p0QH07" name="FileList.h" compile="0" resource="0" file="Source/FileList.h"/>
         <FILE id="NJVbNA" name="FileBrowseComponent.cpp" compile="1" resource="0"
               file="Source/FileBrowseComponent.cpp"/>
         <FILE id="U5qQW0" name="FileBrowseComponent.h" compile="0" resource="0"

@@ -94,7 +94,6 @@ void DimensionReduction::pca()
             
             // Definitely doing more work here than needs to be done -- converting from one orientation to another
             // and then back -- TODO fix this up!
-            std::cout << sql << "\n";
             jassert(analysisMatrix_.size() > 0);
             std::vector<std::vector<Real>> rotated(analysisMatrix_[0].size());
             for (int i = 0; i < analysisMatrix_.size(); i++)

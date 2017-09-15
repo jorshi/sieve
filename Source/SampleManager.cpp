@@ -19,6 +19,8 @@ SampleManager::SampleManager()
     
     // Load in sample folders from database
     readSampleFolders();
+    
+    std::cout << sampleFolders_.size() << "\n";
     setupTypes();
     
     dimensionReduction_ = new DimensionReduction(db_, sampleFolders_);
@@ -316,7 +318,7 @@ AudioFormatReader* SampleManager::getReaderForSample(Sample& sample)
 void SampleManager::readSampleFolders()
 {
     sampleFolders_.clear();
-    String sql = "SELECT * FROM `sample_folders` LIMIT 50;";
+    String sql = "SELECT * FROM `sample_folders` LIMIT 1000;";
     db_.runCommand(sql, selectSampleFolderCallback, this);
 }
 

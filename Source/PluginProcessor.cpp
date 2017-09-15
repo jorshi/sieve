@@ -200,7 +200,7 @@ void SampleBrowserAudioProcessor::loadSamplerSounds()
                                      *reader,
                                      midiNotes,
                                      startNote_+i,
-                                     0.1,
+                                     0.001,
                                      length,
                                      length);
             sampler_->addSound(sound);

@@ -138,7 +138,7 @@ private:
     static int selectSampleFolderCallback(void *param, int argc, char **argv, char **azCol)
     {
         SampleManager* manager = reinterpret_cast<SampleManager*>(param);
-        if (argc > 2)
+        if (argc > 3)
         {
             SampleFolder::Ptr newFolder = new SampleFolder(atoi(argv[0]), String(argv[1]));
             newFolder->setStatus(atoi(argv[2]));

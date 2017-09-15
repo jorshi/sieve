@@ -13,6 +13,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "CustomLookAndFeel.h"
 #include "SampleManager.h"
+#include "FileList.h"
 
 //==============================================================================
 /*
@@ -35,9 +36,17 @@ private:
     
     void buttonClicked(Button* button) override;
     
-    ScopedPointer<TextButton> fileBrowser;
+    // Resize the file list if there are more files to show
+    void resizeFileList();
+    
     SampleManager* manager;
     
+    ScopedPointer<TextButton> fileBrowser;
+    ScopedPointer<FileList> fileList;
+    ScopedPointer<Viewport> fileViewPort;
     
+    int currentFileListSize;
+    
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBrowseComponent)
 };
