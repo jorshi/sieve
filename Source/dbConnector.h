@@ -37,10 +37,10 @@ private:
     {
         for (int i=0; i < argc; i++)
         {
-            std::cout << azColName << " = " << (argv[i] ? argv[i] : "NULL") << "\n";
+            //std::cout << azColName << " = " << (argv[i] ? argv[i] : "NULL") << "\n";
         }
     
-        std::cout << "\n";
+        //std::cout << "\n";
         return 0;
     }
     

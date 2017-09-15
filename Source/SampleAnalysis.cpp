@@ -119,7 +119,7 @@ void SampleAnalysis::runAnalysisBatch()
                         analysis_->run(*sample, newAnalysis, (*seg)->start, (*seg)->length);
                         newAnalysis->save(db_);
                     } catch (std::exception& e) {
-                        std::cout << e.what() << "\n";
+                        //std::cout << e.what() << "\n";
                         analysis_ = nullptr;
                         return;
                     }

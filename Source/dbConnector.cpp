@@ -17,7 +17,7 @@ DBConnector::DBConnector()
     if (sqlite3_open("sample_browse.db", &db_))
     {
         isConnected_ = false;
-        std::cout << "Failed to open DB";
+        //std::cerr << "Failed to open DB";
     }
     else
     {
@@ -41,7 +41,7 @@ bool DBConnector::runCommand(juce::String command, int (*callbackFunc)(void *, i
     
     if (rc != SQLITE_OK)
     {
-        std::cout << "SQL ERROR: " << zErrMsg << "\n";
+        //std::cout << "SQL ERROR: " << zErrMsg << "\n";
         return false;
     }
     
@@ -251,7 +251,7 @@ void DBConnector::setupTables()
             runCommand(sqlReducedDimension) &&
             runCommand(sqlAnalysis))
     {
-        std::cout << "All tables succesfully created\n";
+        //std::cout << "All tables succesfully created\n";
     }
     
     runCommand("PRAGMA foreign_keys = ON;");
