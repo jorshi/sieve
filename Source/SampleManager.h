@@ -38,10 +38,7 @@ public:
     
     // Prompt user to input directory for new samples
     void loadNewSamples();
-    
-    // Loads a random selection of samples into the current sample buffer
-    void updateGridRandom();
-    
+
     // Load samples onto grid based on sample type selected
     void updateGrid(const int& sampleType);
     
@@ -50,9 +47,6 @@ public:
     
     // Load thumbnail caches
     void updateThumbnails();
-    
-    // Rainbow colours for testing!
-    void updateRainbowColours();
     
     // Gets the audio format reader for a given sample
     AudioFormatReader* getReaderForSample(Sample& sample);

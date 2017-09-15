@@ -241,20 +241,6 @@ void SampleManager::distributeSamples(std::vector<SampleReduced::Ptr>& samples, 
 }
 
 
-void SampleManager::updateGridRandom()
-{
-    queuedSamples_.clear();
-    String sql = "SELECT * FROM `samples` LIMIT 64;";
-    if(db_.runCommand(sql, selectSampleCallback, this))
-    {
-        currentSamples_.swapWith(queuedSamples_);
-        queuedSamples_.clear();
-        updateThumbnails();
-        updateRainbowColours();
-    }
-}
-
-
 Sample::Ptr SampleManager::getSample(int num) const
 {
     if (num < currentSamples_.size())
@@ -274,37 +260,6 @@ void SampleManager::updateThumbnails()
         AudioThumbnail* newThumbnail = new AudioThumbnail(512, loader_.getFormatManager(), *thumbnailCache_);
         newThumbnail->setSource(new FileInputSource((*sample)->getFile()));
         (*sample)->setThumbnail(newThumbnail);
-    }
-}
-
-
-// This is just here for testing
-void SampleManager::updateRainbowColours()
-{
-    int numSamples = currentSamples_.size();
-    int count = 0;
-    Sample::Ptr sample;
-    
-    for (int i = 0;  i < 8; i++)
-    {
-        for (int j = 0; j < 8; j++)
-        {
-            if (count >= numSamples)
-            {
-                return;
-            }
-            
-            // Set rainbow
-            int r = i*15 + 100;
-            int g = j*10 + 100;
-            int b = 150 - (i*j)*2;
-            
-            sample = currentSamples_.getUnchecked(count);
-            sample->setColour(Colour::fromRGB(r,g,b));
-            //std::cout << r << " " << g << " " << b << "\n";
-            
-            count++;
-        }
     }
 }
 
