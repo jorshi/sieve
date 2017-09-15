@@ -110,7 +110,8 @@
   </MAINGROUP>
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3&#10;essentia&#10;mlpack&#10;munkres"
-               extraCompilerFlags="-I/usr/local/include&#10;" extraLinkerFlags="-L/usr/local/lib">
+               extraCompilerFlags="-I/usr/local/include&#10;" extraLinkerFlags="-L/usr/local/lib"
+               extraDefs="SAFE_TYPE_COMPARISONS=1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"
                        osxCompatibility="default" osxArchitecture="default"/>

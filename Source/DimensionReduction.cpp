@@ -59,6 +59,8 @@ void DimensionReduction::run()
         {
             // Clean up the sample reduction table
             db_.runCommand("DELETE FROM `samples_reduced`;");
+            
+            // TODO: Should check for a success - return a boolean 
             pca();
             
             if (threadShouldExit()) break;
@@ -78,6 +80,7 @@ void DimensionReduction::pca()
     {
         if (!threadShouldExit())
         {
+
             // Get all samples for a sample type
             String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
                 "WHERE s.sample_type = " + String((*sampleClass)->sampleType) + \
@@ -94,7 +97,9 @@ void DimensionReduction::pca()
             
             // Definitely doing more work here than needs to be done -- converting from one orientation to another
             // and then back -- TODO fix this up!
-            jassert(analysisMatrix_.size() > 0);
+            
+            if (analysisMatrix_.size() < 1) return;
+            
             std::vector<std::vector<Real>> rotated(analysisMatrix_[0].size());
             for (int i = 0; i < analysisMatrix_.size(); i++)
             {
@@ -130,7 +135,7 @@ void DimensionReduction::pca()
             
             // Check to see if we need to exit the thread
             if (threadShouldExit()) return;
-            
+ 
             // Pools for Essentia PCA
             Pool pcaIn;
             Pool pcaOut;
