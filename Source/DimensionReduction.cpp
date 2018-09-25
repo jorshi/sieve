@@ -17,9 +17,8 @@ DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCou
     Thread("Dimension Reduction Thread"), db_(db), sampleFolders_(f)
 {
 
-    
-    sampleClasses_.add(new SampleClassPCA(1, 0.2, 0.1));    // Kick Drum PCA Segmentations
-    sampleClasses_.add(new SampleClassPCA(2, 0.9, 0.25));   // Snare Drum PCA Segmentations
+    sampleClasses_.add(new SampleClassPCA(1, 0.5, 0.5));   // Kick Drum PCA Segmentations
+    sampleClasses_.add(new SampleClassPCA(2, 0.5, 0.5));   // Snare Drum PCA Segmentations
     
     essentia::init();
     AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -27,6 +26,8 @@ DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCou
     pca_ = factory.create("PCA",
                           "namespaceIn", "feature",
                           "namespaceOut", "pca");
+    
+    tsne_ = new TSNE();
     
     if (sampleFolders_.size())
     {
@@ -64,6 +65,7 @@ void DimensionReduction::run()
             // TODO: Should check for a success - return a boolean
             try {
                 pca();
+                //tsne();
             } catch (std::exception& e) {
                 std::cout << e.what() << "\n";
             }
@@ -78,6 +80,49 @@ void DimensionReduction::run()
         wait(1000);
     }
 }
+
+void DimensionReduction::preprocess() {
+    
+    // Check to see if we need to exit the thread
+    if (threadShouldExit()) return;
+    
+    // Definitely doing more work here than needs to be done -- converting from one orientation to another
+    // and then back -- TODO fix this up!
+    
+    std::vector<std::vector<Real>> rotated(analysisMatrix_[0].size());
+    for (int i = 0; i < analysisMatrix_.size(); i++)
+    {
+        for (int j = 0; j < analysisMatrix_[0].size(); j++)
+        {
+            rotated[j].push_back(analysisMatrix_[i][j]);
+        }
+    }
+    
+    // Standardize data
+    if (threadShouldExit()) return;
+    for (auto feature = rotated.begin(); feature != rotated.end(); ++feature)
+    {
+        Real sum = std::accumulate(feature->begin(), feature->end(), 0.0);
+        Real mean = sum / feature->size();
+        
+        std::vector<Real> diff(feature->size());
+        std::transform(feature->begin(), feature->end(), diff.begin(), std::bind2nd(std::minus<Real>(), mean));
+        
+        Real sqSum = std::inner_product(feature->begin(), feature->end(), diff.begin(), 0.0);
+        Real stdDev = std::sqrt(sqSum / feature->size());
+        
+        std::transform(feature->begin(), feature->end(), feature->begin(), [mean, stdDev](Real v){ return (v - mean) / stdDev; });
+    }
+    
+    for (int i = 0; i < analysisMatrix_.size(); i++)
+    {
+        for (int j = 0; j < analysisMatrix_[0].size(); j++)
+        {
+            analysisMatrix_[i][j] = rotated[j][i];
+        }
+    }
+}
+
 
 void DimensionReduction::pca()
 {
@@ -97,46 +142,9 @@ void DimensionReduction::pca()
             sampleOrder_.clear();
             if (!db_.runCommand(sql, selectAnalysisPoolCallback, this)) return;
             
-            // Check to see if we need to exit the thread
-            if (threadShouldExit()) return;
-            
-            // Definitely doing more work here than needs to be done -- converting from one orientation to another
-            // and then back -- TODO fix this up!
-            
+            // Standardize data through preprocess
             if (analysisMatrix_.size() < 1) return;
-            
-            std::vector<std::vector<Real>> rotated(analysisMatrix_[0].size());
-            for (int i = 0; i < analysisMatrix_.size(); i++)
-            {
-                for (int j = 0; j < analysisMatrix_[0].size(); j++)
-                {
-                    rotated[j].push_back(analysisMatrix_[i][j]);
-                }
-            }
-            
-            // Standardize data
-            if (threadShouldExit()) return;
-            for (auto feature = rotated.begin(); feature != rotated.end(); ++feature)
-            {
-                Real sum = std::accumulate(feature->begin(), feature->end(), 0.0);
-                Real mean = sum / feature->size();
-                
-                std::vector<Real> diff(feature->size());
-                std::transform(feature->begin(), feature->end(), diff.begin(), std::bind2nd(std::minus<Real>(), mean));
-                
-                Real sqSum = std::inner_product(feature->begin(), feature->end(), diff.begin(), 0.0);
-                Real stdDev = std::sqrt(sqSum / feature->size());
-                
-                std::transform(feature->begin(), feature->end(), feature->begin(), [mean, stdDev](Real v){ return (v - mean) / stdDev; });
-            }
-            
-            for (int i = 0; i < analysisMatrix_.size(); i++)
-            {
-                for (int j = 0; j < analysisMatrix_[0].size(); j++)
-                {
-                    analysisMatrix_[i][j] = rotated[j][i];
-                }
-            }
+            preprocess();
             
             // Check to see if we need to exit the thread
             if (threadShouldExit()) return;
@@ -175,3 +183,102 @@ void DimensionReduction::pca()
         }
     }
 }
+
+
+void DimensionReduction::tsne()
+{
+    for (auto sampleClass = sampleClasses_.begin(); sampleClass != sampleClasses_.end(); ++sampleClass)
+    {
+        if (!threadShouldExit())
+        {
+            
+            // Get all samples for a sample type
+            String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
+            "WHERE s.sample_type = " + String((*sampleClass)->sampleType) + \
+            " AND a.start = " + String((*sampleClass)->segStart) + \
+            " AND a.length = " + String((*sampleClass)->segLength) + \
+            " AND s.exclude = 0;";
+            
+            analysisMatrix_.clear();
+            sampleOrder_.clear();
+            if (!db_.runCommand(sql, selectAnalysisPoolCallback, this)) return;
+            
+            // Standardize data through preprocess
+            if (analysisMatrix_.size() < 1) return;
+            //preprocess();
+            
+            // Check to see if we need to exit the thread
+            if (threadShouldExit()) return;
+            
+            // Define some variables
+            int origN, N, D, no_dims, max_iter;
+            double perc_landmarks;
+            double perplexity, theta, *data;
+            int rand_seed = -1;
+            
+            // Number of data points
+            origN = (int)analysisMatrix_.size();
+            
+            // Dimensions
+            D = (int)analysisMatrix_[0].size();
+            no_dims = 2;
+            
+            // TSNE Settings
+            max_iter = 1000;
+            theta = 0.5;
+            perplexity = 50;
+            if (origN-1 < 3*perplexity) {
+                perplexity = std::floor((origN-1) / 3);
+            }
+            
+            // Create some space for the data
+            data = (double*) malloc(origN * D * sizeof(double));
+            if(!data) { std::cerr << "Failed to allocate memory!"; return; }
+            
+            double* dataPtr = data;
+            for (int j = 0; j < analysisMatrix_.size(); j++) {
+                for (int k = 0; k < analysisMatrix_[j].size(); k++) {
+                    *dataPtr = (double)analysisMatrix_[j][k];
+                    ++dataPtr;
+                }
+            }
+            
+            // Make dummy landmarks
+            N = origN;
+            int* landmarks = (int*) malloc(N * sizeof(int));
+            if(!landmarks) { std::cerr << "Failed to allocate memory!"; return; }
+            for(int n = 0; n < N; n++) landmarks[n] = n;
+            
+            // Now fire up the SNE implementation
+            double* Y = (double*) malloc(N * no_dims * sizeof(double));
+            double* costs = (double*) calloc(N, sizeof(double));
+            if(Y == NULL || costs == NULL) { std::cerr << "Memory allocation failed!"; exit(1); }
+            try {
+                tsne_->run(data, N, D, Y, no_dims, perplexity, theta, rand_seed, false, max_iter);
+            } catch (std::exception& e) {
+                std::cout << e.what() << "\n";
+            }
+            
+            // Save the new reduced dimensions for each sample
+            SampleReduced::Ptr newSampleRedux;
+            
+            if (threadShouldExit()) return;
+            int* landmarkPtr = landmarks;
+            for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId, ++landmarkPtr)
+            {
+                double dim1 = Y[*landmarkPtr];
+                double dim2 = Y[*landmarkPtr + 1];
+                
+                newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
+                newSampleRedux->save(db_);
+            }
+            
+            // Clean up the memory
+            free(data); data = NULL;
+            free(Y); Y = NULL;
+            free(costs); costs = NULL;
+            free(landmarks); landmarks = NULL;
+        }
+    }
+}
+

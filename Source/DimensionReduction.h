@@ -23,6 +23,7 @@
 #include "FeatureAnalysis.h"
 #include "AnalysisObject.h"
 #include "SampleReduced.h"
+#include "tsne.h"
 
 
 
@@ -52,6 +53,9 @@ private:
     // PCA Algorithm
     Algorithm* pca_;
     
+    // TSNE Algorithm
+    ScopedPointer<TSNE> tsne_;
+    
     // Struct for keeping track of the different sample types and the specific segmentation to use
     struct SampleClassPCA
     {
@@ -65,7 +69,10 @@ private:
     OwnedArray<SampleClassPCA> sampleClasses_;
     
     void run() override;
+    void preprocess();
     void pca();
+    void tsne();
+    void setupTsne();
     
     
     // Static callback for a select sample query

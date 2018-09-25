@@ -62,6 +62,14 @@
               file="Source/SampleManager.cpp"/>
         <FILE id="F4C8OM" name="SampleManager.h" compile="0" resource="0" file="Source/SampleManager.h"/>
       </GROUP>
+      <GROUP id="{E8369DD2-C261-2371-3913-E61EA89A9E59}" name="TSNE">
+        <FILE id="gSNnC7" name="sptree.cpp" compile="1" resource="0" file="Source/sptree.cpp"/>
+        <FILE id="PQA6YF" name="sptree.h" compile="0" resource="0" file="Source/sptree.h"/>
+        <FILE id="tpQDTw" name="tsne.cpp" compile="1" resource="0" file="Source/tsne.cpp"/>
+        <FILE id="WGgSd4" name="tsne.h" compile="0" resource="0" file="Source/tsne.h"/>
+        <FILE id="wGtKM2" name="tsne_main.cpp" compile="1" resource="0" file="Source/tsne_main.cpp"/>
+        <FILE id="yA5WJZ" name="vptree.h" compile="0" resource="0" file="Source/vptree.h"/>
+      </GROUP>
       <GROUP id="{51E519B5-B385-27A8-E6CC-7D8128A84556}" name="UI">
         <FILE id="FNshZy" name="FileList.cpp" compile="1" resource="0" file="Source/FileList.cpp"/>
         <FILE id="p0QH07" name="FileList.h" compile="0" resource="0" file="Source/FileList.h"/>
