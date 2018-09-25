@@ -16,10 +16,7 @@ using namespace standard;
 DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCountedArray<SampleFolder>& f) :
     Thread("Dimension Reduction Thread"), db_(db), sampleFolders_(f)
 {
-    if (sampleFolders_.size())
-    {
-        startThread();
-    }
+
     
     sampleClasses_.add(new SampleClassPCA(1, 0.2, 0.1));    // Kick Drum PCA Segmentations
     sampleClasses_.add(new SampleClassPCA(2, 0.9, 0.25));   // Snare Drum PCA Segmentations
@@ -31,6 +28,10 @@ DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCou
                           "namespaceIn", "feature",
                           "namespaceOut", "pca");
     
+    if (sampleFolders_.size())
+    {
+        startThread();
+    }
 }
 
 
@@ -60,8 +61,12 @@ void DimensionReduction::run()
             // Clean up the sample reduction table
             db_.runCommand("DELETE FROM `samples_reduced`;");
             
-            // TODO: Should check for a success - return a boolean 
-            pca();
+            // TODO: Should check for a success - return a boolean
+            try {
+                pca();
+            } catch (std::exception& e) {
+                std::cout << e.what() << "\n";
+            }
             
             if (threadShouldExit()) break;
             for (auto folder = sampleFolders_.begin(); folder != sampleFolders_.end(); ++folder)

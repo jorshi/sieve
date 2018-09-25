@@ -64,7 +64,11 @@ void SampleAnalysis::run()
         {
             if (analysis_ == nullptr)
             {
-                analysis_ = new FeatureAnalysis(db_);
+                try {
+                    analysis_ = new FeatureAnalysis(db_);
+                } catch (std::exception& e) {
+                    std::cout << e.what() << "\n";
+                }
             }
             runAnalysisBatch();
         }
