@@ -21,6 +21,7 @@ WaveformComponent::WaveformComponent()
 
 WaveformComponent::~WaveformComponent()
 {
+    setLookAndFeel(nullptr);
 }
 
 void WaveformComponent::paint (Graphics& g)

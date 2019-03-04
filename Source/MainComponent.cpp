@@ -28,6 +28,7 @@ MainComponent::MainComponent(SampleManager* s) : sampleManager(s)
 
 MainComponent::~MainComponent()
 {
+    setLookAndFeel(nullptr);
 }
 
 void MainComponent::paint (Graphics& g)

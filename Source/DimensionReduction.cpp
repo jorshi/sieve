@@ -67,7 +67,7 @@ void DimensionReduction::run()
                 pca();
                 //tsne();
             } catch (std::exception& e) {
-                std::cout << e.what() << "\n";
+                //std::cout << e.what() << "\n";
             }
             
             if (threadShouldExit()) break;
@@ -233,7 +233,9 @@ void DimensionReduction::tsne()
             
             // Create some space for the data
             data = (double*) malloc(origN * D * sizeof(double));
-            if(!data) { std::cerr << "Failed to allocate memory!"; return; }
+            if(!data) { //std::cerr << "Failed to allocate memory!"; return;
+                
+            }
             
             double* dataPtr = data;
             for (int j = 0; j < analysisMatrix_.size(); j++) {
@@ -246,17 +248,21 @@ void DimensionReduction::tsne()
             // Make dummy landmarks
             N = origN;
             int* landmarks = (int*) malloc(N * sizeof(int));
-            if(!landmarks) { std::cerr << "Failed to allocate memory!"; return; }
+            if(!landmarks) { //std::cerr << "Failed to allocate memory!"; return;
+                
+            }
             for(int n = 0; n < N; n++) landmarks[n] = n;
             
             // Now fire up the SNE implementation
             double* Y = (double*) malloc(N * no_dims * sizeof(double));
             double* costs = (double*) calloc(N, sizeof(double));
-            if(Y == NULL || costs == NULL) { std::cerr << "Memory allocation failed!"; exit(1); }
+            if(Y == NULL || costs == NULL) { //std::cerr << "Memory allocation failed!"; exit(1);
+                
+            }
             try {
                 tsne_->run(data, N, D, Y, no_dims, perplexity, theta, rand_seed, false, max_iter);
             } catch (std::exception& e) {
-                std::cout << e.what() << "\n";
+                //std::cout << e.what() << "\n";
             }
             
             // Save the new reduced dimensions for each sample

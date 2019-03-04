@@ -19,7 +19,7 @@
 /*
 */
 class FileBrowseComponent    : public Component,
-                               public ButtonListener,
+                               public Button::Listener,
                                public ActionBroadcaster,
                                public Timer
 {
@@ -34,7 +34,7 @@ public:
 
 private:
     
-    void buttonClicked(Button* button) override;
+    void buttonClicked(Button* button);
     
     // Resize the file list if there are more files to show
     void resizeFileList();

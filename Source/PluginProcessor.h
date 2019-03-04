@@ -67,7 +67,10 @@ private:
     ScopedPointer<SampleManager> sampleManager_;
     ScopedPointer<Synthesiser> sampler_;
     ReferenceCountedArray<SamplerSound> sounds_;
+    OwnedArray<BigInteger> midiNotes_;
     int startNote_;
+    
+    ScopedPointer<FileLogger> logger;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleBrowserAudioProcessor)
 };

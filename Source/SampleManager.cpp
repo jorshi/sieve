@@ -12,6 +12,8 @@
 
 SampleManager::SampleManager()
 {
+    juce::Logger::writeToLog("In Sample Manager Constructor");
+    
     sampleLoader_ = new SampleLoader;
     analysis_ = new SampleAnalysis(db_);
     thumbnailCache_ = new AudioThumbnailCache(64);
@@ -20,7 +22,7 @@ SampleManager::SampleManager()
     // Load in sample folders from database
     readSampleFolders();
     
-    std::cout << sampleFolders_.size() << "\n";
+    //std::cout << sampleFolders_.size() << "\n";
     setupTypes();
     
     dimensionReduction_ = new DimensionReduction(db_, sampleFolders_);

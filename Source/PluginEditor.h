@@ -28,7 +28,7 @@
 /**
 */
 class SampleBrowserAudioProcessorEditor  : public AudioProcessorEditor,
-                                           public ButtonListener,
+                                           public Button::Listener,
                                            public ActionListener
 {
 public:
@@ -41,7 +41,7 @@ public:
 
 private:
     // Button callback
-    void buttonClicked(Button* button) override;
+    void buttonClicked(Button* button);
     
     // Action callback
     void actionListenerCallback(const String& message) override;

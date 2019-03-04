@@ -12,6 +12,7 @@
 #include "PluginEditor.h"
 
 
+
 //==============================================================================
 SampleBrowserAudioProcessor::SampleBrowserAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -25,7 +26,17 @@ SampleBrowserAudioProcessor::SampleBrowserAudioProcessor()
                        )
 #endif
 {
-    sampleManager_ = new SampleManager;
+    logger = FileLogger::createDefaultAppLogger("/Users/jshier/Development", "sieve.log", "Sieve Log");
+    juce::Logger::setCurrentLogger(logger.get());
+    juce::Logger::writeToLog("Starting to Log");
+    
+    try {
+        sampleManager_ = new SampleManager;
+    } catch (const std::exception& e) {
+        juce::Logger::writeToLog(e.what());
+    }
+    
+
     sampler_ = new Synthesiser;
     
     // Make an 8 voice sampler
@@ -35,6 +46,14 @@ SampleBrowserAudioProcessor::SampleBrowserAudioProcessor()
     }
     
     startNote_ = 48;
+    
+    for (int i = 0; i < 64; i++) {
+        BigInteger* bigInt = new BigInteger();
+        bigInt->setRange(startNote_+i, 1, true);
+        midiNotes_.add(bigInt);
+    }
+    
+
 }
 
 SampleBrowserAudioProcessor::~SampleBrowserAudioProcessor()
@@ -198,7 +217,7 @@ void SampleBrowserAudioProcessor::loadSamplerSounds()
             // Create a new sampler sound for this sound
             sound = new SamplerSound("Pad " + String(i),
                                      *reader,
-                                     midiNotes,
+                                     *midiNotes_.getUnchecked(i),
                                      startNote_+i,
                                      0.001,
                                      length,
@@ -211,7 +230,7 @@ void SampleBrowserAudioProcessor::loadSamplerSounds()
 
 void SampleBrowserAudioProcessor::triggerSound(int pad)
 {
-    sampler_->noteOn(1, pad + startNote_, 1.0);
+    sampler_->noteOn(1, pad + startNote_, 0.9);
 }
 
 //==============================================================================

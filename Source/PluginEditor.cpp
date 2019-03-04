@@ -38,6 +38,7 @@ SampleBrowserAudioProcessorEditor::SampleBrowserAudioProcessorEditor (SampleBrow
 
 SampleBrowserAudioProcessorEditor::~SampleBrowserAudioProcessorEditor()
 {
+    setLookAndFeel(nullptr);
 }
 
 //==============================================================================

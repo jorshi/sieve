@@ -14,16 +14,16 @@
 DBConnector::DBConnector()
 {
     
-    if (sqlite3_open("sample_browse.db", &db_))
-    {
+    if (sqlite3_open("/Users/jshier/Development/sample_browse.db", &db_) != SQLITE_OK) {
+        Logger::writeToLog(sqlite3_errmsg(db_));
         isConnected_ = false;
-        //std::cerr << "Failed to open DB";
+        return;
     }
-    else
-    {
-        isConnected_ = true;
-        setupTables();
-    }
+
+    isConnected_ = true;
+    setupTables();
+    Logger::writeToLog("Opened DB");
+
 }
 
 

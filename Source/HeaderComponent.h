@@ -17,7 +17,7 @@
 /*
 */
 class HeaderComponent    : public Component,
-                           public ButtonListener,
+                           public Button::Listener,
                            public ActionBroadcaster
 {
 public:
@@ -33,7 +33,7 @@ public:
 private:
     
     // Button callback
-    void buttonClicked(Button* button) override;
+    void buttonClicked(Button* button);
     
     void updateHeaderUI();
     

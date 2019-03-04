@@ -19,8 +19,8 @@
 //==============================================================================
 /*
 */
-class ControlComponent    : public Component,
-                            public ButtonListener,
+class ControlComponent :    public Component,
+                            public Button::Listener,
                             public ActionBroadcaster
                             
 {
@@ -36,7 +36,7 @@ public:
 private:
 
     // Button callback
-    void buttonClicked(Button* button) override;
+    void buttonClicked(Button* button);
     
     // Reset buttons and sample grid
     void resetState();

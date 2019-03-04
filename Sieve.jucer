@@ -9,9 +9,10 @@
               pluginManufacturerCode="Uvic" pluginCode="Pm83" pluginChannelConfigs=""
               pluginIsSynth="1" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="SieveAU"
-              pluginRTASCategory="" aaxIdentifier="com.yourcompany.Sieve" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
-              jucerVersion="5.1.1" companyName="University of Victoria" companyWebsite="uvic.ca"
-              cppLanguageStandard="11">
+              pluginRTASCategory="" aaxIdentifier="com.yourcompany.Sieve" pluginAAXCategory="2"
+              jucerVersion="5.4.1" companyName="University of Victoria" companyWebsite="uvic.ca"
+              cppLanguageStandard="11" pluginFormats="buildVST,buildAU,buildStandalone"
+              pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="bS7Zw9" name="Sieve">
     <GROUP id="{22B62575-2E8A-2AC3-6CB4-58FFE5C4B28D}" name="Resources">
       <FILE id="GSG8XL" name="Offside-Regular.ttf" compile="0" resource="1"
@@ -119,28 +120,28 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3&#10;essentia&#10;mlpack&#10;munkres"
                extraCompilerFlags="-I/usr/local/include&#10;" extraLinkerFlags="-L/usr/local/lib"
-               extraDefs="SAFE_TYPE_COMPARISONS=1&#10;__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=1">
+               extraDefs="SAFE_TYPE_COMPARISONS=1&#10;__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=1"
+               vstLegacyFolder="/Users/jshier/Development/Libraries/vst3sdk">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"
-                       osxCompatibility="default" osxArchitecture="default"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Sieve"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_events" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_graphics" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_video" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_opengl" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../../Archive/juce-grapefruit-osx/modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../../Archive/juce-grapefruit-osx/modules"/>
+        <MODULEPATH id="juce_core" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../Libraries/JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
   </EXPORTFORMATS>
@@ -162,4 +163,7 @@
     <MODULE id="juce_video" showAllCode="1" useLocalCopy="0"/>
   </MODULES>
   <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+  <LIVE_SETTINGS>
+    <OSX/>
+  </LIVE_SETTINGS>
 </JUCERPROJECT>

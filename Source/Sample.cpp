@@ -58,7 +58,7 @@ bool Sample::save(const DBConnector &db)
         ", " + String(0) + \
         ", " + String(folder_) + \
         ", " + String(type_) + \
-        ", " + String(exclude_) + \
+        ", " + String(int(exclude_)) + \
         ");";
     
     if (db.runCommand(sql))
@@ -98,7 +98,7 @@ bool Sample::updateSave(const DBConnector &db)
         "analyzed = " + String(int(analyzed_)) + ", " + \
         "sample_folder = " + String(folder_) + ", " + \
         "sample_type = " + String(type_) + ", " + \
-        "exclude = " + String(exclude_) + " " + \
+        "exclude = " + String(int(exclude_)) + " " + \
         "WHERE id = " + String(id_) + ";";
     
     return db.runCommand(sql);
