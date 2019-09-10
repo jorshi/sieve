@@ -10,7 +10,7 @@
               pluginIsSynth="1" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="SieveAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.Sieve" pluginAAXCategory="2"
-              jucerVersion="5.4.1" companyName="University of Victoria" companyWebsite="uvic.ca"
+              jucerVersion="5.4.4" companyName="University of Victoria" companyWebsite="uvic.ca"
               cppLanguageStandard="11" pluginFormats="buildVST,buildAU,buildStandalone"
               pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="bS7Zw9" name="Sieve">
