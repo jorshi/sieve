@@ -58,6 +58,7 @@ SampleBrowserAudioProcessor::SampleBrowserAudioProcessor()
 
 SampleBrowserAudioProcessor::~SampleBrowserAudioProcessor()
 {
+    juce::Logger::setCurrentLogger(nullptr);
 }
 
 //==============================================================================

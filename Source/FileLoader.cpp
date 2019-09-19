@@ -25,7 +25,7 @@ File* FileLoader::getNewAudioFile()
 {
     // Get new audio file
     FileChooser chooser ("Choose audio file ...",
-                         File::nonexistent,
+                         File(),
                          "*.wav");
     
     // Open file and make sure it is a valid audio file

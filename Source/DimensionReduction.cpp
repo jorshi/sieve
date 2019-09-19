@@ -17,8 +17,8 @@ DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCou
     Thread("Dimension Reduction Thread"), db_(db), sampleFolders_(f)
 {
 
-    sampleClasses_.add(new SampleClassPCA(1, 0.2, 0.1));   // Kick Drum PCA Segmentations
-    sampleClasses_.add(new SampleClassPCA(2, 0.9, 0.25));   // Snare Drum PCA Segmentations
+    sampleClasses_.add(new SampleClassPCA(1, 0.2, 0.5));   // Kick Drum PCA Segmentations
+    sampleClasses_.add(new SampleClassPCA(2, 0.2, 0.5));   // Snare Drum PCA Segmentations
     
     essentia::init();
     AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -64,8 +64,8 @@ void DimensionReduction::run()
             
             // TODO: Should check for a success - return a boolean
             try {
-                pca();
-                //tsne();
+                //pca();
+                tsne();
             } catch (std::exception& e) {
                 //std::cout << e.what() << "\n";
             }
@@ -205,14 +205,13 @@ void DimensionReduction::tsne()
             
             // Standardize data through preprocess
             if (analysisMatrix_.size() < 1) return;
-            //preprocess();
+            preprocess();
             
             // Check to see if we need to exit the thread
             if (threadShouldExit()) return;
             
             // Define some variables
             int origN, N, D, no_dims, max_iter;
-            double perc_landmarks;
             double perplexity, theta, *data;
             int rand_seed = -1;
             
@@ -245,14 +244,7 @@ void DimensionReduction::tsne()
                 }
             }
             
-            // Make dummy landmarks
             N = origN;
-            int* landmarks = (int*) malloc(N * sizeof(int));
-            if(!landmarks) { //std::cerr << "Failed to allocate memory!"; return;
-                
-            }
-            for(int n = 0; n < N; n++) landmarks[n] = n;
-            
             // Now fire up the SNE implementation
             double* Y = (double*) malloc(N * no_dims * sizeof(double));
             double* costs = (double*) calloc(N, sizeof(double));
@@ -267,13 +259,14 @@ void DimensionReduction::tsne()
             
             // Save the new reduced dimensions for each sample
             SampleReduced::Ptr newSampleRedux;
-            
             if (threadShouldExit()) return;
-            int* landmarkPtr = landmarks;
-            for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId, ++landmarkPtr)
+
+            int i = 0;
+            for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId)
             {
-                double dim1 = Y[*landmarkPtr];
-                double dim2 = Y[*landmarkPtr + 1];
+                double dim1 = Y[i];
+                double dim2 = Y[i + 1];
+                i += 2;
                 
                 newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
                 newSampleRedux->save(db_);
@@ -283,7 +276,6 @@ void DimensionReduction::tsne()
             free(data); data = NULL;
             free(Y); Y = NULL;
             free(costs); costs = NULL;
-            free(landmarks); landmarks = NULL;
         }
     }
 }

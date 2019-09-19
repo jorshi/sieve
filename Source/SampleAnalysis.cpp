@@ -18,16 +18,16 @@ SampleAnalysis::SampleAnalysis(const DBConnector& db) : Thread("Sample Analysis 
     
     // Time segmentations to run
     //segmentations_.add(new TimeSegmentation(.20, .025));
-    segmentations_.add(new TimeSegmentation(.20, .1));
+    //segmentations_.add(new TimeSegmentation(.20, .1));
     //segmentations_.add(new TimeSegmentation(.20, .25));
-    //segmentations_.add(new TimeSegmentation(.20, .5));
+    segmentations_.add(new TimeSegmentation(.20, .5));
     //segmentations_.add(new TimeSegmentation(.50, .025));
     //segmentations_.add(new TimeSegmentation(.50, .1));
     //segmentations_.add(new TimeSegmentation(.50, .25));
     //segmentations_.add(new TimeSegmentation(.50, .5));
     //segmentations_.add(new TimeSegmentation(.90, .025));
     //segmentations_.add(new TimeSegmentation(.90, .1));
-    segmentations_.add(new TimeSegmentation(.90, .25));
+    //segmentations_.add(new TimeSegmentation(.90, .25));
     //segmentations_.add(new TimeSegmentation(.90, .5));
 }
 
@@ -49,6 +49,7 @@ void SampleAnalysis::run()
         if (sampleFolders_.size() < 1 && currentSampleFolder_ == nullptr)
         {
             signalThreadShouldExit();
+            analysis_.reset();
         }
         
         // Get next sample folder to run analysis on
