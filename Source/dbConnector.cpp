@@ -239,7 +239,7 @@ void DBConnector::setupTables()
         "lat DOUBLE, " \
         "temporal_centroid DOUBLE, " \
         "rms DOUBLE, " \
-        "UNIQUE (`sample_id`, `sample_id`, `length`), " \
+        "UNIQUE (`sample_id`, `start`, `length`), " \
         "FOREIGN KEY (`sample_id`) REFERENCES `samples` (`id`) ON DELETE CASCADE " \
         ");";
         

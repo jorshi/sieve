@@ -18,6 +18,7 @@
 #include "dbConnector.h"
 #include "FeatureAnalysis.h"
 #include "AnalysisObject.h"
+#include "TimeSegmentation.h"
 
 
 class SampleAnalysis : private Thread
@@ -35,13 +36,7 @@ public:
     
 private:
     
-    struct TimeSegmentation
-    {
-        TimeSegmentation(double s, double l) : start(s), length(l) {};
-        double start;
-        double length;
-    };
-    
+    // Selection of time segmentations that are used by Sieve
     OwnedArray<TimeSegmentation> segmentations_;
     
     CriticalSection mutex_;

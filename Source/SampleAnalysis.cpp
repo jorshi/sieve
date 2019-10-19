@@ -17,18 +17,18 @@ SampleAnalysis::SampleAnalysis(const DBConnector& db) : Thread("Sample Analysis 
     analysis_ = nullptr;
     
     // Time segmentations to run
-    //segmentations_.add(new TimeSegmentation(.20, .025));
-    //segmentations_.add(new TimeSegmentation(.20, .1));
-    //segmentations_.add(new TimeSegmentation(.20, .25));
+    segmentations_.add(new TimeSegmentation(.20, .025));
+    segmentations_.add(new TimeSegmentation(.20, .1));
+    segmentations_.add(new TimeSegmentation(.20, .25));
     segmentations_.add(new TimeSegmentation(.20, .5));
-    //segmentations_.add(new TimeSegmentation(.50, .025));
-    //segmentations_.add(new TimeSegmentation(.50, .1));
-    //segmentations_.add(new TimeSegmentation(.50, .25));
-    //segmentations_.add(new TimeSegmentation(.50, .5));
-    //segmentations_.add(new TimeSegmentation(.90, .025));
-    //segmentations_.add(new TimeSegmentation(.90, .1));
-    //segmentations_.add(new TimeSegmentation(.90, .25));
-    //segmentations_.add(new TimeSegmentation(.90, .5));
+    segmentations_.add(new TimeSegmentation(.50, .025));
+    segmentations_.add(new TimeSegmentation(.50, .1));
+    segmentations_.add(new TimeSegmentation(.50, .25));
+    segmentations_.add(new TimeSegmentation(.50, .5));
+    segmentations_.add(new TimeSegmentation(.90, .025));
+    segmentations_.add(new TimeSegmentation(.90, .1));
+    segmentations_.add(new TimeSegmentation(.90, .25));
+    segmentations_.add(new TimeSegmentation(.90, .5));
 }
 
 
@@ -112,37 +112,20 @@ void SampleAnalysis::runAnalysisBatch()
     
     for (auto sample = analysisSamples_.begin(); sample != analysisSamples_.end(); ++sample)
     {
-        if (!threadShouldExit())
+        if (threadShouldExit()) return;
+        
+        try
         {
-            // Run analysis for all segmentations
-            for (auto seg = segmentations_.begin(); seg != segmentations_.end(); ++seg)
-            {
-                if (!threadShouldExit())
-                {
-                    AnalysisObject::Ptr newAnalysis = new AnalysisObject(0, (*sample)->getId(), (*seg)->start, (*seg)->length);
-                    try {
-                        analysis_->run(*sample, newAnalysis, (*seg)->start, (*seg)->length);
-                        newAnalysis->save(db_);
-                    } catch (std::exception& e) {
-                        //std::cout << e.what() << "\n";
-                        analysis_ = nullptr;
-                        return;
-                    }
-                }
-                else
-                {
-                    return;
-                }
-            }
-            
-            // Save sample as being fully analyzed
+            analysis_->run(*sample, segmentations_);
             (*sample)->setAnalyzed(1);
             (*sample)->updateSave(db_);
             remainingSamples--;
             currentSampleFolder_->setPercentAnalyzed(100 * (double(totalSamples)-remainingSamples) / totalSamples);
         }
-        else
+        catch (std::exception& e)
         {
+            DBG(e.what());
+            analysis_ = nullptr;
             return;
         }
     }
