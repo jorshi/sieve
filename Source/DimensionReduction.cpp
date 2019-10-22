@@ -205,7 +205,7 @@ void DimensionReduction::tsne()
             
             // Standardize data through preprocess
             if (analysisMatrix_.size() < 1) return;
-            //preprocess();
+            preprocess();
             
             // Check to see if we need to exit the thread
             if (threadShouldExit()) return;
