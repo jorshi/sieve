@@ -363,6 +363,7 @@ void FeatureAnalysis::computeSegmentPool(std::vector<Real>& buffer, TimeSegmenta
     envelope_->output("signal").set(envelopeBuffer);
     
     lat_->configure("startAttackThreshold", segmentation.start > 0.9 ? 0.9 : segmentation.start);
+    lat_->configure("stopAttackThreshold", 1.0);
     lat_->input("signal").set(envelopeBuffer);
     lat_->output("logAttackTime").set(latUnused);
     lat_->output("attackStart").set(windowStart);
@@ -371,7 +372,7 @@ void FeatureAnalysis::computeSegmentPool(std::vector<Real>& buffer, TimeSegmenta
     envelope_->compute();
     lat_->compute();
     
-    windowStart = segmentation.start > 0.9 ? windowEnd : windowStart;
+    windowStart = segmentation.start >= 0.9 ? windowEnd : windowStart;
     
     if (segmentation.length > 0)
     {
