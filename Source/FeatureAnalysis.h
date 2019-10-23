@@ -65,6 +65,7 @@ private:
     void computeSampleStartAndStopTime(Sample::Ptr sample, std::vector<Real>& buffer);
     void trimAudioBuffer(std::vector<Real>& buffer, Real startTrim, Real endTrim);
     void computeTemporalFeatures(std::vector<Real>& buffer, Pool& pool);
+    Real computeRMS(std::vector<Real>& buffer);
     void computeSpectralEqLoudFeatures(std::vector<Real>& buffer, Pool& pool);
     void computeSpectralFeatures(std::vector<Real>& buffer, Pool& pool);
     void computeSegmentPool(std::vector<Real>& buffer, TimeSegmentation& segmentation, Pool& inputPool, Pool& outputPool);

@@ -17,6 +17,7 @@ SampleAnalysis::SampleAnalysis(const DBConnector& db) : Thread("Sample Analysis 
     analysis_ = nullptr;
     
     // Time segmentations to run
+    segmentations_.add(new TimeSegmentation());
     segmentations_.add(new TimeSegmentation(.20, .025));
     segmentations_.add(new TimeSegmentation(.20, .1));
     segmentations_.add(new TimeSegmentation(.20, .25));

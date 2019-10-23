@@ -191,6 +191,8 @@ void FeatureAnalysis::computeTemporalFeatures(std::vector<Real>& buffer, Pool &p
     Real attackStop;
     Real tc;
     
+    Real rms = computeRMS(buffer);
+    
     envelope_->input("signal").set(buffer);
     envelope_->output("signal").set(envelopeBuffer);
     lat_->input("signal").set(envelopeBuffer);
@@ -206,8 +208,21 @@ void FeatureAnalysis::computeTemporalFeatures(std::vector<Real>& buffer, Pool &p
     lat_->compute();
     centroid_->compute();
     
-    pool.add("lat", lat);
-    pool.add("temporal_centroid", tc);
+    pool.set("lat", lat);
+    pool.set("temporal_centroid", tc);
+    pool.set("rms", rms);
+}
+
+
+Real FeatureAnalysis::computeRMS(std::vector<Real> &buffer)
+{
+    // Calculat RMS on trimmed sample
+    Real rms;
+    rms_->input("array").set(buffer);
+    rms_->output("rms").set(rms);
+    rms_->compute();
+    rms = 20*log10(rms);
+    return rms;
 }
 
 
@@ -348,6 +363,13 @@ void FeatureAnalysis::computeSpectralFeatures(std::vector<Real> &buffer, Pool &p
 
 void FeatureAnalysis::computeSegmentPool(std::vector<Real>& buffer, TimeSegmentation& segmentation, Pool& inputPool, Pool& outputPool)
 {
+    outputPool = inputPool;
+    
+    // Don't apply segmentation if this is the full sample length
+    if (segmentation.isFullSample) {
+        return;
+    }
+    
     envelope_->reset();
     lat_->reset();
     trimmer_->reset();
@@ -386,15 +408,6 @@ void FeatureAnalysis::computeSegmentPool(std::vector<Real>& buffer, TimeSegmenta
         trimBuffer = buffer;
     }
     
-    // Calculat RMS on trimmed sample
-    Real rms;
-    rms_->input("array").set(trimBuffer);
-    rms_->output("rms").set(rms);
-    rms_->compute();
-    rms = 20*log10(rms);
-    
-    outputPool.add("rms", rms);
-    
     long frameStart = (windowStart * sampleRate_) / hopSize_;
     long frameEnd = ((windowStart + segmentation.length) * sampleRate_) / hopSize_;
     
@@ -403,6 +416,10 @@ void FeatureAnalysis::computeSegmentPool(std::vector<Real>& buffer, TimeSegmenta
     
     segmentPool(inputVectors, outputPool, frameStart, frameEnd);
     segmentPool(input2DVectors, outputPool, frameStart, frameEnd);
+    
+    // Calculat RMS on trimmed sample
+    Real rms = computeRMS(trimBuffer);
+    outputPool.set("rms", rms);
 }
 
 
@@ -431,9 +448,7 @@ void FeatureAnalysis::segmentPool(const std::map<std::string, std::vector<T>> &i
 
 
 void FeatureAnalysis::savePool(Sample::Ptr sample, Pool &pool, TimeSegmentation &segmentation)
-{
-    DBG("Start: " << segmentation.start << " End:" << segmentation.length);
-    
+{    
     // Stats aggregration
     Pool aggrPool;
     
@@ -591,9 +606,9 @@ void FeatureAnalysis::savePool(Sample::Ptr sample, Pool &pool, TimeSegmentation 
     analysis->spectral_skewness_dev = realResults.at("spectral_skewness.stdev");
     analysis->spectral_spread_dev = realResults.at("spectral_spread.stdev");
     
-    analysis->lat = realResults.at("lat.mean");
-    analysis->temporal_centroid = realResults.at("temporal_centroid.mean");
-    analysis->rms = realResults.at("rms.mean");
+    analysis->lat = realResults.at("lat");
+    analysis->temporal_centroid = realResults.at("temporal_centroid");
+    analysis->rms = realResults.at("rms");
     
     analysis->save(db_);
 }

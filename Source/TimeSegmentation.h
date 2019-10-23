@@ -11,9 +11,14 @@
 
 struct TimeSegmentation
 {
-    TimeSegmentation(double s, double l) : start(s), length(l) {};
-    double start;
-    double length;
+    TimeSegmentation() : start(-1.0), length(-1.0), isFullSample(true) {};
+    TimeSegmentation(double s, double l) : start(s), length(l), isFullSample(false) {};
+    
+    const double start;
+    const double length;
+    const bool isFullSample;
 };
+
+
 
 #endif /* TimeSegmentation_h */
