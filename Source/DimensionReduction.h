@@ -72,6 +72,7 @@ private:
     
     struct SampleSegmentation
     {
+        SampleSegmentation() : numSamples(0), segStart(0), segLength(0) {};
         SampleSegmentation(long n, double s, double l) : numSamples(n), segStart(s), segLength(l) {};
         
         long numSamples;
@@ -85,9 +86,11 @@ private:
     // Private Membmer Functions
     void run() override;
     void reduceDimensionality();
-    void loadAllSampleTypes();
+    void loadSampleTypes();
     void loadDataWithMixedSegmentations(SampleType::Ptr type);
     void loadSegmentationsForSampleType(SampleType::Ptr type);
+    void loadAnalysisSamples(const SampleType::Ptr type, const SampleSegmentation& segmentation);
+    void computeFeatureVariance(std::vector<Real>& outputVariance);
     
     void preprocess();
     void pca();

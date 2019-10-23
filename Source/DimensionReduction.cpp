@@ -82,7 +82,7 @@ void DimensionReduction::run()
 
 void DimensionReduction::reduceDimensionality()
 {
-    loadAllSampleTypes();
+    loadSampleTypes();
     for (auto sampleType = sampleTypes_.begin(); sampleType != sampleTypes_.end(); ++sampleType)
     {
         loadDataWithMixedSegmentations(*sampleType);
@@ -90,7 +90,7 @@ void DimensionReduction::reduceDimensionality()
 }
 
 
-void DimensionReduction::loadAllSampleTypes()
+void DimensionReduction::loadSampleTypes()
 {
     String sql = "SELECT * FROM `sample_type`";
     sampleTypes_.clear();
@@ -107,7 +107,39 @@ void DimensionReduction::loadDataWithMixedSegmentations(SampleType::Ptr type)
     if (sampleSegmentations_.size() < 1) return;
     
     // Load samples for each segmentation scheme and then calculate the variance for each feature and store it
+    std::vector<std::pair<SampleSegmentation, std::vector<Real>>> segmentVariances;
     
+    for (auto segmentation = sampleSegmentations_.begin(); segmentation != sampleSegmentations_.end(); ++segmentation)
+    {
+        loadAnalysisSamples(type, *(segmentation->get()));
+        
+        // Calculate and store feature variance for segmentation and sample type
+        std::vector<Real> featureVariance;
+        computeFeatureVariance(featureVariance);
+        segmentVariances.emplace_back(*(segmentation->get()), featureVariance);
+    }
+    
+    if (segmentVariances.size() < 1) return;
+    
+    // Now that we have variance calculations for all features, pick a segmentation for each feature that
+    // expressed the most variance for the sample set
+    std::vector<SampleSegmentation> featureSegmentations(segmentVariances[0].second.size());
+    for (int i = 0; i < featureSegmentations.size(); ++i)
+    {
+        SampleSegmentation topVarianceSegmentation;
+        Real topVariance = 0.0;
+        
+        for (auto segmentVariance = segmentVariances.begin(); segmentVariance != segmentVariances.end(); ++segmentVariance)
+        {
+            if (segmentVariance->second.at(i) > topVariance)
+            {
+                topVariance = segmentVariance->second.at(i);
+                topVarianceSegmentation = segmentVariance->first;
+            }
+        }
+        
+        featureSegmentations[i] = topVarianceSegmentation;
+    }
 }
 
 void DimensionReduction::loadSegmentationsForSampleType(SampleType::Ptr type)
@@ -122,6 +154,65 @@ void DimensionReduction::loadSegmentationsForSampleType(SampleType::Ptr type)
     {
         throw "Unable to retrieve segmentations for sample type";
     }
+}
+
+
+void DimensionReduction::loadAnalysisSamples(const SampleType::Ptr type, const SampleSegmentation& segmentation)
+{
+    // Get all samples for a sample type & segmentation
+    String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
+    "WHERE s.sample_type = " + String(type->getId()) + \
+    " AND a.start = " + String(segmentation.segStart) + \
+    " AND a.length = " + String(segmentation.segLength) + \
+    " AND s.exclude = 0;";
+    
+    analysisMatrix_.clear();
+    sampleOrder_.clear();
+    if (!db_.runCommand(sql, selectAnalysisPoolCallback, this))
+    {
+        throw "Failed loading analysis samples for " + type->getName();
+    }
+}
+
+
+void DimensionReduction::computeFeatureVariance(std::vector<Real> &outputVariance)
+{
+    outputVariance.clear();
+    if (analysisMatrix_.size() < 1) return;
+    
+    size_t numSamples = analysisMatrix_.size();
+    size_t numFeatures = analysisMatrix_[0].size();
+    std::vector<Real> mean(numFeatures, 0.0);
+    
+    // Accumulate values for all features
+    for (int i = 0; i < numSamples; ++i)
+    {
+        for (int j = 0; j < numFeatures; j++)
+        {
+            mean[j] += analysisMatrix_[i][j];
+        }
+    }
+
+    // Divide each by the number of samples
+    std::for_each(mean.begin(), mean.end(), [numSamples](Real& value) { value = value / numSamples; });
+    
+    // Initialize the output variance vector
+    outputVariance.resize(numFeatures);
+    std::fill(outputVariance.begin(), outputVariance.end(), 0.0);
+    
+    // Calculation of variation for each feature
+    for (int i = 0; i < numSamples; ++i)
+    {
+        for (int j = 0; j < numFeatures; j++)
+        {
+            Real varCalc = analysisMatrix_[i][j] - mean[j];
+            varCalc *= varCalc;
+            outputVariance[j] += varCalc;
+        }
+    }
+    
+    // Divide each feature variance calculation by the number of samples
+    std::for_each(outputVariance.begin(), outputVariance.end(), [numSamples](Real& value) { value = value / numSamples; });
 }
 
 
