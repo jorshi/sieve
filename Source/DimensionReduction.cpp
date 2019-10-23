@@ -17,8 +17,8 @@ DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCou
     Thread("Dimension Reduction Thread"), db_(db), sampleFolders_(f)
 {
 
-    sampleClasses_.add(new SampleClassPCA(1, 0.2, 0.5));   // Kick Drum PCA Segmentations
-    sampleClasses_.add(new SampleClassPCA(2, 0.2, 0.5));   // Snare Drum PCA Segmentations
+    sampleClasses_.add(new SampleTypeAndSegmentation(1, 0.2, 0.5));   // Kick Drum PCA Segmentations
+    sampleClasses_.add(new SampleTypeAndSegmentation(2, 0.2, 0.5));   // Snare Drum PCA Segmentations
     
     essentia::init();
     AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -62,12 +62,10 @@ void DimensionReduction::run()
             // Clean up the sample reduction table
             db_.runCommand("DELETE FROM `samples_reduced`;");
             
-            // TODO: Should check for a success - return a boolean
             try {
-                //pca();
-                tsne();
+                reduceDimensionality();
             } catch (std::exception& e) {
-                //std::cout << e.what() << "\n";
+                DBG(e.what());
             }
             
             if (threadShouldExit()) break;
@@ -80,6 +78,52 @@ void DimensionReduction::run()
         wait(1000);
     }
 }
+
+
+void DimensionReduction::reduceDimensionality()
+{
+    loadAllSampleTypes();
+    for (auto sampleType = sampleTypes_.begin(); sampleType != sampleTypes_.end(); ++sampleType)
+    {
+        loadDataWithMixedSegmentations(*sampleType);
+    }
+}
+
+
+void DimensionReduction::loadAllSampleTypes()
+{
+    String sql = "SELECT * FROM `sample_type`";
+    sampleTypes_.clear();
+    if (!db_.runCommand(sql, selectSampleTypeCallback, this))
+    {
+        throw "Unable to retrieve sample types";
+    }
+}
+
+void DimensionReduction::loadDataWithMixedSegmentations(SampleType::Ptr type)
+{
+    loadSegmentationsForSampleType(type);
+    
+    if (sampleSegmentations_.size() < 1) return;
+    
+    // Load samples for each segmentation scheme and then calculate the variance for each feature and store it
+    
+}
+
+void DimensionReduction::loadSegmentationsForSampleType(SampleType::Ptr type)
+{
+    String sql = "SELECT count(*) as num_samples, a.start, a.length " \
+        "FROM analysis a JOIN samples s ON a.sample_id = s.id " \
+        "WHERE s.sample_type = " + String(type->getId()) + " " \
+        "group by a.start, a.length;";
+    
+    sampleSegmentations_.clear();
+    if (!db_.runCommand(sql, selectSampleSegmentationCallback, this))
+    {
+        throw "Unable to retrieve segmentations for sample type";
+    }
+}
+
 
 void DimensionReduction::preprocess() {
     

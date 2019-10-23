@@ -19,6 +19,7 @@
 
 #include "Sample.h"
 #include "SampleFolder.h"
+#include "SampleType.h"
 #include "dbConnector.h"
 #include "FeatureAnalysis.h"
 #include "AnalysisObject.h"
@@ -45,6 +46,9 @@ private:
     ReferenceCountedArray<Sample> samples_;
     ReferenceCountedArray<AnalysisObject> analyses_;
     
+    // List of sample types from DB
+    ReferenceCountedArray<SampleType> sampleTypes_;
+    
     // Essentia Pool object for storing matrix of analyses prior to PCA
     std::vector<std::vector<Real>> analysisMatrix_;
     std::vector<int> sampleOrder_;
@@ -57,22 +61,74 @@ private:
     ScopedPointer<TSNE> tsne_;
     
     // Struct for keeping track of the different sample types and the specific segmentation to use
-    struct SampleClassPCA
+    struct SampleTypeAndSegmentation
     {
-        SampleClassPCA(int t, double s, double l) : sampleType(t), segStart(s), segLength(l) {};
+        SampleTypeAndSegmentation(int t, double s, double l) : sampleType(t), segStart(s), segLength(l) {};
         
         int sampleType;
         double segStart;
         double segLength;
     };
     
-    OwnedArray<SampleClassPCA> sampleClasses_;
+    struct SampleSegmentation
+    {
+        SampleSegmentation(long n, double s, double l) : numSamples(n), segStart(s), segLength(l) {};
+        
+        long numSamples;
+        double segStart;
+        double segLength;
+    };
     
+    OwnedArray<SampleTypeAndSegmentation> sampleClasses_;
+    std::vector<std::unique_ptr<SampleSegmentation>> sampleSegmentations_;
+    
+    // Private Membmer Functions
     void run() override;
+    void reduceDimensionality();
+    void loadAllSampleTypes();
+    void loadDataWithMixedSegmentations(SampleType::Ptr type);
+    void loadSegmentationsForSampleType(SampleType::Ptr type);
+    
     void preprocess();
     void pca();
     void tsne();
     void setupTsne();
+    
+    
+    
+    //===========================================================
+    // Static DB Callbacks
+    
+    // Static callback for a select sample type query
+    static int selectSampleTypeCallback(void *param, int argc, char **argv, char **azCol)
+    {
+        DimensionReduction* parent = reinterpret_cast<DimensionReduction*>(param);
+        if (argc == 2)
+        {
+            SampleType::Ptr newSampleType = new SampleType(atoi(argv[0]),
+                                                           String(CharPointer_UTF8(argv[1]))
+                                                           );
+            
+            parent->sampleTypes_.add(newSampleType);
+        }
+        return 0;
+    }
+    
+    
+    // Static callback for a select sample segmentation query
+    static int selectSampleSegmentationCallback(void *param, int argc, char **argv, char **azCol)
+    {
+        DimensionReduction* parent = reinterpret_cast<DimensionReduction*>(param);
+        if (argc == 3)
+        {
+            parent->sampleSegmentations_.emplace_back(new SampleSegmentation(atol(argv[0]),
+                                                                             atof(argv[1]),
+                                                                             atof(argv[2])
+                                                                             )
+                                                      );
+        }
+        return 0;
+    }
     
     
     // Static callback for a select sample query

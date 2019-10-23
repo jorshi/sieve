@@ -41,7 +41,7 @@ bool DBConnector::runCommand(juce::String command, int (*callbackFunc)(void *, i
     
     if (rc != SQLITE_OK)
     {
-        //std::cout << "SQL ERROR: " << zErrMsg << "\n";
+        DBG("SQL ERROR: " << zErrMsg << "\n");
         return false;
     }
     
