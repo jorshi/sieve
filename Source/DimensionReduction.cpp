@@ -86,6 +86,7 @@ void DimensionReduction::reduceDimensionality()
     for (auto sampleType = sampleTypes_.begin(); sampleType != sampleTypes_.end(); ++sampleType)
     {
         loadDataWithMixedSegmentations(*sampleType);
+        tsne();
     }
 }
 
@@ -124,6 +125,8 @@ void DimensionReduction::loadDataWithMixedSegmentations(SampleType::Ptr type)
     // Now that we have variance calculations for all features, pick a segmentation for each feature that
     // expressed the most variance for the sample set
     std::vector<SampleSegmentation> featureSegmentations(segmentVariances[0].second.size());
+    
+    
     for (int i = 0; i < featureSegmentations.size(); ++i)
     {
         SampleSegmentation topVarianceSegmentation;
@@ -140,6 +143,8 @@ void DimensionReduction::loadDataWithMixedSegmentations(SampleType::Ptr type)
         
         featureSegmentations[i] = topVarianceSegmentation;
     }
+    
+    constructMixedTimeSegmentationAnalysisMatrix(type, featureSegmentations);
 }
 
 void DimensionReduction::loadSegmentationsForSampleType(SampleType::Ptr type)
@@ -213,6 +218,55 @@ void DimensionReduction::computeFeatureVariance(std::vector<Real> &outputVarianc
     
     // Divide each feature variance calculation by the number of samples
     std::for_each(outputVariance.begin(), outputVariance.end(), [numSamples](Real& value) { value = value / numSamples; });
+}
+
+
+void DimensionReduction::constructMixedTimeSegmentationAnalysisMatrix(const SampleType::Ptr type, const std::vector<SampleSegmentation> &featureSegmentations)
+{
+    // Get a mapping of all unique segmentations and the features that are associated with that
+    std::map<SampleSegmentation, std::vector<int>> featuresForSegmentations;
+    for (int i = 0; i < featureSegmentations.size(); ++i)
+    {
+        const SampleSegmentation& segmentation = featureSegmentations[i];
+        auto foundSegmentation = featuresForSegmentations.find(segmentation);
+        
+        if (foundSegmentation != featuresForSegmentations.end())
+        {
+            featuresForSegmentations.at(segmentation).push_back(i);
+        }
+        else
+        {
+            featuresForSegmentations.insert(std::pair<SampleSegmentation, std::vector<int>>(segmentation, std::vector<int>(1,i)));
+        }
+    }
+    
+    std::vector<std::vector<Real>> mixedTimeAnalysisMatrix;
+    for (auto segment = featuresForSegmentations.begin(); segment != featuresForSegmentations.end(); ++segment)
+    {
+        loadAnalysisSamples(type, segment->first);
+        copyFeaturesFromAnalysisMatrix(segment->second, mixedTimeAnalysisMatrix);
+    }
+    
+    analysisMatrix_ = mixedTimeAnalysisMatrix;
+}
+
+
+void DimensionReduction::copyFeaturesFromAnalysisMatrix(const std::vector<int> &featureList, std::vector<std::vector<Real> > &outputMatrix)
+{
+    // Initialize output matrix
+    if (outputMatrix.size() == 0)
+    {
+        outputMatrix = analysisMatrix_;
+    }
+    
+    for (int i = 0; i < outputMatrix.size(); ++i)
+    {
+        for (auto feature = featureList.begin(); feature != featureList.end(); ++feature)
+        {
+            outputMatrix[i][*feature] = analysisMatrix_[i][*feature];
+        }
+    }
+    
 }
 
 
@@ -322,96 +376,78 @@ void DimensionReduction::pca()
 
 void DimensionReduction::tsne()
 {
-    for (auto sampleClass = sampleClasses_.begin(); sampleClass != sampleClasses_.end(); ++sampleClass)
-    {
-        if (!threadShouldExit())
-        {
-            
-            // Get all samples for a sample type
-            String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
-            "WHERE s.sample_type = " + String((*sampleClass)->sampleType) + \
-            " AND a.start = " + String((*sampleClass)->segStart) + \
-            " AND a.length = " + String((*sampleClass)->segLength) + \
-            " AND s.exclude = 0;";
-            
-            analysisMatrix_.clear();
-            sampleOrder_.clear();
-            if (!db_.runCommand(sql, selectAnalysisPoolCallback, this)) return;
-            
-            // Standardize data through preprocess
-            if (analysisMatrix_.size() < 1) return;
-            preprocess();
-            
-            // Check to see if we need to exit the thread
-            if (threadShouldExit()) return;
-            
-            // Define some variables
-            int origN, N, D, no_dims, max_iter;
-            double perplexity, theta, *data;
-            int rand_seed = -1;
-            
-            // Number of data points
-            origN = (int)analysisMatrix_.size();
-            
-            // Dimensions
-            D = (int)analysisMatrix_[0].size();
-            no_dims = 2;
-            
-            // TSNE Settings
-            max_iter = 1000;
-            theta = 0.5;
-            perplexity = 50;
-            if (origN-1 < 3*perplexity) {
-                perplexity = std::floor((origN-1) / 3);
-            }
-            
-            // Create some space for the data
-            data = (double*) malloc(origN * D * sizeof(double));
-            if(!data) { //std::cerr << "Failed to allocate memory!"; return;
-                
-            }
-            
-            double* dataPtr = data;
-            for (int j = 0; j < analysisMatrix_.size(); j++) {
-                for (int k = 0; k < analysisMatrix_[j].size(); k++) {
-                    *dataPtr = (double)analysisMatrix_[j][k];
-                    ++dataPtr;
-                }
-            }
-            
-            N = origN;
-            // Now fire up the SNE implementation
-            double* Y = (double*) malloc(N * no_dims * sizeof(double));
-            double* costs = (double*) calloc(N, sizeof(double));
-            if(Y == NULL || costs == NULL) { //std::cerr << "Memory allocation failed!"; exit(1);
-                
-            }
-            try {
-                tsne_->run(data, N, D, Y, no_dims, perplexity, theta, rand_seed, false, max_iter);
-            } catch (std::exception& e) {
-                //std::cout << e.what() << "\n";
-            }
-            
-            // Save the new reduced dimensions for each sample
-            SampleReduced::Ptr newSampleRedux;
-            if (threadShouldExit()) return;
-
-            int i = 0;
-            for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId)
-            {
-                double dim1 = Y[i];
-                double dim2 = Y[i + 1];
-                i += 2;
-                
-                newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
-                newSampleRedux->save(db_);
-            }
-            
-            // Clean up the memory
-            free(data); data = NULL;
-            free(Y); Y = NULL;
-            free(costs); costs = NULL;
+    // Standardize data through preprocess
+    if (analysisMatrix_.size() < 1) return;
+    preprocess();
+    
+    // Check to see if we need to exit the thread
+    if (threadShouldExit()) return;
+    
+    // Define some variables
+    int origN, N, D, no_dims, max_iter;
+    double perplexity, theta, *data;
+    int rand_seed = -1;
+    
+    // Number of data points
+    origN = (int)analysisMatrix_.size();
+    
+    // Dimensions
+    D = (int)analysisMatrix_[0].size();
+    no_dims = 2;
+    
+    // TSNE Settings
+    max_iter = 1000;
+    theta = 0.5;
+    perplexity = 50;
+    if (origN-1 < 3*perplexity) {
+        perplexity = std::floor((origN-1) / 3);
+    }
+    
+    // Create some space for the data
+    data = (double*) malloc(origN * D * sizeof(double));
+    if(!data) { //std::cerr << "Failed to allocate memory!"; return;
+        
+    }
+    
+    double* dataPtr = data;
+    for (int j = 0; j < analysisMatrix_.size(); j++) {
+        for (int k = 0; k < analysisMatrix_[j].size(); k++) {
+            *dataPtr = (double)analysisMatrix_[j][k];
+            ++dataPtr;
         }
     }
+    
+    N = origN;
+    // Now fire up the SNE implementation
+    double* Y = (double*) malloc(N * no_dims * sizeof(double));
+    double* costs = (double*) calloc(N, sizeof(double));
+    if(Y == NULL || costs == NULL) { //std::cerr << "Memory allocation failed!"; exit(1);
+        
+    }
+    try {
+        tsne_->run(data, N, D, Y, no_dims, perplexity, theta, rand_seed, false, max_iter);
+    } catch (std::exception& e) {
+        //std::cout << e.what() << "\n";
+    }
+    
+    // Save the new reduced dimensions for each sample
+    SampleReduced::Ptr newSampleRedux;
+    if (threadShouldExit()) return;
+
+    int i = 0;
+    for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId)
+    {
+        double dim1 = Y[i];
+        double dim2 = Y[i + 1];
+        i += 2;
+        
+        newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
+        newSampleRedux->save(db_);
+    }
+    
+    // Clean up the memory
+    free(data); data = NULL;
+    free(Y); Y = NULL;
+    free(costs); costs = NULL;
 }
 

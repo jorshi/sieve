@@ -75,10 +75,21 @@ private:
         SampleSegmentation() : numSamples(0), segStart(0), segLength(0) {};
         SampleSegmentation(long n, double s, double l) : numSamples(n), segStart(s), segLength(l) {};
         
+        friend bool operator <(const SampleSegmentation& l, const SampleSegmentation& r)
+        {
+            return std::tie(l.segStart, l.segLength) < std::tie(r.segStart, r.segLength);
+        }
+        
+        friend bool operator ==(const SampleSegmentation& l, const SampleSegmentation& r)
+        {
+            return std::tie(l.segStart, l.segLength) == std::tie(r.segStart, r.segLength);
+        }
+        
         long numSamples;
         double segStart;
         double segLength;
     };
+    
     
     OwnedArray<SampleTypeAndSegmentation> sampleClasses_;
     std::vector<std::unique_ptr<SampleSegmentation>> sampleSegmentations_;
@@ -91,6 +102,8 @@ private:
     void loadSegmentationsForSampleType(SampleType::Ptr type);
     void loadAnalysisSamples(const SampleType::Ptr type, const SampleSegmentation& segmentation);
     void computeFeatureVariance(std::vector<Real>& outputVariance);
+    void constructMixedTimeSegmentationAnalysisMatrix(const SampleType::Ptr type, const std::vector<SampleSegmentation>& featureSegmentations);
+    void copyFeaturesFromAnalysisMatrix(const std::vector<int>& featureList, std::vector<std::vector<Real>>& outputMatrix);
     
     void preprocess();
     void pca();
