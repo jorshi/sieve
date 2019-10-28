@@ -53,7 +53,7 @@ SampleManager::~SampleManager()
 
 void SampleManager::setupTypes()
 {
-    Array<String> defaultTypes = {"kick", "snare"};
+    Array<String> defaultTypes = {"kick", "snare", "all"};
     SampleType::Ptr newType;
     
     // Load default sample types. If they don't exist in the database yet then create

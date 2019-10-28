@@ -43,6 +43,7 @@ ControlComponent::ControlComponent(SampleManager* s) : sampleManager(s)
     typeCombo = new ComboBox("type_combo");
     typeCombo->addItem("Kicks", 1);
     typeCombo->addItem("Snares", 2);
+    typeCombo->addItem("All", 3);
     addAndMakeVisible(typeCombo);
     
     parentSample = nullptr;
