@@ -104,7 +104,7 @@ std::vector<std::pair<std::vector<int>, int>> Mapping::cluster(std::vector<std::
     arma::Row<size_t> assignments;
     arma::mat centroids;
     
-    KMeans<> k;
+    KMeans<> k(10000);
     k.Cluster(data, clusters, assignments, centroids);
     
     std::vector<std::pair<std::vector<int>, int>> clusterSamples(64);
@@ -118,17 +118,18 @@ std::vector<std::pair<std::vector<int>, int>> Mapping::cluster(std::vector<std::
     // Figure out the representive sample for this cluster
     for (int i = 0; i < 64; i++)
     {
-        if (clusterSamples.at(i).first.size() < 1)
+        const size_t clusterSize = clusterSamples.at(i).first.size();
+        if (clusterSize < 1)
             continue;
         
-        if (clusterSamples.at(i).first.size() == 1)
+        if (clusterSize == 1)
         {
             clusterSamples.at(i).second = clusterSamples.at(i).first.at(0);
             continue;
         }
         
-        arma::mat subsetData(2, clusterSamples.at(i).first.size());
-        for (int j = 0; j < clusterSamples.at(i).first.size(); j++)
+        arma::mat subsetData(2, clusterSize);
+        for (int j = 0; j < clusterSize; j++)
         {
             subsetData(0, j) = data(0, clusterSamples.at(i).first.at(j));
             subsetData(1, j) = data(1, clusterSamples.at(i).first.at(j));
@@ -142,8 +143,8 @@ std::vector<std::pair<std::vector<int>, int>> Mapping::cluster(std::vector<std::
         arma::mat centroidMat(2, 1);
         centroidMat(0,0) = centroids(0,i);
         centroidMat(1,0) = centroids(1,i);
-    
-        knn.Search(centroids, 1, resultingNeighbors, resultingDistances);
+        
+        knn.Search(centroidMat, clusterSize, resultingNeighbors, resultingDistances);
         clusterSamples.at(i).second =  clusterSamples.at(i).first.at(resultingNeighbors[0]);
     }
     

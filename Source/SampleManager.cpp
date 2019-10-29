@@ -53,7 +53,7 @@ SampleManager::~SampleManager()
 
 void SampleManager::setupTypes()
 {
-    Array<String> defaultTypes = {"kick", "snare"};
+    Array<String> defaultTypes = {"kick", "snare", "all"};
     SampleType::Ptr newType;
     
     // Load default sample types. If they don't exist in the database yet then create
@@ -105,11 +105,17 @@ void SampleManager::updateGrid(const int &sampleType)
 {
     String sql = "SELECT r.*, s.* FROM `samples_reduced` r " \
         "JOIN samples s ON s.id = r.sample_id " \
-        "WHERE s.sample_type = " + String(sampleType) + ";";
+        "WHERE r.sample_type = " + String(sampleType) + ";";
     
     samplesReduced_.clear();
     if (db_.runCommand(sql, selectSamplesReducedCallback, this))
     {
+        // If no samples - then clear grid and return
+        if (samplesReduced_.size() < 1)
+        {
+            clear();
+            return;
+        }
         
         double x;
         double y;

@@ -19,6 +19,7 @@
 
 #include "Sample.h"
 #include "SampleFolder.h"
+#include "SampleType.h"
 #include "dbConnector.h"
 #include "FeatureAnalysis.h"
 #include "AnalysisObject.h"
@@ -26,6 +27,7 @@
 #include "tsne.h"
 
 
+static const bool USE_MIXED_TIME_SEGMENTATIONS = true;
 
 
 class DimensionReduction : private Thread
@@ -45,6 +47,9 @@ private:
     ReferenceCountedArray<Sample> samples_;
     ReferenceCountedArray<AnalysisObject> analyses_;
     
+    // List of sample types from DB
+    ReferenceCountedArray<SampleType> sampleTypes_;
+    
     // Essentia Pool object for storing matrix of analyses prior to PCA
     std::vector<std::vector<Real>> analysisMatrix_;
     std::vector<int> sampleOrder_;
@@ -56,23 +61,80 @@ private:
     // TSNE Algorithm
     ScopedPointer<TSNE> tsne_;
     
-    // Struct for keeping track of the different sample types and the specific segmentation to use
-    struct SampleClassPCA
+    struct SampleSegmentation
     {
-        SampleClassPCA(int t, double s, double l) : sampleType(t), segStart(s), segLength(l) {};
+        SampleSegmentation() : numSamples(0), segStart(0), segLength(0) {};
+        SampleSegmentation(long n, double s, double l) : numSamples(n), segStart(s), segLength(l) {};
         
-        int sampleType;
+        friend bool operator <(const SampleSegmentation& l, const SampleSegmentation& r)
+        {
+            return std::tie(l.segStart, l.segLength) < std::tie(r.segStart, r.segLength);
+        }
+        
+        friend bool operator ==(const SampleSegmentation& l, const SampleSegmentation& r)
+        {
+            return std::tie(l.segStart, l.segLength) == std::tie(r.segStart, r.segLength);
+        }
+        
+        long numSamples;
         double segStart;
         double segLength;
     };
     
-    OwnedArray<SampleClassPCA> sampleClasses_;
+    std::vector<std::unique_ptr<SampleSegmentation>> sampleSegmentations_;
     
+    // Private Membmer Functions
     void run() override;
+    void reduceDimensionality();
+    void loadSampleTypes();
+    void loadDataWithSegmentation(SampleType::Ptr, SampleSegmentation& segmentation);
+    void loadDataWithMixedSegmentations(SampleType::Ptr type);
+    void loadSegmentationsForSampleType(SampleType::Ptr type);
+    void loadAnalysisSamples(const SampleType::Ptr type, const SampleSegmentation& segmentation);
+    void computeFeatureVariance(std::vector<Real>& outputVariance);
+    void constructMixedTimeSegmentationAnalysisMatrix(const SampleType::Ptr type, const std::vector<SampleSegmentation>& featureSegmentations);
+    void copyFeaturesFromAnalysisMatrix(const std::vector<int>& featureList, std::vector<std::vector<Real>>& outputMatrix);
+    
     void preprocess();
-    void pca();
-    void tsne();
+    void pca(const SampleType::Ptr type);
+    void tsne(const SampleType::Ptr type);
     void setupTsne();
+    
+    
+    
+    //===========================================================
+    // Static DB Callbacks
+    
+    // Static callback for a select sample type query
+    static int selectSampleTypeCallback(void *param, int argc, char **argv, char **azCol)
+    {
+        DimensionReduction* parent = reinterpret_cast<DimensionReduction*>(param);
+        if (argc == 2)
+        {
+            SampleType::Ptr newSampleType = new SampleType(atoi(argv[0]),
+                                                           String(CharPointer_UTF8(argv[1]))
+                                                           );
+            
+            parent->sampleTypes_.add(newSampleType);
+        }
+        return 0;
+    }
+    
+    
+    // Static callback for a select sample segmentation query
+    static int selectSampleSegmentationCallback(void *param, int argc, char **argv, char **azCol)
+    {
+        DimensionReduction* parent = reinterpret_cast<DimensionReduction*>(param);
+        if (argc == 3)
+        {
+            parent->sampleSegmentations_.emplace_back(new SampleSegmentation(atol(argv[0]),
+                                                                             atof(argv[1]),
+                                                                             atof(argv[2])
+                                                                             )
+                                                      );
+        }
+        return 0;
+    }
     
     
     // Static callback for a select sample query

@@ -41,7 +41,7 @@ bool DBConnector::runCommand(juce::String command, int (*callbackFunc)(void *, i
     
     if (rc != SQLITE_OK)
     {
-        //std::cout << "SQL ERROR: " << zErrMsg << "\n";
+        DBG("SQL ERROR: " << zErrMsg << "\n");
         return false;
     }
     
@@ -96,6 +96,7 @@ void DBConnector::setupTables()
     String sqlReducedDimension = "CREATE TABLE IF NOT EXISTS `samples_reduced` ( " \
         "`id` INTEGER PRIMARY KEY, " \
         "`sample_id` INT(11) NOT NULL, " \
+        "`sample_type` INT(11) NOT NULL, " \
         "`dim_1` DOUBLE NOT NULL, " \
         "`dim_2` DOUBLE NOT NULL, " \
         "FOREIGN KEY (`sample_id`) REFERENCES `samples` (`id`) ON DELETE CASCADE " \
@@ -239,7 +240,7 @@ void DBConnector::setupTables()
         "lat DOUBLE, " \
         "temporal_centroid DOUBLE, " \
         "rms DOUBLE, " \
-        "UNIQUE (`sample_id`, `sample_id`, `length`), " \
+        "UNIQUE (`sample_id`, `start`, `length`), " \
         "FOREIGN KEY (`sample_id`) REFERENCES `samples` (`id`) ON DELETE CASCADE " \
         ");";
         

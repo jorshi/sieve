@@ -16,6 +16,7 @@
 
 #include "Sample.h"
 #include "AnalysisObject.h"
+#include "TimeSegmentation.h"
 #include "dbConnector.h"
 
 using namespace essentia;
@@ -33,7 +34,7 @@ public:
     
     // Function call operator to run analysis
     void run();
-    void run(Sample::Ptr sample, AnalysisObject::Ptr analysis, double segStart=0, double segLength=0);
+    void run(Sample::Ptr sample, OwnedArray<TimeSegmentation>& segmentations);
     
 private:
     
@@ -58,7 +59,21 @@ private:
     Algorithm* trimmer_;
     Algorithm* rms_;
     
+    // Private Functions
+    void resetFactoryAlgorithms();
+    void loadAudio(Sample::Ptr sample, std::vector<Real>& buffer, Algorithm* loader);
+    void computeSampleStartAndStopTime(Sample::Ptr sample, std::vector<Real>& buffer);
+    void trimAudioBuffer(std::vector<Real>& buffer, Real startTrim, Real endTrim);
+    void computeTemporalFeatures(std::vector<Real>& buffer, Pool& pool);
+    Real computeRMS(std::vector<Real>& buffer);
+    void computeSpectralEqLoudFeatures(std::vector<Real>& buffer, Pool& pool);
+    void computeSpectralFeatures(std::vector<Real>& buffer, Pool& pool);
+    void computeSegmentPool(std::vector<Real>& buffer, TimeSegmentation& segmentation, Pool& inputPool, Pool& outputPool);
+    
+    template<typename T>
+    void segmentPool(const std::map<std::string, std::vector<T>>& inputFeatures, Pool& outputPool, long startFrame, long endFrame);
+    
+    void savePool(Sample::Ptr sample, Pool& pool, TimeSegmentation& segmentation);
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FeatureAnalysis)
-    
-    
 };

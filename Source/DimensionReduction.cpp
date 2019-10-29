@@ -16,10 +16,6 @@ using namespace standard;
 DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCountedArray<SampleFolder>& f) :
     Thread("Dimension Reduction Thread"), db_(db), sampleFolders_(f)
 {
-
-    sampleClasses_.add(new SampleClassPCA(1, 0.2, 0.5));   // Kick Drum PCA Segmentations
-    sampleClasses_.add(new SampleClassPCA(2, 0.2, 0.5));   // Snare Drum PCA Segmentations
-    
     essentia::init();
     AlgorithmFactory& factory = AlgorithmFactory::instance();
     
@@ -38,6 +34,7 @@ DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCou
 
 DimensionReduction::~DimensionReduction()
 {
+    delete pca_;
     stopThread(4000);
 }
 
@@ -62,12 +59,10 @@ void DimensionReduction::run()
             // Clean up the sample reduction table
             db_.runCommand("DELETE FROM `samples_reduced`;");
             
-            // TODO: Should check for a success - return a boolean
             try {
-                //pca();
-                tsne();
+                reduceDimensionality();
             } catch (std::exception& e) {
-                //std::cout << e.what() << "\n";
+                DBG(e.what());
             }
             
             if (threadShouldExit()) break;
@@ -80,6 +75,210 @@ void DimensionReduction::run()
         wait(1000);
     }
 }
+
+
+void DimensionReduction::reduceDimensionality()
+{
+    loadSampleTypes();
+    for (auto sampleType = sampleTypes_.begin(); sampleType != sampleTypes_.end(); ++sampleType)
+    {
+        if (USE_MIXED_TIME_SEGMENTATIONS)
+            loadDataWithMixedSegmentations(*sampleType);
+        
+        else
+            loadAnalysisSamples(*sampleType, SampleSegmentation(0, -1.0, -1.0));
+        
+        if (analysisMatrix_.size() < 1)
+            continue;
+        
+        tsne(*sampleType);
+        analysisMatrix_.clear();
+    }
+}
+
+
+void DimensionReduction::loadSampleTypes()
+{
+    String sql = "SELECT * FROM `sample_type`";
+    sampleTypes_.clear();
+    if (!db_.runCommand(sql, selectSampleTypeCallback, this))
+    {
+        throw "Unable to retrieve sample types";
+    }
+}
+
+
+void DimensionReduction::loadDataWithMixedSegmentations(SampleType::Ptr type)
+{
+    loadSegmentationsForSampleType(type);
+    
+    if (sampleSegmentations_.size() < 1) return;
+    
+    // Load samples for each segmentation scheme and then calculate the variance for each feature and store it
+    std::vector<std::pair<SampleSegmentation, std::vector<Real>>> segmentVariances;
+    
+    for (auto segmentation = sampleSegmentations_.begin(); segmentation != sampleSegmentations_.end(); ++segmentation)
+    {
+        loadAnalysisSamples(type, *(segmentation->get()));
+        
+        // Calculate and store feature variance for segmentation and sample type
+        std::vector<Real> featureVariance;
+        computeFeatureVariance(featureVariance);
+        segmentVariances.emplace_back(*(segmentation->get()), featureVariance);
+    }
+    
+    if (segmentVariances.size() < 1) return;
+    
+    // Now that we have variance calculations for all features, pick a segmentation for each feature that
+    // expressed the most variance for the sample set
+    std::vector<SampleSegmentation> featureSegmentations(segmentVariances[0].second.size());
+    
+    
+    for (int i = 0; i < featureSegmentations.size(); ++i)
+    {
+        SampleSegmentation topVarianceSegmentation;
+        Real topVariance = 0.0;
+        
+        for (auto segmentVariance = segmentVariances.begin(); segmentVariance != segmentVariances.end(); ++segmentVariance)
+        {
+            if (segmentVariance->second.at(i) > topVariance)
+            {
+                topVariance = segmentVariance->second.at(i);
+                topVarianceSegmentation = segmentVariance->first;
+            }
+        }
+        
+        featureSegmentations[i] = topVarianceSegmentation;
+    }
+    
+    constructMixedTimeSegmentationAnalysisMatrix(type, featureSegmentations);
+}
+
+void DimensionReduction::loadSegmentationsForSampleType(SampleType::Ptr type)
+{
+    String sqlWhere = type->getName() == "all" ? " " : ("WHERE s.sample_type = " + String(type->getId()) + " ");
+    
+    String sql = "SELECT count(*) as num_samples, a.start, a.length " \
+    "FROM analysis a JOIN samples s ON a.sample_id = s.id " + \
+    sqlWhere + "group by a.start, a.length;";
+
+    sampleSegmentations_.clear();
+    if (!db_.runCommand(sql, selectSampleSegmentationCallback, this))
+    {
+        throw "Unable to retrieve segmentations for sample type";
+    }
+}
+
+
+void DimensionReduction::loadAnalysisSamples(const SampleType::Ptr type, const SampleSegmentation& segmentation)
+{
+    String sqlType = type->getName() == "all" ? "" : (" AND s.sample_type = " + String(type->getId()));
+    
+    // Get all samples for a sample type & segmentation
+    String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
+    "WHERE a.start = " + String(segmentation.segStart) + \
+    " AND a.length = " + String(segmentation.segLength) + \
+    sqlType + \
+    " AND s.exclude = 0;";
+    
+    analysisMatrix_.clear();
+    sampleOrder_.clear();
+    if (!db_.runCommand(sql, selectAnalysisPoolCallback, this))
+    {
+        throw "Failed loading analysis samples for " + type->getName();
+    }
+}
+
+
+void DimensionReduction::computeFeatureVariance(std::vector<Real> &outputVariance)
+{
+    outputVariance.clear();
+    if (analysisMatrix_.size() < 1) return;
+    
+    size_t numSamples = analysisMatrix_.size();
+    size_t numFeatures = analysisMatrix_[0].size();
+    std::vector<Real> mean(numFeatures, 0.0);
+    
+    // Accumulate values for all features
+    for (int i = 0; i < numSamples; ++i)
+    {
+        for (int j = 0; j < numFeatures; j++)
+        {
+            mean[j] += analysisMatrix_[i][j];
+        }
+    }
+
+    // Divide each by the number of samples
+    std::for_each(mean.begin(), mean.end(), [numSamples](Real& value) { value = value / numSamples; });
+    
+    // Initialize the output variance vector
+    outputVariance.resize(numFeatures);
+    std::fill(outputVariance.begin(), outputVariance.end(), 0.0);
+    
+    // Calculation of variation for each feature
+    for (int i = 0; i < numSamples; ++i)
+    {
+        for (int j = 0; j < numFeatures; j++)
+        {
+            Real varCalc = analysisMatrix_[i][j] - mean[j];
+            varCalc *= varCalc;
+            outputVariance[j] += varCalc;
+        }
+    }
+    
+    // Divide each feature variance calculation by the number of samples
+    std::for_each(outputVariance.begin(), outputVariance.end(), [numSamples](Real& value) { value = value / numSamples; });
+}
+
+
+void DimensionReduction::constructMixedTimeSegmentationAnalysisMatrix(const SampleType::Ptr type, const std::vector<SampleSegmentation> &featureSegmentations)
+{
+    // Get a mapping of all unique segmentations and the features that are associated with that
+    std::map<SampleSegmentation, std::vector<int>> featuresForSegmentations;
+    for (int i = 0; i < featureSegmentations.size(); ++i)
+    {
+        const SampleSegmentation& segmentation = featureSegmentations[i];
+        auto foundSegmentation = featuresForSegmentations.find(segmentation);
+        
+        if (foundSegmentation != featuresForSegmentations.end())
+        {
+            featuresForSegmentations.at(segmentation).push_back(i);
+        }
+        else
+        {
+            featuresForSegmentations.insert(std::pair<SampleSegmentation, std::vector<int>>(segmentation, std::vector<int>(1,i)));
+        }
+    }
+    
+    std::vector<std::vector<Real>> mixedTimeAnalysisMatrix;
+    for (auto segment = featuresForSegmentations.begin(); segment != featuresForSegmentations.end(); ++segment)
+    {
+        loadAnalysisSamples(type, segment->first);
+        copyFeaturesFromAnalysisMatrix(segment->second, mixedTimeAnalysisMatrix);
+    }
+    
+    analysisMatrix_ = mixedTimeAnalysisMatrix;
+}
+
+
+void DimensionReduction::copyFeaturesFromAnalysisMatrix(const std::vector<int> &featureList, std::vector<std::vector<Real> > &outputMatrix)
+{
+    // Initialize output matrix
+    if (outputMatrix.size() == 0)
+    {
+        outputMatrix = analysisMatrix_;
+    }
+    
+    for (int i = 0; i < outputMatrix.size(); ++i)
+    {
+        for (auto feature = featureList.begin(); feature != featureList.end(); ++feature)
+        {
+            outputMatrix[i][*feature] = analysisMatrix_[i][*feature];
+        }
+    }
+    
+}
+
 
 void DimensionReduction::preprocess() {
     
@@ -124,159 +323,125 @@ void DimensionReduction::preprocess() {
 }
 
 
-void DimensionReduction::pca()
+void DimensionReduction::pca(const SampleType::Ptr type)
 {
-    for (auto sampleClass = sampleClasses_.begin(); sampleClass != sampleClasses_.end(); ++sampleClass)
+    if (threadShouldExit()) return;
+
+    // Standardize data through preprocess
+    if (analysisMatrix_.size() < 1) return;
+    preprocess();
+    
+    // Check to see if we need to exit the thread
+    if (threadShouldExit()) return;
+
+    // Pools for Essentia PCA
+    Pool pcaIn;
+    Pool pcaOut;
+    
+    // Store analysis matrix in a pool
+    pcaIn.merge("feature", analysisMatrix_, "replace");
+    
+    // Calculate PCA
+    pca_->reset();
+    pca_->input("poolIn").set(pcaIn);
+    pca_->output("poolOut").set(pcaOut);
+    pca_->compute();
+    
+    // Get principle components out from pool
+    std::map<std::string, std::vector<std::vector<Real>>> output =  pcaOut.getVectorRealPool();
+    
+    // Save the first two components resulting from PCA
+    jassert(output.at("pca").size() == sampleOrder_.size());
+    auto component = output.at("pca").begin();
+    size_t numFeatures = component->size();
+    SampleReduced::Ptr newSampleRedux;
+    
+    if (threadShouldExit()) return;
+    for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId, ++component)
     {
-        if (!threadShouldExit())
-        {
-
-            // Get all samples for a sample type
-            String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
-                "WHERE s.sample_type = " + String((*sampleClass)->sampleType) + \
-                " AND a.start = " + String((*sampleClass)->segStart) + \
-                " AND a.length = " + String((*sampleClass)->segLength) + \
-                " AND s.exclude = 0;";
-
-            analysisMatrix_.clear();
-            sampleOrder_.clear();
-            if (!db_.runCommand(sql, selectAnalysisPoolCallback, this)) return;
-            
-            // Standardize data through preprocess
-            if (analysisMatrix_.size() < 1) return;
-            preprocess();
-            
-            // Check to see if we need to exit the thread
-            if (threadShouldExit()) return;
- 
-            // Pools for Essentia PCA
-            Pool pcaIn;
-            Pool pcaOut;
-            
-            // Store analysis matrix in a pool
-            pcaIn.merge("feature", analysisMatrix_, "replace");
-            
-            // Calculate PCA
-            pca_->reset();
-            pca_->input("poolIn").set(pcaIn);
-            pca_->output("poolOut").set(pcaOut);
-            pca_->compute();
-            
-            // Get principle components out from pool
-            std::map<std::string, std::vector<std::vector<Real>>> output =  pcaOut.getVectorRealPool();
-            
-            // Save the first two components resulting from PCA
-            jassert(output.at("pca").size() == sampleOrder_.size());
-            auto component = output.at("pca").begin();
-            size_t numFeatures = component->size();
-            SampleReduced::Ptr newSampleRedux;
-            
-            if (threadShouldExit()) return;
-            for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId, ++component)
-            {
-                double dim1 = component->at(numFeatures - 1);
-                double dim2 = component->at(numFeatures - 2);
-                
-                newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
-                newSampleRedux->save(db_);
-            }
-        }
+        double dim1 = component->at(numFeatures - 1);
+        double dim2 = component->at(numFeatures - 2);
+        
+        newSampleRedux = new SampleReduced(0, *sampleId, type->getId(), dim1, dim2);
+        newSampleRedux->save(db_);
     }
 }
 
 
-void DimensionReduction::tsne()
+void DimensionReduction::tsne(const SampleType::Ptr type)
 {
-    for (auto sampleClass = sampleClasses_.begin(); sampleClass != sampleClasses_.end(); ++sampleClass)
-    {
-        if (!threadShouldExit())
-        {
-            
-            // Get all samples for a sample type
-            String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
-            "WHERE s.sample_type = " + String((*sampleClass)->sampleType) + \
-            " AND a.start = " + String((*sampleClass)->segStart) + \
-            " AND a.length = " + String((*sampleClass)->segLength) + \
-            " AND s.exclude = 0;";
-            
-            analysisMatrix_.clear();
-            sampleOrder_.clear();
-            if (!db_.runCommand(sql, selectAnalysisPoolCallback, this)) return;
-            
-            // Standardize data through preprocess
-            if (analysisMatrix_.size() < 1) return;
-            preprocess();
-            
-            // Check to see if we need to exit the thread
-            if (threadShouldExit()) return;
-            
-            // Define some variables
-            int origN, N, D, no_dims, max_iter;
-            double perplexity, theta, *data;
-            int rand_seed = -1;
-            
-            // Number of data points
-            origN = (int)analysisMatrix_.size();
-            
-            // Dimensions
-            D = (int)analysisMatrix_[0].size();
-            no_dims = 2;
-            
-            // TSNE Settings
-            max_iter = 1000;
-            theta = 0.5;
-            perplexity = 50;
-            if (origN-1 < 3*perplexity) {
-                perplexity = std::floor((origN-1) / 3);
-            }
-            
-            // Create some space for the data
-            data = (double*) malloc(origN * D * sizeof(double));
-            if(!data) { //std::cerr << "Failed to allocate memory!"; return;
-                
-            }
-            
-            double* dataPtr = data;
-            for (int j = 0; j < analysisMatrix_.size(); j++) {
-                for (int k = 0; k < analysisMatrix_[j].size(); k++) {
-                    *dataPtr = (double)analysisMatrix_[j][k];
-                    ++dataPtr;
-                }
-            }
-            
-            N = origN;
-            // Now fire up the SNE implementation
-            double* Y = (double*) malloc(N * no_dims * sizeof(double));
-            double* costs = (double*) calloc(N, sizeof(double));
-            if(Y == NULL || costs == NULL) { //std::cerr << "Memory allocation failed!"; exit(1);
-                
-            }
-            try {
-                tsne_->run(data, N, D, Y, no_dims, perplexity, theta, rand_seed, false, max_iter);
-            } catch (std::exception& e) {
-                //std::cout << e.what() << "\n";
-            }
-            
-            // Save the new reduced dimensions for each sample
-            SampleReduced::Ptr newSampleRedux;
-            if (threadShouldExit()) return;
-
-            int i = 0;
-            for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId)
-            {
-                double dim1 = Y[i];
-                double dim2 = Y[i + 1];
-                i += 2;
-                
-                newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
-                newSampleRedux->save(db_);
-            }
-            
-            // Clean up the memory
-            free(data); data = NULL;
-            free(Y); Y = NULL;
-            free(costs); costs = NULL;
+    // Standardize data through preprocess
+    if (analysisMatrix_.size() < 1) return;
+    preprocess();
+    
+    // Check to see if we need to exit the thread
+    if (threadShouldExit()) return;
+    
+    // Define some variables
+    int origN, N, D, no_dims, max_iter;
+    double perplexity, theta, *data;
+    int rand_seed = -1;
+    
+    // Number of data points
+    origN = (int)analysisMatrix_.size();
+    
+    // Dimensions
+    D = (int)analysisMatrix_[0].size();
+    no_dims = 2;
+    
+    // TSNE Settings
+    max_iter = 1000;
+    theta = 0.5;
+    perplexity = 50;
+    if (origN-1 < 3*perplexity) {
+        perplexity = std::floor((origN-1) / 3);
+    }
+    
+    // Create some space for the data
+    data = (double*) malloc(origN * D * sizeof(double));
+    if(!data) { //std::cerr << "Failed to allocate memory!"; return;
+        
+    }
+    
+    double* dataPtr = data;
+    for (int j = 0; j < analysisMatrix_.size(); j++) {
+        for (int k = 0; k < analysisMatrix_[j].size(); k++) {
+            *dataPtr = (double)analysisMatrix_[j][k];
+            ++dataPtr;
         }
     }
+    
+    N = origN;
+    // Now fire up the SNE implementation
+    double* Y = (double*) malloc(N * no_dims * sizeof(double));
+    double* costs = (double*) calloc(N, sizeof(double));
+    if(Y == NULL || costs == NULL) { //std::cerr << "Memory allocation failed!"; exit(1);
+        
+    }
+    try {
+        tsne_->run(data, N, D, Y, no_dims, perplexity, theta, rand_seed, false, max_iter);
+    } catch (std::exception& e) {
+        //std::cout << e.what() << "\n";
+    }
+    
+    // Save the new reduced dimensions for each sample
+    SampleReduced::Ptr newSampleRedux;
+    if (threadShouldExit()) return;
+
+    int i = 0;
+    for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId)
+    {
+        double dim1 = Y[i];
+        double dim2 = Y[i + 1];
+        i += 2;
+        
+        newSampleRedux = new SampleReduced(0, *sampleId, type->getId(), dim1, dim2);
+        newSampleRedux->save(db_);
+    }
+    
+    // Clean up the memory
+    free(data); data = NULL;
+    free(Y); Y = NULL;
+    free(costs); costs = NULL;
 }
 

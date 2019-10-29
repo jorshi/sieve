@@ -160,19 +160,19 @@ private:
         SampleManager* manager = reinterpret_cast<SampleManager*>(param);
         
         // This also quered for the associated sample object
-        if (argc == 13)
+        if (argc == 14)
         {
-            SampleReduced::Ptr newSampleReduced = new SampleReduced(atoi(argv[0]), atoi(argv[1]), atof(argv[2]), atof(argv[3]));
+            SampleReduced::Ptr newSampleReduced = new SampleReduced(atoi(argv[0]), atoi(argv[1]), atoi(argv[2]), atof(argv[3]), atof(argv[4]));
             
-            Sample::Ptr newSample = new Sample(atoi(argv[4]),
-                                               String(CharPointer_UTF8(argv[5])),
+            Sample::Ptr newSample = new Sample(atoi(argv[5]),
                                                String(CharPointer_UTF8(argv[6])),
-                                               atof(argv[7]),
+                                               String(CharPointer_UTF8(argv[7])),
                                                atof(argv[8]),
-                                               atoi(argv[9]),
+                                               atof(argv[9]),
                                                atoi(argv[10]),
                                                atoi(argv[11]),
-                                               atoi(argv[12]));
+                                               atoi(argv[12]),
+                                               atoi(argv[13]));
             
             newSampleReduced->setSamplePtr(newSample);
             manager->samplesReduced_.push_back(newSampleReduced);
