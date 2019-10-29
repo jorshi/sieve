@@ -88,6 +88,7 @@ void DimensionReduction::reduceDimensionality()
             loadAnalysisSamples(*sampleType, SampleSegmentation(0, -1.0, -1.0));
         
         tsne();
+        //pca();
     }
 }
 
@@ -317,61 +318,45 @@ void DimensionReduction::preprocess() {
 
 void DimensionReduction::pca()
 {
-    for (auto sampleClass = sampleClasses_.begin(); sampleClass != sampleClasses_.end(); ++sampleClass)
+    if (threadShouldExit()) return;
+
+    // Standardize data through preprocess
+    if (analysisMatrix_.size() < 1) return;
+    preprocess();
+    
+    // Check to see if we need to exit the thread
+    if (threadShouldExit()) return;
+
+    // Pools for Essentia PCA
+    Pool pcaIn;
+    Pool pcaOut;
+    
+    // Store analysis matrix in a pool
+    pcaIn.merge("feature", analysisMatrix_, "replace");
+    
+    // Calculate PCA
+    pca_->reset();
+    pca_->input("poolIn").set(pcaIn);
+    pca_->output("poolOut").set(pcaOut);
+    pca_->compute();
+    
+    // Get principle components out from pool
+    std::map<std::string, std::vector<std::vector<Real>>> output =  pcaOut.getVectorRealPool();
+    
+    // Save the first two components resulting from PCA
+    jassert(output.at("pca").size() == sampleOrder_.size());
+    auto component = output.at("pca").begin();
+    size_t numFeatures = component->size();
+    SampleReduced::Ptr newSampleRedux;
+    
+    if (threadShouldExit()) return;
+    for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId, ++component)
     {
-        if (!threadShouldExit())
-        {
-
-            // Get all samples for a sample type
-            String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
-                "WHERE s.sample_type = " + String((*sampleClass)->sampleType) + \
-                " AND a.start = " + String((*sampleClass)->segStart) + \
-                " AND a.length = " + String((*sampleClass)->segLength) + \
-                " AND s.exclude = 0;";
-
-            analysisMatrix_.clear();
-            sampleOrder_.clear();
-            if (!db_.runCommand(sql, selectAnalysisPoolCallback, this)) return;
-            
-            // Standardize data through preprocess
-            if (analysisMatrix_.size() < 1) return;
-            preprocess();
-            
-            // Check to see if we need to exit the thread
-            if (threadShouldExit()) return;
- 
-            // Pools for Essentia PCA
-            Pool pcaIn;
-            Pool pcaOut;
-            
-            // Store analysis matrix in a pool
-            pcaIn.merge("feature", analysisMatrix_, "replace");
-            
-            // Calculate PCA
-            pca_->reset();
-            pca_->input("poolIn").set(pcaIn);
-            pca_->output("poolOut").set(pcaOut);
-            pca_->compute();
-            
-            // Get principle components out from pool
-            std::map<std::string, std::vector<std::vector<Real>>> output =  pcaOut.getVectorRealPool();
-            
-            // Save the first two components resulting from PCA
-            jassert(output.at("pca").size() == sampleOrder_.size());
-            auto component = output.at("pca").begin();
-            size_t numFeatures = component->size();
-            SampleReduced::Ptr newSampleRedux;
-            
-            if (threadShouldExit()) return;
-            for (auto sampleId = sampleOrder_.begin(); sampleId != sampleOrder_.end(); ++sampleId, ++component)
-            {
-                double dim1 = component->at(numFeatures - 1);
-                double dim2 = component->at(numFeatures - 2);
-                
-                newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
-                newSampleRedux->save(db_);
-            }
-        }
+        double dim1 = component->at(numFeatures - 1);
+        double dim2 = component->at(numFeatures - 2);
+        
+        newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
+        newSampleRedux->save(db_);
     }
 }
 

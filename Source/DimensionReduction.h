@@ -61,16 +61,6 @@ private:
     // TSNE Algorithm
     ScopedPointer<TSNE> tsne_;
     
-    // Struct for keeping track of the different sample types and the specific segmentation to use
-    struct SampleTypeAndSegmentation
-    {
-        SampleTypeAndSegmentation(int t, double s, double l) : sampleType(t), segStart(s), segLength(l) {};
-        
-        int sampleType;
-        double segStart;
-        double segLength;
-    };
-    
     struct SampleSegmentation
     {
         SampleSegmentation() : numSamples(0), segStart(0), segLength(0) {};
@@ -91,8 +81,6 @@ private:
         double segLength;
     };
     
-    
-    OwnedArray<SampleTypeAndSegmentation> sampleClasses_;
     std::vector<std::unique_ptr<SampleSegmentation>> sampleSegmentations_;
     
     // Private Membmer Functions
