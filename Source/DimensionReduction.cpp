@@ -87,8 +87,11 @@ void DimensionReduction::reduceDimensionality()
         else
             loadAnalysisSamples(*sampleType, SampleSegmentation(0, -1.0, -1.0));
         
-        tsne();
-        //pca();
+        if (analysisMatrix_.size() < 1)
+            continue;
+        
+        tsne(*sampleType);
+        analysisMatrix_.clear();
     }
 }
 
@@ -152,11 +155,12 @@ void DimensionReduction::loadDataWithMixedSegmentations(SampleType::Ptr type)
 
 void DimensionReduction::loadSegmentationsForSampleType(SampleType::Ptr type)
 {
-    String sql = "SELECT count(*) as num_samples, a.start, a.length " \
-        "FROM analysis a JOIN samples s ON a.sample_id = s.id " \
-        "WHERE s.sample_type = " + String(type->getId()) + " " \
-        "group by a.start, a.length;";
+    String sqlWhere = type->getName() == "all" ? " " : ("WHERE s.sample_type = " + String(type->getId()) + " ");
     
+    String sql = "SELECT count(*) as num_samples, a.start, a.length " \
+    "FROM analysis a JOIN samples s ON a.sample_id = s.id " + \
+    sqlWhere + "group by a.start, a.length;";
+
     sampleSegmentations_.clear();
     if (!db_.runCommand(sql, selectSampleSegmentationCallback, this))
     {
@@ -167,11 +171,13 @@ void DimensionReduction::loadSegmentationsForSampleType(SampleType::Ptr type)
 
 void DimensionReduction::loadAnalysisSamples(const SampleType::Ptr type, const SampleSegmentation& segmentation)
 {
+    String sqlType = type->getName() == "all" ? "" : (" AND s.sample_type = " + String(type->getId()));
+    
     // Get all samples for a sample type & segmentation
     String sql = "SELECT a.* FROM analysis a JOIN samples s ON a.sample_id = s.id " \
-    "WHERE s.sample_type = " + String(type->getId()) + \
-    " AND a.start = " + String(segmentation.segStart) + \
+    "WHERE a.start = " + String(segmentation.segStart) + \
     " AND a.length = " + String(segmentation.segLength) + \
+    sqlType + \
     " AND s.exclude = 0;";
     
     analysisMatrix_.clear();
@@ -316,7 +322,7 @@ void DimensionReduction::preprocess() {
 }
 
 
-void DimensionReduction::pca()
+void DimensionReduction::pca(const SampleType::Ptr type)
 {
     if (threadShouldExit()) return;
 
@@ -355,13 +361,13 @@ void DimensionReduction::pca()
         double dim1 = component->at(numFeatures - 1);
         double dim2 = component->at(numFeatures - 2);
         
-        newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
+        newSampleRedux = new SampleReduced(0, *sampleId, type->getId(), dim1, dim2);
         newSampleRedux->save(db_);
     }
 }
 
 
-void DimensionReduction::tsne()
+void DimensionReduction::tsne(const SampleType::Ptr type)
 {
     // Standardize data through preprocess
     if (analysisMatrix_.size() < 1) return;
@@ -428,7 +434,7 @@ void DimensionReduction::tsne()
         double dim2 = Y[i + 1];
         i += 2;
         
-        newSampleRedux = new SampleReduced(0, *sampleId, dim1, dim2);
+        newSampleRedux = new SampleReduced(0, *sampleId, type->getId(), dim1, dim2);
         newSampleRedux->save(db_);
     }
     

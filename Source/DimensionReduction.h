@@ -96,8 +96,8 @@ private:
     void copyFeaturesFromAnalysisMatrix(const std::vector<int>& featureList, std::vector<std::vector<Real>>& outputMatrix);
     
     void preprocess();
-    void pca();
-    void tsne();
+    void pca(const SampleType::Ptr type);
+    void tsne(const SampleType::Ptr type);
     void setupTsne();
     
     

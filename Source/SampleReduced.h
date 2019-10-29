@@ -21,7 +21,7 @@ public:
     
     typedef ReferenceCountedObjectPtr<SampleReduced> Ptr;
     
-    SampleReduced(int id, int sampleId, double x, double y);
+    SampleReduced(int id, int sampleId, int sampleType, double x, double y);
     ~SampleReduced() {};
     
     // Copy Constructor
@@ -30,6 +30,7 @@ public:
     // Getters
     int getId() { return id_; };
     int getSampleId() { return sampleId_; };
+    int getSampleTypeId() { return sampleType_; }
     double getX() { return d1_; };
     double getY() { return d2_; };
     Sample::Ptr getSamplePtr() { return sample_; };
@@ -46,8 +47,9 @@ public:
     
 private:
     
-    int id_;
-    int sampleId_;
+    long long id_;
+    long long sampleId_;
+    long long sampleType_;
     
     // The interface shows X and Y, but keep the dimensions general in here
     // in case we want to add more later on

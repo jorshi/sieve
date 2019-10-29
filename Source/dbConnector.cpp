@@ -96,6 +96,7 @@ void DBConnector::setupTables()
     String sqlReducedDimension = "CREATE TABLE IF NOT EXISTS `samples_reduced` ( " \
         "`id` INTEGER PRIMARY KEY, " \
         "`sample_id` INT(11) NOT NULL, " \
+        "`sample_type` INT(11) NOT NULL, " \
         "`dim_1` DOUBLE NOT NULL, " \
         "`dim_2` DOUBLE NOT NULL, " \
         "FOREIGN KEY (`sample_id`) REFERENCES `samples` (`id`) ON DELETE CASCADE " \
