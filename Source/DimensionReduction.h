@@ -27,6 +27,7 @@
 #include "tsne.h"
 
 
+static const bool USE_MIXED_TIME_SEGMENTATIONS = true;
 
 
 class DimensionReduction : private Thread
@@ -98,6 +99,7 @@ private:
     void run() override;
     void reduceDimensionality();
     void loadSampleTypes();
+    void loadDataWithSegmentation(SampleType::Ptr, SampleSegmentation& segmentation);
     void loadDataWithMixedSegmentations(SampleType::Ptr type);
     void loadSegmentationsForSampleType(SampleType::Ptr type);
     void loadAnalysisSamples(const SampleType::Ptr type, const SampleSegmentation& segmentation);

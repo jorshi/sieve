@@ -16,10 +16,6 @@ using namespace standard;
 DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCountedArray<SampleFolder>& f) :
     Thread("Dimension Reduction Thread"), db_(db), sampleFolders_(f)
 {
-
-    sampleClasses_.add(new SampleTypeAndSegmentation(1, 0.2, 0.5));   // Kick Drum PCA Segmentations
-    sampleClasses_.add(new SampleTypeAndSegmentation(2, 0.2, 0.5));   // Snare Drum PCA Segmentations
-    
     essentia::init();
     AlgorithmFactory& factory = AlgorithmFactory::instance();
     
@@ -85,7 +81,12 @@ void DimensionReduction::reduceDimensionality()
     loadSampleTypes();
     for (auto sampleType = sampleTypes_.begin(); sampleType != sampleTypes_.end(); ++sampleType)
     {
-        loadDataWithMixedSegmentations(*sampleType);
+        if (USE_MIXED_TIME_SEGMENTATIONS)
+            loadDataWithMixedSegmentations(*sampleType);
+        
+        else
+            loadAnalysisSamples(*sampleType, SampleSegmentation(0, -1.0, -1.0));
+        
         tsne();
     }
 }
@@ -100,6 +101,7 @@ void DimensionReduction::loadSampleTypes()
         throw "Unable to retrieve sample types";
     }
 }
+
 
 void DimensionReduction::loadDataWithMixedSegmentations(SampleType::Ptr type)
 {
