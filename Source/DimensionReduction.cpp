@@ -34,6 +34,7 @@ DimensionReduction::DimensionReduction(const DBConnector& db, const ReferenceCou
 
 DimensionReduction::~DimensionReduction()
 {
+    delete pca_;
     stopThread(4000);
 }
 
