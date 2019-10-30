@@ -58,6 +58,20 @@ void MainComponent::actionListenerCallback(const juce::String &message)
         const int pad = message.fromFirstOccurrenceOf("midi_trigger", false, true).getIntValue();
         controlComponent->updateSelectedSample(sampleManager->getSample(pad));
     }
+    else if (message == "zoomin")
+    {
+        controlComponent->zoomIn();
+        sendActionMessage("push_zoomin_button_0");
+        sendActionMessage("push_zoomout_button_1");
+    }
+    else if (message == "zoomout")
+    {
+        controlComponent->zoomOut();
+    }
+    else if (message == "zoomed_out_full")
+    {
+        sendActionMessage("push_zoomout_button_0");
+    }
     else
     {
         sendActionMessage(message);

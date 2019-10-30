@@ -207,6 +207,10 @@ void SampleBrowserAudioProcessor::loadSamplerSounds()
     sampler_->clearSounds();
     sounds_.clear();
     
+    // Clear push colours
+    if (push_)
+        push_->clearPadColours();
+    
     // TODO -- the number of pads should be some sort of setting variable somewhere
     for (int i = 0; i < 64; i++)
     {
@@ -227,11 +231,12 @@ void SampleBrowserAudioProcessor::loadSamplerSounds()
                                      length);
             sampler_->addSound(sound);
             delete reader;
+            
+            // Set pad colour on push interface
+            if (push_)
+                push_->setPadLED(i, sample->getColour());
         }
     }
-    
-    if (push_)
-        push_->setPadColours();
 }
 
 void SampleBrowserAudioProcessor::triggerSound(int pad)
@@ -280,10 +285,58 @@ void SampleBrowserAudioProcessor::processPushMidi(const MidiMessage& message)
         if (noteNumber >= 36 && noteNumber <= 99)
         {
             int padNumber = Push::mapMidiToPadNumber(noteNumber);
-            triggerSound(padNumber);
-            sendActionMessage("midi_trigger" + String(padNumber));
+            auto sample = sampleManager_->getSample(padNumber);
+            if (sample)
+            {
+                triggerSound(padNumber);
+                sendActionMessage("midi_trigger" + String(padNumber));
+                
+                
+                if (push_)
+                {
+                    if (sample->getSubsetSamples())
+                        push_->turnControlPadOn(20);
+                    else
+                        push_->turnControlPadOff(20);
+                }
+            }
         }
+    }
+    else if (message.isController())
+    {
+        const int ccNumber = message.getControllerNumber();
+        const int ccValue = message.getControllerValue();
         
+        if (ccNumber == 20 && ccValue > 0)
+        {
+            sendActionMessage("zoomin");
+        }
+        else if (ccNumber == 21 && ccValue > 0)
+        {
+            sendActionMessage("zoomout");
+        }
+    }
+}
+
+void SampleBrowserAudioProcessor::zoomOutButtonOn(bool isOn)
+{
+    if (push_)
+    {
+        if (isOn)
+            push_->turnControlPadOn(21);
+        else
+            push_->turnControlPadOff(21);
+    }
+}
+
+void SampleBrowserAudioProcessor::zoomInButtonOn(bool isOn)
+{
+    if (push_)
+    {
+        if (isOn)
+            push_->turnControlPadOn(20);
+        else
+            push_->turnControlPadOff(20);
     }
 }
 

@@ -32,6 +32,10 @@ public:
     void resized() override;
     
     void updateSelectedSample(Sample::Ptr s);
+    
+    // Will try to zoom-in / out if possible on selected sample
+    void zoomIn();
+    void zoomOut();
 
 private:
 

@@ -103,6 +103,16 @@ void SampleBrowserAudioProcessorEditor::actionListenerCallback(const juce::Strin
     {
         sampleManager->loadNewSamples();
     }
+    else if (message.startsWith("push_zoomin_button_"))
+    {
+        int buttonValue = message.fromFirstOccurrenceOf("push_zoomin_button_", false, true).getIntValue();
+        processor.zoomInButtonOn(buttonValue > 0);
+    }
+    else if (message.startsWith("push_zoomout_button_"))
+    {
+        int buttonValue = message.fromFirstOccurrenceOf("push_zoomout_button_", false, true).getIntValue();
+        processor.zoomOutButtonOn(buttonValue > 0);
+    }
     else
     {
         int pad = message.getIntValue();

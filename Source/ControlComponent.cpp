@@ -91,6 +91,43 @@ void ControlComponent::updateSelectedSample(Sample::Ptr s)
     }
 }
 
+void ControlComponent::zoomIn()
+{
+    if (selectedSample != nullptr && selectedSample->getSubsetSamples() > 0)
+    {
+        sampleManager->zoom(selectedSample);
+        sendActionMessage("update_grid");
+        parentSample = selectedSample;
+        selectedSample = nullptr;
+        zoomInButton->setEnabled(false);
+        zoomOutButton->setEnabled(true);
+    }
+}
+
+void ControlComponent::zoomOut()
+{
+    if (parentSample != nullptr)
+    {
+        if (parentSample->getParent() != nullptr)
+        {
+            sampleManager->zoom(parentSample->getParent());
+        }
+        else
+        {
+            sampleManager->zoomOutFull();
+            zoomOutButton->setEnabled(false);
+            sendActionMessage("zoomed_out_full");
+        }
+        
+        sendActionMessage("update_grid");
+        parentSample = parentSample->getParent();
+        selectedSample = nullptr;
+        zoomInButton->setEnabled(false);
+        
+    }
+}
+
+
 // Button callback
 void ControlComponent::buttonClicked(Button* button)
 {
@@ -104,37 +141,12 @@ void ControlComponent::buttonClicked(Button* button)
     
     if (button == zoomInButton)
     {
-        if (selectedSample != nullptr)
-        {
-            sampleManager->zoom(selectedSample);
-            sendActionMessage("update_grid");
-            parentSample = selectedSample;
-            selectedSample = nullptr;
-            zoomInButton->setEnabled(false);
-            zoomOutButton->setEnabled(true);
-        }
+        zoomIn();
     }
     
     if (button == zoomOutButton)
     {
-        if (parentSample != nullptr)
-        {
-            if (parentSample->getParent() != nullptr)
-            {
-                sampleManager->zoom(parentSample->getParent());
-            }
-            else
-            {
-                sampleManager->zoomOutFull();
-                zoomOutButton->setEnabled(false);
-            }
-            
-            sendActionMessage("update_grid");
-            parentSample = parentSample->getParent();
-            selectedSample = nullptr;
-            zoomInButton->setEnabled(false);
-
-        }
+        zoomOut();
     }
     
     if (button == resetButton)

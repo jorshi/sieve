@@ -19,6 +19,8 @@
             file="Resources/Offside-Regular.ttf"/>
       <FILE id="DofLIH" name="PushStartup.png" compile="0" resource="1" file="Resources/PushStartup.png"/>
       <FILE id="EIWeRz" name="SieveText.png" compile="0" resource="1" file="Resources/SieveText.png"/>
+      <FILE id="ikWFzY" name="SieveTextColour.png" compile="0" resource="1"
+            file="Resources/SieveTextColour.png"/>
     </GROUP>
     <GROUP id="{05089DAC-D89A-209E-728C-18A42D6C77FD}" name="Source">
       <GROUP id="{995325E8-B056-B4A3-384A-89ED481AD7B4}" name="libusb">

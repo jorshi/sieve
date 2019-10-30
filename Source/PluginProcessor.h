@@ -70,6 +70,8 @@ public:
     
     //==============================================================================
     void processPushMidi(const MidiMessage& message);
+    void zoomOutButtonOn(bool isOn);
+    void zoomInButtonOn(bool isOn);
 
     
 private:

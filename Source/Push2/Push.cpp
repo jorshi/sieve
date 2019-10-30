@@ -59,7 +59,8 @@ NBase::Result Push::Init()
     elapsed_ = 0;
     
     // Start the timer to draw the animation
-    startTimerHz(60);
+    //startTimerHz(60);
+    drawIntroText();
     
     return NBase::Result::NoError;
 }
@@ -81,6 +82,36 @@ void Push::setPadColours()
     }
 }
 
+
+void Push::setPadLED(int padNumber, const Colour &colour)
+{
+    int colourEntry = padNumber + 1;
+    
+    uint8 red = colour.getRed();
+    uint8 green = colour.getGreen();
+    uint8 blue = colour.getBlue();
+    uint8 alpha = colour.getAlpha();
+    
+    uint8 redLSB = red & 127;
+    uint8 redMSB = (red & 128) >> 7;
+    
+    uint8 greenLSB = green & 127;
+    uint8 greenMSB = (green & 128) >> 7;
+    
+    uint8 blueLSB = blue & 127;
+    uint8 blueMSB = (blue & 128) >> 7;
+    
+    auto colourMessage = MidiMessage(0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x03, colourEntry, redLSB, redMSB, greenLSB, greenMSB, blueLSB, blueMSB, 0x00, 0x00, 0xF7);
+    auto padMessage = MidiMessage(144, mapPadNumberToMidi(padNumber), colourEntry);
+    
+    if (midiOutput_)
+    {
+        midiOutput_->sendMessageNow(colourMessage);
+        midiOutput_->sendMessageNow(padMessage);
+    }
+}
+
+
 void Push::clearPadColours()
 {
     if (!midiOutput_) return;
@@ -90,6 +121,26 @@ void Push::clearPadColours()
         auto message = MidiMessage(144, i, 0);
         midiOutput_->sendMessageNow(message);
     }
+}
+
+
+void Push::turnControlPadOn(int ccNumber)
+{
+    auto colourMessage = MidiMessage(0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x03, 90, 82, 0, 30, 1, 125, 1, 0x00, 0x00, 0xF7);
+    auto padMessage = MidiMessage(176, ccNumber, 90);
+    
+    if (midiOutput_)
+    {
+        midiOutput_->sendMessageNow(colourMessage);
+        midiOutput_->sendMessageNow(padMessage);
+    }
+}
+
+void Push::turnControlPadOff(int ccNumber)
+{
+    auto padMessage = MidiMessage(176, ccNumber, 0);
+    if (midiOutput_)
+        midiOutput_->sendMessageNow(padMessage);
 }
 
 
@@ -103,6 +154,15 @@ int Push::mapMidiToPadNumber(const int& midiNumber)
     padNumber = padY + padX;
     
     return padNumber;
+}
+
+int Push::mapPadNumberToMidi(const int &padNumber)
+{
+    int midiX = padNumber % 8;
+    int midiY = (float)padNumber / 8.0;
+    midiY = (7 - midiY) * 8;
+    
+    return midiX + midiY + 36;
 }
 
 //------------------------------------------------------------------------------
@@ -202,6 +262,10 @@ void Push::timerCallback()
 
 
 void Push::drawFrame()
+{
+}
+
+void Push::drawIntroText()
 {
     // Request a juce::Graphics from the bridge
     auto& g = bridge_.GetGraphic();

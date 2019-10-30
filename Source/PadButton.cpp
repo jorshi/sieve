@@ -25,7 +25,6 @@ void PadButton::buttonStateChanged()
     if (isDown())
     {
         // Send an action
-        DBG(padId_);
         sendActionMessage(String(padId_));
     }
 }

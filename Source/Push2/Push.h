@@ -28,11 +28,16 @@ public:
     void SetMidiInputCallback(const midiCallbackType& func);
     
     void setPadColours();
+    void setPadLED(int padNumber, const Colour& colour);
     void clearPadColours();
+    
+    void turnControlPadOn(int ccNumber);
+    void turnControlPadOff(int ccNumber);
     
     enum ConnectionStatus { none, displayOnly, midiOnly, connected};
     
     static int mapMidiToPadNumber(const int& midiNumber);
+    static int mapPadNumberToMidi(const int& padNumber);
     
 private:
     
@@ -45,6 +50,7 @@ private:
     void handleIncomingMidiMessage (MidiInput *source, const MidiMessage &message) override;
     
     void drawFrame();
+    void drawIntroText();
     void timerCallback() override;
     
     ableton::Push2DisplayBridge bridge_;
