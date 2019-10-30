@@ -13,12 +13,14 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "dbConnector.h"
 #include "SampleManager.h"
+#include "Push2/Push.h"
+#include "Push2/Result.h"
 
 
 //==============================================================================
 /**
 */
-class SampleBrowserAudioProcessor  : public AudioProcessor
+class SampleBrowserAudioProcessor  : public AudioProcessor, public ActionBroadcaster
 {
 public:
     //==============================================================================
@@ -61,7 +63,15 @@ public:
     SampleManager* getSampleManager() { return sampleManager_.get(); };
     void loadSamplerSounds();
     void triggerSound(int pad);
+    
+    //==============================================================================
+    void connectPush2();
+    void shutdownPush2();
+    
+    //==============================================================================
+    void processPushMidi(const MidiMessage& message);
 
+    
 private:
     //==============================================================================
     ScopedPointer<SampleManager> sampleManager_;
@@ -71,6 +81,9 @@ private:
     int startNote_;
     
     ScopedPointer<FileLogger> logger;
+    
+    std::unique_ptr<Push> push_;
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleBrowserAudioProcessor)
 };

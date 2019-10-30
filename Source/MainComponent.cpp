@@ -53,6 +53,11 @@ void MainComponent::actionListenerCallback(const juce::String &message)
         sendActionMessage(message);
         
     }
+    else if (message.startsWith("midi_trigger"))
+    {
+        const int pad = message.fromFirstOccurrenceOf("midi_trigger", false, true).getIntValue();
+        controlComponent->updateSelectedSample(sampleManager->getSample(pad));
+    }
     else
     {
         sendActionMessage(message);

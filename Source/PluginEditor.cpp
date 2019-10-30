@@ -24,6 +24,7 @@ SampleBrowserAudioProcessorEditor::SampleBrowserAudioProcessorEditor (SampleBrow
     
     main = new MainComponent(sampleManager);
     main->addActionListener(this);
+    p.addActionListener(main);
     addAndMakeVisible(main);
     
     fileBrowse = new FileBrowseComponent(sampleManager);
@@ -38,6 +39,7 @@ SampleBrowserAudioProcessorEditor::SampleBrowserAudioProcessorEditor (SampleBrow
 
 SampleBrowserAudioProcessorEditor::~SampleBrowserAudioProcessorEditor()
 {
+    processor.shutdownPush2();
     setLookAndFeel(nullptr);
 }
 

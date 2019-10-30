@@ -59,6 +59,7 @@ SampleBrowserAudioProcessor::SampleBrowserAudioProcessor()
 SampleBrowserAudioProcessor::~SampleBrowserAudioProcessor()
 {
     juce::Logger::setCurrentLogger(nullptr);
+    shutdownPush2();
 }
 
 //==============================================================================
@@ -176,6 +177,7 @@ bool SampleBrowserAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* SampleBrowserAudioProcessor::createEditor()
 {
+    connectPush2();
     return new SampleBrowserAudioProcessorEditor (*this);
 }
 
@@ -227,11 +229,62 @@ void SampleBrowserAudioProcessor::loadSamplerSounds()
             delete reader;
         }
     }
+    
+    if (push_)
+        push_->setPadColours();
 }
 
 void SampleBrowserAudioProcessor::triggerSound(int pad)
 {
     sampler_->noteOn(1, pad + startNote_, 0.9);
+}
+
+//==============================================================================
+void SampleBrowserAudioProcessor::connectPush2()
+{
+    // Check for Push 2
+    if (!push_)
+        push_.reset(new Push);
+    
+    auto result = push_->Init();
+    
+    if (result.Succeeded())
+    {
+        DBG("Successfully connected to Push");
+        push_->SetMidiInputCallback([this](const MidiMessage& message) {
+            this->processPushMidi(message);
+        });
+    }
+    else
+    {
+        DBG(result.GetDescription());
+    }
+}
+
+void SampleBrowserAudioProcessor::shutdownPush2()
+{
+    if (push_)
+    {
+        push_->clearPadColours();
+    }
+    
+    push_.reset(nullptr);
+}
+
+//==============================================================================
+void SampleBrowserAudioProcessor::processPushMidi(const MidiMessage& message)
+{
+    if (message.isNoteOn())
+    {
+        const int noteNumber = message.getNoteNumber();
+        if (noteNumber >= 36 && noteNumber <= 99)
+        {
+            int padNumber = Push::mapMidiToPadNumber(noteNumber);
+            triggerSound(padNumber);
+            sendActionMessage("midi_trigger" + String(padNumber));
+        }
+        
+    }
 }
 
 //==============================================================================

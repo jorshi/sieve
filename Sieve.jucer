@@ -10,15 +10,45 @@
               pluginIsSynth="1" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="SieveAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.Sieve" pluginAAXCategory="2"
-              jucerVersion="5.4.4" companyName="University of Victoria" companyWebsite="uvic.ca"
+              jucerVersion="5.4.5" companyName="University of Victoria" companyWebsite="uvic.ca"
               cppLanguageStandard="11" pluginFormats="buildVST,buildAU,buildStandalone"
               pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="bS7Zw9" name="Sieve">
     <GROUP id="{22B62575-2E8A-2AC3-6CB4-58FFE5C4B28D}" name="Resources">
       <FILE id="GSG8XL" name="Offside-Regular.ttf" compile="0" resource="1"
             file="Resources/Offside-Regular.ttf"/>
+      <FILE id="DofLIH" name="PushStartup.png" compile="0" resource="1" file="Resources/PushStartup.png"/>
+      <FILE id="EIWeRz" name="SieveText.png" compile="0" resource="1" file="Resources/SieveText.png"/>
     </GROUP>
     <GROUP id="{05089DAC-D89A-209E-728C-18A42D6C77FD}" name="Source">
+      <GROUP id="{995325E8-B056-B4A3-384A-89ED481AD7B4}" name="libusb">
+        <FILE id="jHChVS" name="config.h" compile="0" resource="0" file="Source/libusb/config.h"/>
+        <FILE id="Pph3eA" name="config_msvc.h" compile="0" resource="0" file="Source/libusb/config_msvc.h"/>
+        <FILE id="aqVxQE" name="config_xcode.h" compile="0" resource="0" file="Source/libusb/config_xcode.h"/>
+        <FILE id="g7TZET" name="libusb_platform_wrapper.c" compile="1" resource="0"
+              file="Source/libusb/libusb_platform_wrapper.c"/>
+      </GROUP>
+      <GROUP id="{4A26FF11-7A44-561D-C528-3A7C83E004BF}" name="Push2">
+        <GROUP id="{9A6962D8-C1CB-5C1F-D1C8-C467567BE86B}" name="lib">
+          <FILE id="O1FjTx" name="JuceToPush2DisplayBridge.cpp" compile="1" resource="0"
+                file="Source/push2/JuceToPush2DisplayBridge.cpp"/>
+          <FILE id="DDfLzV" name="JuceToPush2DisplayBridge.h" compile="0" resource="0"
+                file="Source/push2/JuceToPush2DisplayBridge.h"/>
+          <FILE id="bNAnOR" name="Macros.h" compile="0" resource="0" file="Source/push2/Macros.h"/>
+          <FILE id="tfFpLi" name="Push2-Bitmap.h" compile="0" resource="0" file="Source/push2/Push2-Bitmap.h"/>
+          <FILE id="fkox5m" name="Push2-Display.h" compile="0" resource="0" file="Source/push2/Push2-Display.h"/>
+          <FILE id="i2lwd0" name="Push2-Usb-Communicator.cpp" compile="1" resource="0"
+                file="Source/push2/Push2-Usb-Communicator.cpp"/>
+          <FILE id="AiABPz" name="Push2-UsbCommunicator.h" compile="0" resource="0"
+                file="Source/push2/Push2-UsbCommunicator.h"/>
+          <FILE id="PQRZeN" name="Result.cpp" compile="1" resource="0" file="Source/push2/Result.cpp"/>
+          <FILE id="vSVGey" name="Result.h" compile="0" resource="0" file="Source/push2/Result.h"/>
+        </GROUP>
+        <FILE id="HL2JFK" name="Push.cpp" compile="1" resource="0" file="Source/Push2/Push.cpp"/>
+        <FILE id="YhwfH3" name="Push.h" compile="0" resource="0" file="Source/Push2/Push.h"/>
+        <FILE id="QlZIOI" name="Push2Demo.cpp" compile="1" resource="0" file="Source/Push2/Push2Demo.cpp"/>
+        <FILE id="K8N4qh" name="Push2Demo.h" compile="0" resource="0" file="Source/Push2/Push2Demo.h"/>
+      </GROUP>
       <GROUP id="{CF9A02B6-1242-D27E-45D1-90779AC6E038}" name="DSP">
         <FILE id="lo16qy" name="PluginProcessor.cpp" compile="1" resource="0"
               file="Source/PluginProcessor.cpp"/>
@@ -123,8 +153,10 @@
                extraDefs="SAFE_TYPE_COMPARISONS=1&#10;__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=1"
                vstLegacyFolder="/Users/jshier/Development/Libraries/vst3sdk">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Sieve"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"
+                       headerPath="../../Source/Push2&#10;../../Source/libusb&#10;../../modules/libusb/libusb"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Sieve"
+                       headerPath="../../Source/Push2&#10;../../Source/libusb&#10;../../modules/libusb/libusb"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../Libraries/JUCE/modules"/>
