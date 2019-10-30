@@ -33,6 +33,9 @@ public:
     
     void turnControlPadOn(int ccNumber);
     void turnControlPadOff(int ccNumber);
+    void clearControlPads();
+    
+    void resetAllPads();
     
     enum ConnectionStatus { none, displayOnly, midiOnly, connected};
     

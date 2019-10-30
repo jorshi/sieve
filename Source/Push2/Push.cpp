@@ -37,7 +37,7 @@ Push::Push()
 
 Push::~Push()
 {
-    
+    resetAllPads();
 }
 
 
@@ -60,6 +60,7 @@ NBase::Result Push::Init()
     
     // Start the timer to draw the animation
     //startTimerHz(60);
+    resetAllPads();
     drawIntroText();
     
     return NBase::Result::NoError;
@@ -143,6 +144,22 @@ void Push::turnControlPadOff(int ccNumber)
         midiOutput_->sendMessageNow(padMessage);
 }
 
+void Push::clearControlPads()
+{
+    for (int i = 3; i < 128; ++i)
+    {
+        auto padMessage = MidiMessage(176, i, 0);
+        if (midiOutput_)
+            midiOutput_->sendMessageNow(padMessage);
+    }
+}
+
+
+void Push::resetAllPads()
+{
+    clearPadColours();
+    clearControlPads();
+}
 
 //------------------------------------------------------------------------------
 int Push::mapMidiToPadNumber(const int& midiNumber)
