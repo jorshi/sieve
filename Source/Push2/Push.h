@@ -11,7 +11,14 @@
 #pragma once
 
 #include "JuceToPush2DisplayBridge.h"
+#include "../Sample.h"
+#include "../SampleType.h"
+#include "../CustomLookAndFeel.h"
 #include <assert.h>
+
+
+static const Colour textColour = Colour((uint8)52, (uint8)189, (uint8)235);
+
 
 class Push
 :   public Timer,
@@ -27,6 +34,8 @@ public:
     using midiCallbackType = std::function<void(const MidiMessage&)>;
     void SetMidiInputCallback(const midiCallbackType& func);
     
+    void addSampleType(const SampleType::Ptr sampleType);
+    
     void setPadColours();
     void setPadLED(int padNumber, const Colour& colour);
     void clearPadColours();
@@ -36,6 +45,15 @@ public:
     void clearControlPads();
     
     void resetAllPads();
+    
+    void incrementSampleTypeSelector();
+    void decrementSampleTypeSelector();
+    const SampleType::Ptr getSampleType() const;
+    
+    //------------------------------------------------------------------------------
+    void setSample(Sample::Ptr sample);
+    
+    //------------------------------------------------------------------------------
     
     enum ConnectionStatus { none, displayOnly, midiOnly, connected};
     
@@ -52,9 +70,13 @@ private:
     
     void handleIncomingMidiMessage (MidiInput *source, const MidiMessage &message) override;
     
+    //------------------------------------------------------------------------------
+    // Functions for drawing to the Push screen
+    void timerCallback() override;
     void drawFrame();
     void drawIntroText();
-    void timerCallback() override;
+    
+    const SampleType::Ptr getCurrentSampleType() const;
     
     ableton::Push2DisplayBridge bridge_;
     ableton::Push2Display push2Display_;
@@ -62,4 +84,14 @@ private:
     std::unique_ptr<MidiOutput> midiOutput_;
     midiCallbackType midiCallback_;
     float elapsed_;
+    
+    std::unique_ptr<Font> pushFont_;
+    
+    //------------------------------------------------------------------------------
+    // Members for the main control display
+    Sample::Ptr sample_;
+    std::vector<SampleType::Ptr> sampleTypes_;
+    int sampleTypeSelector;
+    
+    
 };

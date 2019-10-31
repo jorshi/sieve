@@ -31,8 +31,9 @@ namespace
 
 
 Push::Push()
+: sampleTypeSelector(0)
 {
-    
+    pushFont_.reset(new Font(CustomLookAndFeel::offsideTypeface));
 }
 
 Push::~Push()
@@ -59,9 +60,9 @@ NBase::Result Push::Init()
     elapsed_ = 0;
     
     // Start the timer to draw the animation
-    //startTimerHz(60);
+    startTimerHz(60);
+    
     resetAllPads();
-    drawIntroText();
     
     return NBase::Result::NoError;
 }
@@ -81,6 +82,18 @@ void Push::setPadColours()
         auto message = MidiMessage(144, i, 126);
         midiOutput_->sendMessageNow(message);
     }
+}
+
+
+void Push::addSampleType(const SampleType::Ptr sampleType)
+{
+    const long long typeId = sampleType->getId();
+    if (typeId > ((int)sampleTypes_.size() - 1))
+    {
+        sampleTypes_.resize(typeId + 1);
+    }
+    
+    sampleTypes_.at(typeId) = sampleType;
 }
 
 
@@ -161,6 +174,32 @@ void Push::resetAllPads()
     clearControlPads();
 }
 
+void Push::incrementSampleTypeSelector()
+{
+    const int maxValue = (int)sampleTypes_.size() * 25;
+    sampleTypeSelector = std::min(sampleTypeSelector + 1, maxValue);
+    drawFrame();
+}
+
+void Push::decrementSampleTypeSelector()
+{
+    const int minValue = 0;
+    sampleTypeSelector = std::max(sampleTypeSelector - 1, minValue);
+    drawFrame();
+}
+
+const SampleType::Ptr Push::getSampleType() const
+{
+    return getCurrentSampleType();
+}
+
+//------------------------------------------------------------------------------
+void Push::setSample(Sample::Ptr sample)
+{
+    sample_ = sample;
+    drawFrame();
+}
+
 //------------------------------------------------------------------------------
 int Push::mapMidiToPadNumber(const int& midiNumber)
 {
@@ -183,10 +222,6 @@ int Push::mapPadNumberToMidi(const int &padNumber)
 }
 
 //------------------------------------------------------------------------------
-
-
-
-
 NBase::Result Push::openMidiDevice()
 {
     NBase::Result result = openMidiInputDevice();
@@ -273,13 +308,89 @@ void Push::handleIncomingMidiMessage (MidiInput *source, const MidiMessage &mess
 
 void Push::timerCallback()
 {
-    elapsed_ += 0.02f;
-    drawFrame();
+    elapsed_ += 0.01f;
+    
+    if (elapsed_ > 3.0f)
+    {
+        drawFrame();
+        turnControlPadOn(102);
+        stopTimer();
+    }
+    else
+    {
+        drawIntroText();
+    }
 }
 
 
 void Push::drawFrame()
 {
+    // Request a juce::Graphics from the bridge
+    auto& g = bridge_.GetGraphic();
+    
+    // Clear previous frame
+    g.fillAll(juce::Colour(0xff000000));
+    
+    // Get the height and width of the display
+    const auto height = ableton::Push2DisplayBitmap::kHeight;
+    const auto width = ableton::Push2DisplayBitmap::kWidth;
+    
+    Rectangle<int> thumbBounds(width / 4, 0, (3 * width) / 4, height);
+    thumbBounds.reduce(10, 15);
+    thumbBounds.setY(20);
+    
+    if (sample_ != nullptr)
+    {
+        AudioThumbnail& thumbnail = sample_->getThumbnail();
+        if (thumbnail.getNumChannels() == 0)
+        {
+        }
+        else
+        {
+            g.setColour(sample_->getColour());
+            thumbnail.drawChannel(g, thumbBounds, 0.0, thumbnail.getTotalLength(), 0, 1.0f);
+            
+            // Obtain message manager thread lock before drawing text
+            const MessageManagerLock mmLock;
+            
+            g.setFont(*(pushFont_.get()));
+            g.setFont(30);
+            g.drawText(sample_->getName(), thumbBounds.getX(), 10, thumbBounds.getWidth(), 150, Justification::topRight);
+            
+            g.setColour(textColour);
+            g.setFont(28);
+            
+            int numSubsetSamples = sample_->getSubsetSamples();
+            if (numSubsetSamples)
+            {
+                g.drawText(String(numSubsetSamples) + " SAMPLES", 20, height - 60, width/8, 30, Justification::bottomLeft);
+                g.drawText("ZOOM IN", 20, height - 30, width/8, 30, Justification::bottomLeft);
+            }
+            
+            if (sample_->getParent())
+            {
+                g.drawText("ZOOM OUT", width/8, height/2, width/8, height/2, Justification::centredBottom);
+            }
+        }
+    }
+    
+    // Obtain message manager thread lock before drawing text
+    const MessageManagerLock mmLock;
+    
+    g.setFont(*(pushFont_.get()));
+    g.setFont(30);
+    g.setColour(textColour);
+    g.drawText("LOAD SAMPLES:", 20, 10, width/4, 35, Justification::centredLeft);
+    
+    const SampleType::Ptr type = getCurrentSampleType();
+    if (type)
+    {
+        g.drawText(type->getName().toUpperCase(), 20, 40, width/4, 35, Justification::centredLeft);
+    }
+
+    
+    // Tells the bridge we're done with drawing and the frame can be sent to the display
+    bridge_.Flip();
 }
 
 void Push::drawIntroText()
@@ -294,10 +405,34 @@ void Push::drawIntroText()
     const auto height = ableton::Push2DisplayBitmap::kHeight;
     const auto width = ableton::Push2DisplayBitmap::kWidth;
     
-    // Draw sieve logo
-    auto logo = ImageCache::getFromMemory(BinaryData::SieveText_png, BinaryData::SieveText_pngSize);
-    g.drawImageAt(logo, (width - logo.getWidth()) / 2 , (height - logo.getHeight()) / 2);
+    // Draw Logo
+    g.setFont(*(pushFont_.get()));
+    g.setFont(height - 20);
+    Colour fadeInColour = Colour(textColour.getRed(), textColour.getGreen(), textColour.getBlue(), elapsed_ / 3.0f);
+    g.setColour(fadeInColour);
+    g.drawText("SIEVE", 0, 0, width, height, Justification::centred);
+    
     
     // Tells the bridge we're done with drawing and the frame can be sent to the display
     bridge_.Flip();
+}
+
+
+const SampleType::Ptr Push::getCurrentSampleType() const
+{
+    const size_t numberOfTypes = sampleTypes_.size();
+    
+    // Return if no types
+    if (numberOfTypes < 1) return nullptr;
+    
+    int index = sampleTypeSelector / 25;
+    
+    if (index >= 0 && index < numberOfTypes)
+        return sampleTypes_[index];
+
+    else if (index < 0)
+        return sampleTypes_[0];
+
+    else
+        return sampleTypes_[numberOfTypes - 1];
 }

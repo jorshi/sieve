@@ -45,6 +45,9 @@ public:
     // Get a pointer to one of the samples int he sample buffers
     Sample::Ptr getSample(int num) const;
     
+    // Sample type getter
+    const std::map<String, SampleType::Ptr>& getSampleTypes() const { return sampleTypes_; };
+    
     // Load thumbnail caches
     void updateThumbnails();
     

@@ -209,7 +209,10 @@ void SampleBrowserAudioProcessor::loadSamplerSounds()
     
     // Clear push colours
     if (push_)
+    {
         push_->clearPadColours();
+        push_->setSample(nullptr);
+    }
     
     // TODO -- the number of pads should be some sort of setting variable somewhere
     for (int i = 0; i < 64; i++)
@@ -259,6 +262,12 @@ void SampleBrowserAudioProcessor::connectPush2()
         push_->SetMidiInputCallback([this](const MidiMessage& message) {
             this->processPushMidi(message);
         });
+        
+        const auto& sampleTypes = sampleManager_->getSampleTypes();
+        for (const auto& type: sampleTypes)
+        {
+            push_->addSampleType(type.second);
+        }
     }
     else
     {
@@ -270,7 +279,7 @@ void SampleBrowserAudioProcessor::shutdownPush2()
 {
     if (push_)
     {
-        push_->clearPadColours();
+        push_->resetAllPads();
     }
     
     push_.reset(nullptr);
@@ -291,14 +300,10 @@ void SampleBrowserAudioProcessor::processPushMidi(const MidiMessage& message)
                 triggerSound(padNumber);
                 sendActionMessage("midi_trigger" + String(padNumber));
                 
+                zoomInButtonOn(sample->getSubsetSamples());
                 
                 if (push_)
-                {
-                    if (sample->getSubsetSamples())
-                        push_->turnControlPadOn(20);
-                    else
-                        push_->turnControlPadOff(20);
-                }
+                    push_->setSample(sample);
             }
         }
     }
@@ -307,6 +312,8 @@ void SampleBrowserAudioProcessor::processPushMidi(const MidiMessage& message)
         const int ccNumber = message.getControllerNumber();
         const int ccValue = message.getControllerValue();
         
+        DBG("CC: " << ccNumber << " : " << ccValue);
+        
         if (ccNumber == 20 && ccValue > 0)
         {
             sendActionMessage("zoomin");
@@ -314,6 +321,21 @@ void SampleBrowserAudioProcessor::processPushMidi(const MidiMessage& message)
         else if (ccNumber == 21 && ccValue > 0)
         {
             sendActionMessage("zoomout");
+        }
+        else if (ccNumber == 71)
+        {
+            if (ccValue == 1)
+                push_->incrementSampleTypeSelector();
+            else
+                push_->decrementSampleTypeSelector();
+        }
+        else if (ccNumber == 102 && ccValue > 0)
+        {
+            const SampleType::Ptr type = push_->getSampleType();
+            
+            const MessageManagerLock mmLock;
+            sampleManager_->updateGrid((int)type->getId());
+            sendActionMessage("update_grid");
         }
     }
 }
