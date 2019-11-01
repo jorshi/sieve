@@ -9,3 +9,6 @@ Required libraries
 - SQLITE3: https://www.sqlite.org/
 - MLPACK: http://www.mlpack.org/
 - Munkres: https://github.com/saebyn/munkres-cpp
+
+
+NOTE: Location of DB is currently hardcoded, if you are building you will need to update this location in the dbConnector.cpp class: https://github.com/jorshi/sieve/blob/master/Source/dbConnector.cpp
