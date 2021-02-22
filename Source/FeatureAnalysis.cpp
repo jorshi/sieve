@@ -161,7 +161,7 @@ void FeatureAnalysis::computeSampleStartAndStopTime(Sample::Ptr sample, std::vec
         }
         startStopSilence_->compute();
     }
-    
+
     // Save the detected onset and end time for the sample
     sample->setStartTime(double(startFrame * hopSize) / sampleRate_);
     sample->setStopTime(double(stopFrame * hopSize) / sampleRate_);
@@ -395,11 +395,14 @@ void FeatureAnalysis::computeSegmentPool(std::vector<Real>& buffer, TimeSegmenta
     lat_->compute();
     
     windowStart = segmentation.start >= 0.9 ? windowEnd : windowStart;
+    windowEnd = windowStart + segmentation.length;
     
     if (segmentation.length > 0)
     {
-        trimmer_->configure("startTime", windowStart);
-        trimmer_->configure("endTime", windowStart + segmentation.length);
+        ParameterMap params;
+        params.add("startTime", windowStart);
+        params.add("endTime", windowEnd);
+        trimmer_->configure();
         trimmer_->input("signal").set(buffer);
         trimmer_->output("signal").set(trimBuffer);
         trimmer_->compute();

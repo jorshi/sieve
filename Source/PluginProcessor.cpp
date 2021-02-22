@@ -211,20 +211,21 @@ void SampleBrowserAudioProcessor::loadSamplerSounds()
         sample = sampleManager_->getSample(i);
         if (sample != nullptr)
         {
-            reader = sampleManager_->getReaderForSample(*sample);
-            double length = reader->lengthInSamples / reader->sampleRate;
-            midiNotes.setRange(startNote_+i, 1, true);
-            
-            // Create a new sampler sound for this sound
-            sound = new SamplerSound("Pad " + String(i),
-                                     *reader,
-                                     *midiNotes_.getUnchecked(i),
-                                     startNote_+i,
-                                     0.001,
-                                     length,
-                                     length);
-            sampler_->addSound(sound);
-            delete reader;
+            if ((reader = sampleManager_->getReaderForSample(*sample)) != nullptr) {
+                double length = reader->lengthInSamples / reader->sampleRate;
+                midiNotes.setRange(startNote_+i, 1, true);
+                
+                // Create a new sampler sound for this sound
+                sound = new SamplerSound("Pad " + String(i),
+                                         *reader,
+                                         *midiNotes_.getUnchecked(i),
+                                         startNote_+i,
+                                         0.001,
+                                         length,
+                                         length);
+                sampler_->addSound(sound);
+                delete reader;
+            }
         }
     }
 }

@@ -3,16 +3,17 @@
 <JUCERPROJECT id="Pm83vz" name="Sieve" displaySplashScreen="1" reportAppUsage="1"
               splashScreenColour="Dark" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.UVic.Sieve" includeBinaryInAppConfig="1"
-              buildVST="1" buildVST3="0" buildAU="1" buildAUv3="0" buildRTAS="0"
+              buildVST="0" buildVST3="0" buildAU="1" buildAUv3="0" buildRTAS="0"
               buildAAX="0" buildStandalone="1" enableIAA="0" pluginName="Sieve"
               pluginDesc="Sieve" pluginManufacturer="University of Victoria"
               pluginManufacturerCode="Uvic" pluginCode="Pm83" pluginChannelConfigs=""
               pluginIsSynth="1" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="SieveAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.Sieve" pluginAAXCategory="2"
-              jucerVersion="5.4.4" companyName="University of Victoria" companyWebsite="uvic.ca"
-              cppLanguageStandard="11" pluginFormats="buildVST,buildAU,buildStandalone"
-              pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
+              companyName="University of Victoria" companyWebsite="uvic.ca"
+              cppLanguageStandard="11" pluginFormats="buildAU,buildStandalone"
+              pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
+              jucerFormatVersion="1">
   <MAINGROUP id="bS7Zw9" name="Sieve">
     <GROUP id="{22B62575-2E8A-2AC3-6CB4-58FFE5C4B28D}" name="Resources">
       <FILE id="GSG8XL" name="Offside-Regular.ttf" compile="0" resource="1"
@@ -119,12 +120,13 @@
   </MAINGROUP>
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" keepCustomXcodeSchemes="1" externalLibraries="sqlite3&#10;essentia&#10;mlpack&#10;munkres"
-               extraCompilerFlags="-I/usr/local/include&#10;" extraLinkerFlags="-L/usr/local/lib"
-               extraDefs="SAFE_TYPE_COMPARISONS=1&#10;__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=1"
+               extraCompilerFlags="-I/usr/local/include&#10;" extraLinkerFlags="-L/usr/local/lib -L/usr/local/Cellar/ffmpeg/4.3.2/lib -L/usr/local/Cellar/taglib/1.12/lib -L/usr/local/Cellar/fftw/3.3.9/lib -L/usr/local/Cellar/libsamplerate/0.1.9_1/lib -L/usr/local/Cellar/chromaprint/1.5.0_6/lib -L/usr/local/Cellar/libyaml/0.2.5/lib -lfftw3f -lavformat -lavcodec -lavutil -lavresample -lsamplerate -ltag -lz -lyaml -lchromaprint"
                vstLegacyFolder="/Users/jshier/Development/Libraries/vst3sdk">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Sieve"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Sieve"
+                       osxCompatibility="11.0 SDK"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Sieve"
+                       osxCompatibility="11.0 SDK"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../Libraries/JUCE/modules"/>
@@ -136,7 +138,7 @@
         <MODULEPATH id="juce_cryptography" path="../../../Libraries/JUCE/modules"/>
         <MODULEPATH id="juce_video" path="../../../Libraries/JUCE/modules"/>
         <MODULEPATH id="juce_opengl" path="../../../Libraries/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../../Libraries/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../Libraries/JUCE/modules/juce_audio_basics"/>
         <MODULEPATH id="juce_audio_devices" path="../../../Libraries/JUCE/modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../../Libraries/JUCE/modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../../Libraries/JUCE/modules"/>
@@ -146,21 +148,22 @@
     </XCODE_MAC>
   </EXPORTFORMATS>
   <MODULES>
-    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
   </MODULES>
   <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
   <LIVE_SETTINGS>
